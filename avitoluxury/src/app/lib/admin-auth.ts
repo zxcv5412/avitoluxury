@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { TOKEN_EXPIRY, isTokenValid as checkJwtTokenValidity } from './client-auth';
+import { TOKEN_EXPIRY } from './client-auth';
 
 // Define the admin user interface
 export interface AdminUser {
@@ -17,34 +17,22 @@ const TOKEN_KEY = 'admin_token';
 const USER_KEY = 'admin_user';
 const TIMESTAMP_KEY = 'admin_token_timestamp';
 const TOKEN_EXPIRY_TIME = TOKEN_EXPIRY; // Use the same expiry time from client-auth
-const TOKEN_CHECK_INTERVAL = 30000; // Check token validity every 30 seconds
-
-// Global token monitor
-let tokenCheckInterval: NodeJS.Timeout | null = null;
-let tokenExpiryHandler: (() => void) | null = null;
 
 /**
- * Check if the admin token is still valid based on timestamp and JWT expiry
+ * Check if the admin token is still valid based on timestamp
  */
 export function isTokenValid(): boolean {
   if (typeof window === 'undefined') return false;
   
   try {
-    const token = localStorage.getItem(TOKEN_KEY);
     const timestamp = localStorage.getItem(TIMESTAMP_KEY);
+    if (!timestamp) return false;
     
-    if (!token || !timestamp) return false;
-    
-    // Check timestamp-based expiry
     const tokenTime = parseInt(timestamp);
     const currentTime = Date.now();
-    const isTimestampValid = (currentTime - tokenTime) < TOKEN_EXPIRY_TIME;
     
-    // Also check JWT expiry
-    const isJwtValid = checkJwtTokenValidity(token);
-    
-    // Token is valid only if both checks pass
-    return isTimestampValid && isJwtValid;
+    // Check if token has expired
+    return (currentTime - tokenTime) < TOKEN_EXPIRY_TIME;
   } catch (error) {
     console.error('Error checking token validity:', error);
     return false;
@@ -92,9 +80,6 @@ export function saveAdminAuth(token: string, user: AdminUser) {
     // Set cookies for cross-tab support and middleware
     document.cookie = `admin_token=${token}; path=/; max-age=${TOKEN_EXPIRY_TIME / 1000}; SameSite=Lax`;
     document.cookie = `token=${token}; path=/; max-age=${TOKEN_EXPIRY_TIME / 1000}; SameSite=Lax`;
-    
-    // Start monitoring token expiry
-    startTokenExpiryMonitor();
   } catch (error) {
     console.error('Error saving admin auth:', error);
   }
@@ -120,9 +105,6 @@ export function clearAdminAuth() {
     // Clear cookies
     document.cookie = `admin_token=; path=/; max-age=0; SameSite=Lax`;
     document.cookie = `token=; path=/; max-age=0; SameSite=Lax`;
-    
-    // Stop token monitoring
-    stopTokenExpiryMonitor();
   } catch (error) {
     console.error('Error clearing admin auth:', error);
   }
@@ -142,58 +124,6 @@ export async function adminLogout(router: any) {
   } catch (error) {
     console.error('Error logging out admin:', error);
   }
-}
-
-/**
- * Start monitoring token expiry globally
- */
-export function startTokenExpiryMonitor() {
-  // Clear any existing interval
-  stopTokenExpiryMonitor();
-  
-  // Set up new interval to check token validity
-  tokenCheckInterval = setInterval(() => {
-    if (!isTokenValid() && tokenExpiryHandler) {
-      // Token expired, trigger handler
-      tokenExpiryHandler();
-    }
-  }, TOKEN_CHECK_INTERVAL);
-  
-  // Add event listener for storage changes (for cross-tab support)
-  if (typeof window !== 'undefined') {
-    window.addEventListener('storage', handleStorageChange);
-  }
-}
-
-/**
- * Stop monitoring token expiry
- */
-export function stopTokenExpiryMonitor() {
-  if (tokenCheckInterval) {
-    clearInterval(tokenCheckInterval);
-    tokenCheckInterval = null;
-  }
-  
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('storage', handleStorageChange);
-  }
-}
-
-/**
- * Handle storage changes for cross-tab support
- */
-function handleStorageChange(event: StorageEvent) {
-  // If token was cleared in another tab
-  if (event.key === TOKEN_KEY && !event.newValue && tokenExpiryHandler) {
-    tokenExpiryHandler();
-  }
-}
-
-/**
- * Set a handler function to be called when token expires
- */
-export function setTokenExpiryHandler(handler: () => void) {
-  tokenExpiryHandler = handler;
 }
 
 /**
@@ -223,22 +153,15 @@ export function useAdminAuth() {
     setUser(adminUser);
     setLoading(false);
     
-    // Set up token expiry handler
-    setTokenExpiryHandler(() => {
-      // Show a notification that session has expired
-      if (typeof window !== 'undefined') {
-        alert('Your admin session has expired. Please login again.');
+    // Set up interval to periodically check token validity
+    const intervalId = setInterval(() => {
+      if (!isTokenValid()) {
+        clearInterval(intervalId);
+        adminLogout(router);
       }
-      adminLogout(router);
-    });
+    }, 60000); // Check every minute
     
-    // Start monitoring token expiry
-    startTokenExpiryMonitor();
-    
-    return () => {
-      // Clean up
-      stopTokenExpiryMonitor();
-    };
+    return () => clearInterval(intervalId);
   }, [router]);
   
   return { isAuthenticated, user, loading };

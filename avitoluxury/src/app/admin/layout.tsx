@@ -1,14 +1,6 @@
-'use client';
-
+import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "../globals.css";
-import dynamic from 'next/dynamic';
-
-// Dynamically import the AdminTokenMonitor component with no SSR
-const AdminTokenMonitor = dynamic(
-  () => import('../components/AdminTokenMonitor'),
-  { ssr: false }
-);
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -17,6 +9,11 @@ const montserrat = Montserrat({
   weight: ["300", "400", "500", "600", "700"],
 });
 
+export const metadata: Metadata = {
+  title: "Admin Dashboard | A V I T O   S C E N T S",
+  description: "Admin dashboard for A V I T O   S C E N T S perfume store",
+};
+
 export default function AdminLayout({
   children,
 }: {
@@ -24,10 +21,7 @@ export default function AdminLayout({
 }) {
   return (
     <div className={`${montserrat.variable} font-sans`}>
-      {/* Token expiry monitor */}
-      <AdminTokenMonitor />
-      
-      {/* Main content */}
+      {/* No Nav or Footer here */}
       {children}
     </div>
   );
