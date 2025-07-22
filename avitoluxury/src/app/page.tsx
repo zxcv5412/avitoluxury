@@ -8,8 +8,8 @@ export default function Home() {
   const router = useRouter();
   
   useEffect(() => {
-    // For all users, redirect to store-routes
-    router.push('/store-routes');
+    // Redirect to store-routes/store
+    router.push('/store-routes/store');
   }, [router]);
   
   // Return a loading state while redirecting

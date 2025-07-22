@@ -77,6 +77,12 @@ const nextConfig = {
         source: '/product/:path*',
         destination: '/store-routes/product/:path*',
         permanent: true,
+      },
+      // Add root redirect to store
+      {
+        source: '/',
+        destination: '/store-routes/store',
+        permanent: false,
       }
     ];
 
@@ -131,6 +137,19 @@ const nextConfig = {
         ],
         destination: 'https://admin.avitoluxury.in/admin/login',
         permanent: false
+      });
+      
+      // www to non-www redirect
+      redirects.push({
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.avitoluxury.in'
+          }
+        ],
+        destination: 'https://avitoluxury.in/:path*',
+        permanent: true
       });
     }
     
