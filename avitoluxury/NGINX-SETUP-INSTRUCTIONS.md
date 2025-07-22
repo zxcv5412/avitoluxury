@@ -1,6 +1,6 @@
 # Nginx Setup Instructions for Avito Luxury
 
-The 404 errors you're seeing are likely due to Nginx not properly forwarding requests to your Next.js application. Follow these steps to fix the issue:
+The 404 errors and incorrect routing issues you're seeing are likely due to Nginx not properly forwarding requests to your Next.js application. Follow these steps to fix the issue:
 
 ## 1. Update Nginx Configuration
 
@@ -24,6 +24,11 @@ The Nginx configuration includes:
    - Main domain (avitoluxury.in) serves the e-commerce site
    - Admin subdomain (admin.avitoluxury.in) serves the admin panel
    - All requests are forwarded to the same Next.js application
+
+3. **Critical fixes for admin subdomain**:
+   - Hard-coded redirect from / to /admin/login for the admin subdomain
+   - Blocking access to store-routes on the admin subdomain
+   - Redirecting non-admin content to the main domain
 
 ## 2. Enable the Site
 
@@ -71,10 +76,11 @@ After implementing these changes, test the redirects:
 
 1. Visit https://avitoluxury.in/ - should redirect to https://avitoluxury.in/store-routes/store
 2. Visit https://admin.avitoluxury.in/ - should redirect to https://admin.avitoluxury.in/admin/login
+3. Visit https://admin.avitoluxury.in/store-routes/store - should redirect to https://avitoluxury.in/store-routes/store
 
 ## 8. Troubleshooting
 
-If you're still seeing 404 errors:
+If you're still seeing 404 errors or incorrect redirects:
 
 1. Check Nginx error logs:
    ```bash
@@ -93,9 +99,16 @@ If you're still seeing 404 errors:
    curl http://localhost:3000
    ```
 
-4. Make sure your Next.js application is correctly handling the Host header:
-   - The middleware.ts file should be checking the hostname correctly
-   - The Next.js config should have proper redirects set up
+4. Clear your browser cache or test in an incognito window to ensure you're not seeing cached responses.
+
+5. If the redirect from admin.avitoluxury.in to admin/login still doesn't work, you can try a more aggressive approach:
+   ```
+   # In the admin server block in nginx-config.conf
+   location / {
+       rewrite ^/$ /admin/login redirect;
+       # Rest of the location block...
+   }
+   ```
 
 ## Important Notes
 

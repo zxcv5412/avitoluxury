@@ -45,12 +45,19 @@ export async function middleware(request: NextRequest) {
       }
       
       // Redirect root path to admin login or dashboard based on authentication
-      if (pathname === '/') {
+      if (pathname === '/' || pathname === '') {
         if (session && session.role === 'admin') {
           return applySecurityHeaders(NextResponse.redirect(new URL('/admin/dashboard', request.url)));
         } else {
           return applySecurityHeaders(NextResponse.redirect(new URL('/admin/login', request.url)));
         }
+      }
+      
+      // Block access to store routes on admin subdomain
+      if (pathname.startsWith('/store-routes')) {
+        return applySecurityHeaders(
+          NextResponse.redirect(new URL(`https://avitoluxury.in${pathname}`, request.url))
+        );
       }
       
       // For all other admin paths, require admin authentication
@@ -75,7 +82,7 @@ export async function middleware(request: NextRequest) {
       }
       
       // Redirect root path to store
-      if (pathname === '/') {
+      if (pathname === '/' || pathname === '') {
         return applySecurityHeaders(
           NextResponse.redirect(new URL('/store-routes/store', request.url))
         );
