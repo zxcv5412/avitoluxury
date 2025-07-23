@@ -7,6 +7,7 @@ import { FiSearch, FiFilter, FiX, FiChevronDown, FiChevronUp } from 'react-icons
 import Nav from './Nav';
 import Footer from './Footer';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Product {
   _id: string;
@@ -107,11 +108,14 @@ const ProductCardWrapper = ({ product }: { product: Product }) => {
     <div className="h-full flex flex-col bg-white border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-gray-300">
       <div className="relative overflow-hidden group">
         <Link href={`/product/${formattedProduct.slug}`}>
-          <img 
-            src={formattedProduct.mainImage} 
-            alt={formattedProduct.name}
-            className="w-full h-48 xs:h-56 sm:h-60 md:h-64 object-cover object-center transition-transform duration-500 group-hover:scale-105"
-          />
+          <div className="relative w-full h-48 xs:h-56 sm:h-60 md:h-64">
+            <Image 
+              src={formattedProduct.mainImage} 
+              alt={formattedProduct.name}
+              fill
+              className="object-contain transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
         </Link>
         {hasDiscount && (
           <div className="absolute top-2 left-2 bg-black text-white text-xs font-bold px-2 py-1 rounded">

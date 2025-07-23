@@ -318,7 +318,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           alt={product.name}
           width={400}
           height={500}
-          className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
+          className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
           onError={() => setImageError(true)}
         />
       </Link>

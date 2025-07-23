@@ -541,8 +541,8 @@ export default function Nav() {
                     {item.hasDropdown && <FiChevronDown className="ml-1 transition-transform duration-300 group-hover:rotate-180" size={16} />}
                   </div>
                   {item.hasDropdown && activeDropdown === item.id && (
-                    <div className="absolute top-full left-0 mt-1 w-56 bg-white shadow-lg rounded-md overflow-hidden z-20 transition-all duration-300 ease-in-out transform origin-top-left animate-fadeIn">
-                      <div className="py-2">
+                    <div className="absolute top-full left-0 mt-1 w-56 bg-white shadow-lg rounded-md overflow-hidden z-20 transition-all duration-300 ease-in-out transform origin-top-left opacity-100 animate-[fadeIn_0.2s_ease-in-out]">
+                      <div className="py-2 bg-white">
                         {item.dropdownItems?.map((dropdownItem) => (
                           <Link
                             key={dropdownItem.path}
@@ -664,7 +664,7 @@ export default function Nav() {
                         </div>
                         
                         {activeDropdown === item.id && (
-                          <div className="pl-4 mt-2 space-y-2 border-l-2 border-gray-200">
+                          <div className="pl-4 mt-2 space-y-2 border-l-2 border-gray-200 bg-white">
                             {item.dropdownItems?.map((dropdownItem) => (
                               <Link
                                 key={dropdownItem.path}

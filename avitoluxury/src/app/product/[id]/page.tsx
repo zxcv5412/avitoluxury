@@ -322,7 +322,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
               alt={product.name}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
-              style={{ objectFit: 'cover' }}
+              style={{ objectFit: 'contain' }}
               priority
             />
             
@@ -335,6 +335,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                   backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
                   backgroundRepeat: 'no-repeat',
                   backgroundSize: '200%',
+                  backgroundOrigin: 'content-box',
                   zIndex: 10
                 }}
               />
@@ -356,7 +357,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                       alt={`${product.name} view ${index + 1}`} 
                       fill
                       sizes="80px"
-                      style={{ objectFit: 'cover' }}
+                      style={{ objectFit: 'contain' }}
                     />
                   </div>
                 </button>
@@ -492,7 +493,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                       alt={relatedProduct.name}
                       width={300}
                       height={300}
-                      className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                      className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
                     />
                   </Link>
                 </div>
