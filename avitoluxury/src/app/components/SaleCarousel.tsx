@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import ShopNowButton from './ui/ShopNowButton';
+import Image from 'next/image';
 
 // Types
 interface Product {
@@ -165,7 +166,7 @@ export default function SaleCarousel() {
   }
   
   return (
-    <div className="relative w-full h-[250px] xs:h-[280px] sm:h-[350px] md:h-[450px] overflow-hidden bg-gray-50">
+    <div className="relative w-full overflow-hidden bg-gray-50" style={{ height: 'min(700px, 90vh)' }}>
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
@@ -178,25 +179,29 @@ export default function SaleCarousel() {
           {displayProducts[currentIndex] && (
             <div className="grid grid-cols-1 md:grid-cols-2 h-full">
               {/* Image - Mobile: Full screen with link, Desktop: Left side */}
-              <div className="order-1 md:order-1 flex items-center justify-center h-full md:h-full bg-gray-100 relative">
-                <Link href={`/product/${displayProducts[currentIndex]._id}`} className="w-full h-full flex items-center justify-center">
-                  <img
-                    src={displayProducts[currentIndex].images && displayProducts[currentIndex].images[0]?.url || '/perfume-placeholder.jpg'}
-                    alt={displayProducts[currentIndex].name || "Perfume product"}
-                    className="object-contain w-auto h-full max-h-full max-w-[70%] sm:max-w-[80%] md:max-w-[80%]"
-                    onError={(e) => {
-                      // Fallback to placeholder on error
-                      const target = e.target as HTMLImageElement;
-                      target.onerror = null; // Prevent infinite loop
-                      target.src = '/perfume-placeholder.jpg';
-                    }}
-                  />
+              <div className="order-1 md:order-1 flex items-center justify-center h-full bg-gray-100 relative">
+                <Link href={`/product/${displayProducts[currentIndex]._id}`} className="block relative w-full h-full">
+                  <div className="absolute inset-0 flex items-center justify-center p-6 md:p-8">
+                    <img
+                      src={displayProducts[currentIndex].images && displayProducts[currentIndex].images[0]?.url || '/perfume-placeholder.jpg'}
+                      alt={displayProducts[currentIndex].name || "Perfume product"}
+                      className="max-h-full max-w-full object-contain"
+                      onError={(e) => {
+                        // Fallback to placeholder on error
+                        const target = e.target as HTMLImageElement;
+                        target.onerror = null; // Prevent infinite loop
+                        target.src = '/perfume-placeholder.jpg';
+                      }}
+                    />
+                  </div>
+                  
                   {/* Mobile-only discount badge */}
-                  <div className="md:hidden absolute top-4 left-4 bg-red-600 text-white inline-block px-1.5 xs:px-2 py-0.5 text-xs uppercase tracking-wider">
+                  <div className="md:hidden absolute top-4 left-4 bg-red-600 text-white inline-block px-1.5 xs:px-2 py-0.5 text-xs uppercase tracking-wider z-10">
                     {Math.round(displayProducts[currentIndex].discountPercentage || 0)}% OFF
                   </div>
+                  
                   {/* Mobile-only product name overlay at bottom */}
-                  <div className="md:hidden absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-center">
+                  <div className="md:hidden absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-center z-10">
                     <h3 className="text-sm xs:text-base font-medium truncate">{displayProducts[currentIndex].name}</h3>
                   </div>
                 </Link>

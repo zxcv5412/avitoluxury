@@ -23,9 +23,6 @@ EMAIL_SERVICE=gmail
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASSWORD=your-email-password
 
-# API Base URL for frontend calls
-NEXT_PUBLIC_API_BASE_URL=https://api.example.com
-
 # Note: Replace the placeholders above with your actual credentials
 # Make sure to update the MongoDB connection string with your own database credentials
 `;

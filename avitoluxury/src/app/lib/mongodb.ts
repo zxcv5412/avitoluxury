@@ -6,7 +6,8 @@ if (process.env.NODE_ENV === 'development') {
   mongoose.set('autoIndex', false); // Disable automatic index creation to prevent warnings
 }
 
-const MONGODB_URI = process.env.MONGODB_URI;
+// Hardcoded MongoDB URI
+const MONGODB_URI = 'mongodb+srv://avitoluxury:l2AuSv97J5FW4ZvU@freetester.667mr8b.mongodb.net/ecommerce';
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable');
