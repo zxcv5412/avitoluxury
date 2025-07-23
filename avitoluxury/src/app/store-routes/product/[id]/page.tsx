@@ -238,7 +238,7 @@ export default function ProductDetailPage() {
             alt="Product placeholder"
             width={600}
             height={800}
-            className="w-full h-full object-cover rounded-lg"
+            className="w-full h-full object-contain rounded-lg"
           />
         </div>
       );
@@ -253,13 +253,13 @@ export default function ProductDetailPage() {
               alt={`${product.name} - Image ${currentImageIndex + 1}`}
               width={600}
               height={800}
-              className="w-full h-full object-cover rounded-lg"
+              className="w-full h-full object-contain rounded-lg"
             />
           ) : (
             <video 
               src={product.videos[currentImageIndex - product.images.length]?.url} 
               controls
-              className="w-full h-full object-cover rounded-lg"
+              className="w-full h-full object-contain rounded-lg"
             />
           )}
           
@@ -297,7 +297,7 @@ export default function ProductDetailPage() {
                   alt={`Thumbnail ${index + 1}`}
                   width={100}
                   height={100}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </button>
             ))}
@@ -589,7 +589,7 @@ export default function ProductDetailPage() {
                         alt={relatedProduct.name}
                         width={300}
                         height={400}
-                        className="w-full h-64 object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-64 object-contain object-center transition-transform duration-500 group-hover:scale-105"
                       />
                     </Link>
                     {relatedProduct.discountedPrice > 0 && (
