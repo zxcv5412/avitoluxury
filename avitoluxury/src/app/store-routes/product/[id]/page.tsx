@@ -461,6 +461,13 @@ export default function ProductDetailPage() {
                   +
                 </button>
               </div>
+              {/* Volume next to quantity */}
+              <span className="ml-4 flex items-center">
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 text-white text-xs font-semibold shadow-md border border-gray-700">
+                  <span className="mr-1 opacity-70">Volume:</span>
+                  <span className="font-bold">{product.volumeRaw || (product.size ? `${product.size}${product.volumeRaw?.toLowerCase().includes('gm') ? ' Gm' : ' ml'}` : '50ml')}</span>
+                </span>
+              </span>
             </div>
             
             {/* Actions */}

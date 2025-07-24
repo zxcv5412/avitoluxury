@@ -420,6 +420,11 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                 <FiPlus size={16} />
               </button>
             </div>
+            {/* Volume next to quantity */}
+            <span className="ml-4 flex items-center text-sm text-gray-700">
+              <span className="mx-2 h-5 border-l border-gray-300" />
+              <span>Volume: <span className="font-medium">{product.volume || '50ml'}</span></span>
+            </span>
           </div>
           
           {/* Add to cart and Buy now buttons */}
