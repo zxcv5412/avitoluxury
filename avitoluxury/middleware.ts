@@ -26,151 +26,166 @@ function isDevelopmentOrLocalhost(hostname: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const hostname = request.headers.get('host') || '';
-  
-  // Skip domain-based routing for development or localhost
-  const isDevOrLocal = isDevelopmentOrLocalhost(hostname);
-  
-  // Domain-based routing logic for production environment
-  if (!isDevOrLocal) {
-    // Admin subdomain handling
-    if (hostname === 'admin.avitoluxury.in') {
-      // Check if user is authenticated for admin routes
-      const session = await getSessionFromRequest(request);
-      
-      // For admin login page, allow access
-      if (pathname === '/admin/login') {
-        return applySecurityHeaders(NextResponse.next());
+  try {
+    const { pathname } = request.nextUrl;
+    const hostname = request.headers.get('host') || '';
+    
+    // Skip middleware for static files and certain API routes early
+    if (
+      pathname.startsWith('/_next') ||
+      pathname.includes('favicon') ||
+      pathname.includes('.') ||
+      pathname.startsWith('/api/') ||
+      publicPaths.some(path => pathname === path)
+    ) {
+      return applySecurityHeaders(NextResponse.next());
+    }
+
+    // Skip domain-based routing for development or localhost
+    const isDevOrLocal = isDevelopmentOrLocalhost(hostname);
+    
+    // Domain-based routing logic for production environment
+    if (!isDevOrLocal) {
+      try {
+        const domainResponse = await handleDomainRouting(request, hostname, pathname);
+        if (domainResponse) {
+          return domainResponse;
+        }
+      } catch (error) {
+        console.error('Domain routing error:', error);
+        // Continue with normal processing if domain routing fails
       }
-      
-      // Redirect root path to admin login or dashboard based on authentication
-      if (pathname === '/' || pathname === '') {
+    }
+
+    // Handle protected routes
+    if (
+      pathname.startsWith(adminBasePath) || 
+      protectedPaths.some(path => pathname.startsWith(path))
+    ) {
+      try {
+        const authResponse = await handleAuthentication(request, pathname);
+        if (authResponse) {
+          return authResponse;
+        }
+      } catch (error) {
+        console.error('Authentication error:', error);
+        // Redirect to login on auth error
+        return applySecurityHeaders(NextResponse.redirect(new URL('/login', request.url)));
+      }
+    }
+
+    // Default response with security headers
+    return applySecurityHeaders(NextResponse.next());
+    
+  } catch (error) {
+    console.error('Middleware error:', error);
+    // Return a basic response with security headers in case of error
+    return applySecurityHeaders(NextResponse.next());
+  }
+}
+
+// Separate function to handle domain routing
+async function handleDomainRouting(request: NextRequest, hostname: string, pathname: string) {
+  // Admin subdomain handling
+  if (hostname === 'admin.avitoluxury.in') {
+    // For admin login page, allow access
+    if (pathname === '/admin/login') {
+      return applySecurityHeaders(NextResponse.next());
+    }
+    
+    // Redirect root path to admin login or dashboard based on authentication
+    if (pathname === '/' || pathname === '') {
+      try {
+        const session = await getSessionFromRequest(request);
         if (session && session.role === 'admin') {
           return applySecurityHeaders(NextResponse.redirect(new URL('/admin/dashboard', request.url)));
         } else {
           return applySecurityHeaders(NextResponse.redirect(new URL('/admin/login', request.url)));
         }
-      }
-      
-      // Block access to store routes on admin subdomain
-      if (pathname.startsWith('/store-routes')) {
-        return applySecurityHeaders(
-          NextResponse.redirect(new URL(`https://avitoluxury.in${pathname}`, request.url))
-        );
-      }
-      
-      // For all other admin paths, require admin authentication
-      if (pathname.startsWith('/admin') && (!session || session.role !== 'admin')) {
+      } catch (error) {
         return applySecurityHeaders(NextResponse.redirect(new URL('/admin/login', request.url)));
-      }
-      
-      // Redirect non-admin paths to main domain
-      if (!pathname.startsWith('/admin') && !pathname.startsWith('/_next')) {
-        return applySecurityHeaders(
-          NextResponse.redirect(new URL(`https://avitoluxury.in${pathname}`, request.url))
-        );
-      }
-    } 
-    // Main domain handling
-    else if (hostname === 'avitoluxury.in' || hostname === 'www.avitoluxury.in') {
-      // Redirect admin paths to admin subdomain
-      if (pathname.startsWith('/admin')) {
-        return applySecurityHeaders(
-          NextResponse.redirect(new URL(`https://admin.avitoluxury.in${pathname}`, request.url))
-        );
-      }
-      
-      // Redirect root path to store
-      if (pathname === '/' || pathname === '') {
-        return applySecurityHeaders(
-          NextResponse.redirect(new URL('/store-routes/store', request.url))
-        );
       }
     }
     
-    // Handle www to non-www redirect if needed
-    if (hostname === 'www.avitoluxury.in') {
+    // Block access to store routes on admin subdomain
+    if (pathname.startsWith('/store-routes')) {
       return applySecurityHeaders(
         NextResponse.redirect(new URL(`https://avitoluxury.in${pathname}`, request.url))
       );
     }
+    
+    // For all other admin paths, require admin authentication
+    if (pathname.startsWith('/admin')) {
+      try {
+        const session = await getSessionFromRequest(request);
+        if (!session || session.role !== 'admin') {
+          return applySecurityHeaders(NextResponse.redirect(new URL('/admin/login', request.url)));
+        }
+      } catch (error) {
+        return applySecurityHeaders(NextResponse.redirect(new URL('/admin/login', request.url)));
+      }
+    }
+    
+    // Redirect non-admin paths to main domain
+    if (!pathname.startsWith('/admin') && !pathname.startsWith('/_next')) {
+      return applySecurityHeaders(
+        NextResponse.redirect(new URL(`https://avitoluxury.in${pathname}`, request.url))
+      );
+    }
+  } 
+  // Main domain handling
+  else if (hostname === 'avitoluxury.in' || hostname === 'www.avitoluxury.in') {
+    // Redirect admin paths to admin subdomain
+    if (pathname.startsWith('/admin')) {
+      return applySecurityHeaders(
+        NextResponse.redirect(new URL(`https://admin.avitoluxury.in${pathname}`, request.url))
+      );
+    }
+    
+    // Redirect root path to store
+    if (pathname === '/' || pathname === '') {
+      return applySecurityHeaders(
+        NextResponse.redirect(new URL('/store-routes/store', request.url))
+      );
+    }
+  }
+  
+  // Handle www to non-www redirect if needed
+  if (hostname === 'www.avitoluxury.in') {
+    return applySecurityHeaders(
+      NextResponse.redirect(new URL(`https://avitoluxury.in${pathname}`, request.url))
+    );
   }
 
-  // Skip middleware for static files and certain API routes
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.includes('favicon') ||
-    pathname.includes('.') ||
-    publicPaths.some(path => pathname === path)
-  ) {
-    return applySecurityHeaders(NextResponse.next());
-  }
-
-  // Get session from cookies for protected routes
-  if (
-    pathname.startsWith(adminBasePath) || 
-    protectedPaths.some(path => pathname.startsWith(path))
-  ) {
-    const session = await getSessionFromRequest(request);
-
-    // Check if the path is admin-only
-    const isAdminPath = pathname.startsWith(adminBasePath);
-
-    // Check if the path is protected
-    const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path));
-
-    // If path is admin-only and user is not an admin, redirect to admin login
-    if (isAdminPath && (!session || session.role !== 'admin')) {
-      return applySecurityHeaders(NextResponse.redirect(new URL('/admin/login', request.url)));
-    }
-
-    // If path is protected and user is not authenticated, redirect to login
-    if (isProtectedPath && !session) {
-      const url = new URL('/login', request.url);
-      url.searchParams.set('redirect', pathname);
-      return applySecurityHeaders(NextResponse.redirect(url));
-    }
-  }
-
-  // Clone the request headers
-  const requestHeaders = new Headers(request.headers);
-  
-  // Get response for the request
-  const response = NextResponse.next({
-    request: {
-      // Apply new request headers
-      headers: requestHeaders,
-    }
-  });
-  
-  // Add security headers to prevent data leakage
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('X-Frame-Options', 'DENY');
-  response.headers.set('X-XSS-Protection', '1; mode=block');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  response.headers.set('Permissions-Policy', 'geolocation=(), camera=()');
-  
-  // Add Content-Security-Policy to prevent console logging exploits
-  response.headers.set(
-    'Content-Security-Policy',
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com; " +
-    "connect-src 'self' https://*.cloudinary.com https://*.razorpay.com; " +
-    "img-src 'self' data: blob: https://*.cloudinary.com https://placehold.co https://storage.googleapis.com; " +
-    "style-src 'self' 'unsafe-inline'; " +
-    "font-src 'self' data:; " +
-    "frame-src 'self' https://checkout.razorpay.com; " +
-    "object-src 'none'; " +
-    "base-uri 'self'; " +
-    "report-uri /api/csp-report;"
-  );
-  
-  // Return response
-  return response;
+  return null; // No domain-specific handling needed
 }
 
-// Helper function to get session from request
+// Separate function to handle authentication
+async function handleAuthentication(request: NextRequest, pathname: string) {
+  const session = await getSessionFromRequest(request);
+
+  // Check if the path is admin-only
+  const isAdminPath = pathname.startsWith(adminBasePath);
+
+  // Check if the path is protected
+  const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path));
+
+  // If path is admin-only and user is not an admin, redirect to admin login
+  if (isAdminPath && (!session || session.role !== 'admin')) {
+    return applySecurityHeaders(NextResponse.redirect(new URL('/admin/login', request.url)));
+  }
+
+  // If path is protected and user is not authenticated, redirect to login
+  if (isProtectedPath && !session) {
+    const url = new URL('/login', request.url);
+    url.searchParams.set('redirect', pathname);
+    return applySecurityHeaders(NextResponse.redirect(url));
+  }
+
+  return null; // No authentication redirect needed
+}
+
+// Helper function to get session from request with timeout
 async function getSessionFromRequest(request: NextRequest) {
   try {
     // First try to get token from cookie - check both admin_token and regular token
@@ -186,8 +201,14 @@ async function getSessionFromRequest(request: NextRequest) {
       return null;
     }
     
-    // Decrypt and verify the token
-    const payload = await decrypt(authToken);
+    // Decrypt and verify the token with timeout
+    const payload = await Promise.race([
+      decrypt(authToken),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Token verification timeout')), 3000)
+      )
+    ]);
+    
     if (!payload) {
       return null;
     }
@@ -200,7 +221,10 @@ async function getSessionFromRequest(request: NextRequest) {
       role: payload.role
     };
   } catch (error) {
-    // Silent error handling for security
+    // Log error in development for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Session verification error:', error);
+    }
     return null;
   }
 }
@@ -208,16 +232,25 @@ async function getSessionFromRequest(request: NextRequest) {
 // Helper function to apply security headers to any response
 function applySecurityHeaders(response: NextResponse) {
   // Add security headers
-  const securityHeaders = {
-    // Content Security Policy to prevent XSS attacks and console exploits
-    'Content-Security-Policy':
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self'; img-src 'self' data: blob: https://*.cloudinary.com; style-src 'self' 'unsafe-inline'; font-src 'self';"
-  };
-
-  // Apply all security headers
-  Object.entries(securityHeaders).forEach(([key, value]) => {
-    response.headers.set(key, value);
-  });
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Permissions-Policy', 'geolocation=(), camera=()');
+  
+  // Add Content-Security-Policy
+  response.headers.set(
+    'Content-Security-Policy',
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com; " +
+    "connect-src 'self' https://*.cloudinary.com https://*.razorpay.com; " +
+    "img-src 'self' data: blob: https://*.cloudinary.com https://placehold.co https://storage.googleapis.com; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "font-src 'self' data:; " +
+    "frame-src 'self' https://checkout.razorpay.com; " +
+    "object-src 'none'; " +
+    "base-uri 'self';"
+  );
 
   return response;
 }
@@ -228,4 +261,4 @@ export const config = {
     // Apply to all routes except API routes and static files
     '/((?!api|_next/static|_next/image|_next/webpack|favicon.ico).*)',
   ],
-}; 
+};
