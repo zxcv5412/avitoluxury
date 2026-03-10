@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { TOKEN_EXPIRY } from '../../lib/auth-utils';
+
+// Token expiration in milliseconds (24 hours) - defined locally to avoid import issues
+const TOKEN_EXPIRY = 24 * 60 * 60 * 1000;
 
 // Helper function to securely log only in development
 const isProduction = process.env.NODE_ENV === 'production';

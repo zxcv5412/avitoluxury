@@ -20,21 +20,22 @@ export const expTime = '24h';
 // Token expiration in milliseconds (24 hours)
 export const TOKEN_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-const JWT_SECRET = (() => {
+// Lazy initialization of JWT secrets - only validate when actually used
+const getJWTSecret = () => {
   const secret = process.env.JWT_SECRET;
   if (!secret || secret === 'fallback_jwt_secret_for_development_only') {
     throw new Error('JWT_SECRET environment variable must be set with a strong secret key');
   }
   return secret;
-})();
+};
 
-const ADMIN_JWT_SECRET = (() => {
+const getAdminJWTSecret = () => {
   const secret = process.env.ADMIN_JWT_SECRET;
   if (!secret || secret === 'fallback_admin_jwt_secret_for_development_only') {
     throw new Error('ADMIN_JWT_SECRET environment variable must be set with a strong secret key');
   }
   return secret;
-})();
+};
 
 /**
  * Generate a JWT token containing user data
@@ -102,18 +103,18 @@ export async function getUserFromToken(token: string) {
 
 // Generate JWT token for users
 export async function generateToken(payload: any) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign(payload, getJWTSecret(), { expiresIn: '7d' });
 }
 
 // Generate JWT token for admin
 export async function generateAdminToken(payload: any) {
-  return jwt.sign(payload, ADMIN_JWT_SECRET, { expiresIn: '1d' });
+  return jwt.sign(payload, getAdminJWTSecret(), { expiresIn: '1d' });
 }
 
 // Verify user token
 export async function verifyToken(token: string) {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+    const decoded = jwt.verify(token, getJWTSecret()) as { id: string };
     
     // Connect to database
     await connectToDatabase();
