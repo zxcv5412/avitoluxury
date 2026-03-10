@@ -33,12 +33,19 @@ export function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Simple domain routing for production
+    // Temporarily disable domain routing to fix redirect loops
+    // TODO: Re-enable after testing
+    /*
     if (process.env.NODE_ENV === 'production') {
+      // Handle www to non-www redirect first
+      if (hostname === 'www.avitoluxury.in') {
+        return NextResponse.redirect(new URL(`https://avitoluxury.in${pathname}`, request.url));
+      }
+      
       // Admin subdomain handling
       if (hostname === 'admin.avitoluxury.in') {
-        // Redirect root to admin login
-        if (pathname === '/' || pathname === '') {
+        // Only redirect root to admin login
+        if (pathname === '/') {
           return NextResponse.redirect(new URL('/admin/login', request.url));
         }
         
@@ -46,30 +53,21 @@ export function middleware(request: NextRequest) {
         if (pathname.startsWith('/store-routes')) {
           return NextResponse.redirect(new URL(`https://avitoluxury.in${pathname}`, request.url));
         }
-        
-        // Redirect non-admin paths to main domain
-        if (!pathname.startsWith('/admin') && !pathname.startsWith('/_next')) {
-          return NextResponse.redirect(new URL(`https://avitoluxury.in${pathname}`, request.url));
-        }
       }
       // Main domain handling
-      else if (hostname === 'avitoluxury.in' || hostname === 'www.avitoluxury.in') {
+      else if (hostname === 'avitoluxury.in') {
         // Redirect admin paths to admin subdomain
         if (pathname.startsWith('/admin')) {
           return NextResponse.redirect(new URL(`https://admin.avitoluxury.in${pathname}`, request.url));
         }
         
-        // Redirect root to store
-        if (pathname === '/' || pathname === '') {
+        // Only redirect root to store
+        if (pathname === '/') {
           return NextResponse.redirect(new URL('/store-routes/store', request.url));
         }
       }
-      
-      // Handle www redirect
-      if (hostname === 'www.avitoluxury.in') {
-        return NextResponse.redirect(new URL(`https://avitoluxury.in${pathname}`, request.url));
-      }
     }
+    */
 
     // Basic auth check for protected routes (without async operations)
     if (pathname.startsWith(adminBasePath) || protectedPaths.some(path => pathname.startsWith(path))) {
