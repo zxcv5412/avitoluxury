@@ -54,11 +54,32 @@ export async function GET(request: NextRequest) {
     
     // Call RapidAPI for pincode lookup
     console.log('Calling RapidAPI with pincode:', pincode);
+    
+    const rapidApiKey = process.env.RAPIDAPI_KEY;
+    if (!rapidApiKey) {
+      console.log('RapidAPI key not configured, using fallback database');
+      
+      // Try fallback database
+      if (fallbackPincodes[pincode]) {
+        console.log('Using fallback database for pincode:', pincode);
+        return NextResponse.json({
+          success: true,
+          data: fallbackPincodes[pincode],
+          source: 'fallback'
+        });
+      }
+      
+      return NextResponse.json(
+        { success: false, error: 'Pincode lookup service not configured' },
+        { status: 503 }
+      );
+    }
+    
     try {
       const rapidApiResponse = await fetch(`https://india-pincode-with-latitude-and-longitude.p.rapidapi.com/api/v1/pincode/${pincode}`, {
         method: 'GET',
         headers: {
-          'X-RapidAPI-Key': 'ba71473752msh7b13dc531279605p13884djsn2a75f01e559b',
+          'X-RapidAPI-Key': rapidApiKey,
           'X-RapidAPI-Host': 'india-pincode-with-latitude-and-longitude.p.rapidapi.com'
         }
       });

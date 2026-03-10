@@ -36,8 +36,13 @@ async function createAdminUser() {
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB');
 
-    const adminEmail = 'chineshsoni2@gmail.com';
-    const adminPassword = 'chinesh@123';
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    
+    if (!adminPassword) {
+      console.error('ADMIN_PASSWORD environment variable is required');
+      process.exit(1);
+    }
 
     // Check if admin user already exists
     console.log('Checking if admin user exists...');

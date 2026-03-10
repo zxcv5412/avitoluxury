@@ -7,7 +7,7 @@ if (typeof window === 'undefined') {
   const { v2 } = require('cloudinary');
   cloudinary = v2;
   
-  // Configure Cloudinary on server with hardcoded values for simplicity
+  // Configure Cloudinary on server with environment variables
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -15,7 +15,9 @@ if (typeof window === 'undefined') {
     secure: true
   });
   
-  console.log('Cloudinary configured with hardcoded values');
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Cloudinary configured successfully');
+  }
 }
 
 /**

@@ -125,8 +125,7 @@ const UserSchema = new Schema({
   },
   phone: {
     type: String,
-    trim: true,
-    index: false // Explicitly disable automatic indexing
+    trim: true
   },
   gender: {
     type: String,

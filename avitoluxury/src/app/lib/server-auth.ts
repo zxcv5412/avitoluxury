@@ -6,7 +6,11 @@ import User from '../models/User';
 
 // Secret used for JWT signing
 const getSecret = () => {
-  const secretKey = process.env.JWT_SECRET || 'fallback_jwt_secret_for_development_only';
+  const secretKey = process.env.JWT_SECRET;
+  
+  if (!secretKey || secretKey === 'fallback_jwt_secret_for_development_only') {
+    throw new Error('JWT_SECRET environment variable must be set with a strong secret key');
+  }
   
   return new TextEncoder().encode(secretKey);
 };
@@ -16,8 +20,21 @@ export const expTime = '24h';
 // Token expiration in milliseconds (24 hours)
 export const TOKEN_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_jwt_secret_for_development_only';
-const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET || 'fallback_admin_jwt_secret_for_development_only';
+const JWT_SECRET = (() => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret === 'fallback_jwt_secret_for_development_only') {
+    throw new Error('JWT_SECRET environment variable must be set with a strong secret key');
+  }
+  return secret;
+})();
+
+const ADMIN_JWT_SECRET = (() => {
+  const secret = process.env.ADMIN_JWT_SECRET;
+  if (!secret || secret === 'fallback_admin_jwt_secret_for_development_only') {
+    throw new Error('ADMIN_JWT_SECRET environment variable must be set with a strong secret key');
+  }
+  return secret;
+})();
 
 /**
  * Generate a JWT token containing user data

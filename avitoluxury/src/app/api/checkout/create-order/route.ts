@@ -25,11 +25,28 @@ export async function POST(request: NextRequest) {
     let user = await User.findOne({ email: userData.email });
     
     if (!user) {
-      // Create new user
+      // For security, require users to register with a proper password
+      // Don't create users with default passwords during checkout
+      if (!userData.password) {
+        return NextResponse.json(
+          { success: false, error: 'User registration required. Please create an account first.' },
+          { status: 400 }
+        );
+      }
+      
+      // Validate password strength
+      if (userData.password.length < 8) {
+        return NextResponse.json(
+          { success: false, error: 'Password must be at least 8 characters long' },
+          { status: 400 }
+        );
+      }
+      
+      // Create new user with provided password
       user = new User({
         name: userData.fullName,
         email: userData.email,
-        password: userData.password || 'defaultPassword123', // Provide a default password if not provided
+        password: userData.password, // Use provided password only
         phone: userData.phone,
         addresses: [{
           addressId: uuidv4(),

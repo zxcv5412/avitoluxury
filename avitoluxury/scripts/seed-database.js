@@ -363,7 +363,8 @@ async function seedDatabase() {
 
     // 2. Create admin user
     console.log('Creating admin user...');
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const adminPassword = process.env.ADMIN_PASSWORD || 'ChangeMe123!';
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
     const adminUser = await User.create({
       name: 'Admin User',
       email: 'admin@example.com',
@@ -374,7 +375,8 @@ async function seedDatabase() {
 
     // 3. Create regular user
     console.log('Creating regular user...');
-    const regularPassword = await bcrypt.hash('user123', 10);
+    const userPassword = process.env.USER_PASSWORD || 'ChangeMe123!';
+    const regularPassword = await bcrypt.hash(userPassword, 10);
     const regularUser = await User.create({
       name: 'Test User',
       email: 'user@example.com',

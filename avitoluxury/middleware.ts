@@ -33,6 +33,37 @@ export function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
+    // Create response with security headers
+    const response = NextResponse.next();
+    
+    // Security Headers
+    response.headers.set('X-Frame-Options', 'DENY');
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    response.headers.set('X-XSS-Protection', '1; mode=block');
+    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    
+    // Content Security Policy
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://www.googletagmanager.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: https: blob:",
+      "connect-src 'self' https://api.razorpay.com https://checkout.razorpay.com",
+      "frame-src https://api.razorpay.com https://checkout.razorpay.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'"
+    ].join('; ');
+    
+    response.headers.set('Content-Security-Policy', csp);
+    
+    // HSTS for production
+    if (process.env.NODE_ENV === 'production') {
+      response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    }
+
     // Temporarily disable domain routing to fix redirect loops
     // TODO: Re-enable after testing
     /*
@@ -79,37 +110,60 @@ export function middleware(request: NextRequest) {
       // If no token found, redirect to appropriate login
       if (!adminToken && !regularToken && !authHeader) {
         if (pathname.startsWith(adminBasePath)) {
-          return NextResponse.redirect(new URL('/admin/login', request.url));
+          const redirectResponse = NextResponse.redirect(new URL('/admin/login', request.url));
+          // Add security headers to redirect response
+          addSecurityHeaders(redirectResponse);
+          return redirectResponse;
         } else {
           const url = new URL('/login', request.url);
           url.searchParams.set('redirect', pathname);
-          return NextResponse.redirect(url);
+          const redirectResponse = NextResponse.redirect(url);
+          // Add security headers to redirect response
+          addSecurityHeaders(redirectResponse);
+          return redirectResponse;
         }
       }
     }
 
-    // Create response with security headers
-    const response = NextResponse.next();
-    
-    // Add security headers
-    response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('X-Frame-Options', 'DENY');
-    response.headers.set('X-XSS-Protection', '1; mode=block');
-    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-    response.headers.set('Permissions-Policy', 'geolocation=(), camera=()');
-    
-    // Simplified CSP
-    response.headers.set(
-      'Content-Security-Policy',
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com; connect-src 'self' https://*.cloudinary.com https://*.razorpay.com; img-src 'self' data: blob: https://*.cloudinary.com https://placehold.co https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-src 'self' https://checkout.razorpay.com; object-src 'none'; base-uri 'self';"
-    );
-    
+    // Return response with security headers
     return response;
     
   } catch (error) {
     // Log error and return basic response
     console.error('Middleware error:', error);
-    return NextResponse.next();
+    const errorResponse = NextResponse.next();
+    addSecurityHeaders(errorResponse);
+    return errorResponse;
+  }
+}
+
+// Helper function to add security headers
+function addSecurityHeaders(response: NextResponse) {
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  
+  // Content Security Policy
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://www.googletagmanager.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https: blob:",
+    "connect-src 'self' https://api.razorpay.com https://checkout.razorpay.com",
+    "frame-src https://api.razorpay.com https://checkout.razorpay.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'"
+  ].join('; ');
+  
+  response.headers.set('Content-Security-Policy', csp);
+  
+  // HSTS for production
+  if (process.env.NODE_ENV === 'production') {
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
 }
 
