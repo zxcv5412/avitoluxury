@@ -207,9 +207,14 @@ async function getSessionFromRequest(request: NextRequest) {
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Token verification timeout')), 3000)
       )
-    ]);
+    ]) as any;
     
-    if (!payload) {
+    if (!payload || typeof payload !== 'object') {
+      return null;
+    }
+    
+    // Check if payload has required properties
+    if (!payload.userId || !payload.email) {
       return null;
     }
     
