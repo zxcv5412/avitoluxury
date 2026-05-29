@@ -150,19 +150,14 @@ export default function SaleCarousel() {
               {/* Image - Mobile: Full screen with link, Desktop: Left side */}
               <div className="order-1 md:order-1 flex items-center justify-center h-full bg-gray-100 relative">
                 <Link href={`/product/${displayProducts[currentIndex]._id}`} className="block relative w-full h-full">
-                  <div className="absolute inset-0 flex items-center justify-center p-6 md:p-8">
-                    <img
+                    <Image
                       src={displayProducts[currentIndex].images && displayProducts[currentIndex].images[0]?.url || '/perfume-placeholder.jpg'}
                       alt={displayProducts[currentIndex].name || "Perfume product"}
-                      className="max-h-full max-w-full object-contain"
-                      onError={(e) => {
-                        // Fallback to placeholder on error
-                        const target = e.target as HTMLImageElement;
-                        target.onerror = null; // Prevent infinite loop
-                        target.src = '/perfume-placeholder.jpg';
-                      }}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      priority={currentIndex === 0}
+                      className="object-contain p-6 md:p-8"
                     />
-                  </div>
                   
                   {/* Mobile-only discount badge */}
                   <div className="md:hidden absolute top-4 left-4 bg-red-600 text-white inline-block px-1.5 xs:px-2 py-0.5 text-xs uppercase tracking-wider z-10">
