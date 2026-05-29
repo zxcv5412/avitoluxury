@@ -29,6 +29,7 @@ export default function SaleCarousel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [imageAspects, setImageAspects] = useState<{[key: string]: 'horizontal' | 'vertical' | 'square'}>({});
 
   // Fetch products with highest discount percentage
   useEffect(() => {
@@ -182,7 +183,7 @@ export default function SaleCarousel() {
   }
   
   return (
-    <div className="relative w-full overflow-hidden bg-gray-50" style={{ height: 'min(700px, 90vh)' }}>
+    <div className="relative w-full overflow-hidden bg-white h-[300px] xs:h-[350px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
@@ -195,7 +196,7 @@ export default function SaleCarousel() {
           {displayProducts[currentIndex] && (
             <div className="grid grid-cols-1 md:grid-cols-2 h-full">
               {/* Image - Mobile: Full screen with link, Desktop: Left side */}
-              <div className="order-1 md:order-1 flex items-center justify-center h-full bg-gray-100 relative">
+              <div className="order-1 md:order-1 flex items-center justify-center h-full bg-white relative">
                 <Link href={`/product/${displayProducts[currentIndex]._id}`} className="block relative w-full h-full">
                     <Image
                       src={displayProducts[currentIndex].images && displayProducts[currentIndex].images[0]?.url || '/perfume-placeholder.jpg'}
@@ -203,7 +204,27 @@ export default function SaleCarousel() {
                       fill
                       sizes="(max-width: 768px) 100vw, 50vw"
                       priority={currentIndex === 0}
-                      className="object-contain p-6 md:p-8"
+                      onLoad={(e) => {
+                        const img = e.currentTarget;
+                        if (img.naturalWidth && img.naturalHeight) {
+                          const aspect = img.naturalWidth / img.naturalHeight;
+                          const productId = displayProducts[currentIndex]._id;
+                          let type: 'horizontal' | 'vertical' | 'square' = 'square';
+                          if (aspect > 1.25) {
+                            type = 'horizontal';
+                          } else if (aspect < 0.8) {
+                            type = 'vertical';
+                          }
+                          setImageAspects(prev => ({ ...prev, [productId]: type }));
+                        }
+                      }}
+                      className={`object-contain transition-all duration-300 ${
+                        imageAspects[displayProducts[currentIndex]._id] === 'horizontal'
+                          ? 'p-0.5 sm:p-1 md:p-2' 
+                          : imageAspects[displayProducts[currentIndex]._id] === 'vertical'
+                          ? 'p-6 xs:p-8 sm:p-12 md:p-16' 
+                          : 'p-3 xs:p-4 sm:p-6 md:p-8'
+                      }`}
                     />
                   
                   {/* Mobile-only discount badge */}
