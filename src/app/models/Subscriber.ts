@@ -46,7 +46,6 @@ const SubscriberSchema = new Schema({
 });
 
 // Create indexes for better performance
-SubscriberSchema.index({ email: 1 }, { unique: true });
 SubscriberSchema.index({ isActive: 1 });
 
 // Create or get the Subscriber model
