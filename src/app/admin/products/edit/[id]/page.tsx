@@ -65,6 +65,7 @@ export default function EditProductPage() {
           isNewArrival: product.isNewArrival || false,
           isBestBuy: product.isBestBuy || false,
           featured: product.featured || false,
+          isPinned: product.isPinned || false,
           
           // Media
           media: [

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Nav from '../components/Nav';
 import Footer from '../components/Footer';
 import ProductCard from '../components/store/ProductCard';
@@ -62,14 +63,17 @@ export default function GiftingPage() {
       
       {/* Hero Section */}
       <div className="relative">
-        <div className="w-full h-[50vh] bg-gray-100 flex items-center justify-center overflow-hidden">
+        <div className="w-full h-[50vh] bg-gray-100 flex items-center justify-center overflow-hidden relative">
           <div className="absolute inset-0 z-10 bg-black bg-opacity-30"></div>
-          <img 
+          <Image 
             src="https://placehold.co/1200x600/272420/FFFFFF?text=Perfect+Gifts" 
             alt="Gifting"
-            className="absolute inset-0 w-full h-full object-cover"
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover"
           />
-          <div className="text-center px-4 z-20 text-white">
+          <div className="text-center px-4 z-20 text-white relative">
             <h1 className="text-3xl md:text-5xl font-bold mb-4">The Perfect Gift</h1>
             <p className="text-lg max-w-lg mx-auto">
               Thoughtfully curated gifts that leave a lasting impression.
@@ -135,11 +139,13 @@ export default function GiftingPage() {
         <div className="bg-gray-50 p-6 md:p-12 rounded-lg mb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <img 
+              <div className="bg-white p-6 rounded-lg shadow-md relative min-h-[300px] md:min-h-[400px]">
+                <Image 
                   src="https://placehold.co/600x600/272420/FFFFFF?text=Limited+Edition+Gift+Box" 
                   alt="Limited Edition Gift Box"
-                  className="w-full h-auto object-cover"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover rounded-lg"
                 />
               </div>
             </div>
@@ -214,11 +220,13 @@ export default function GiftingPage() {
               </div>
               <ShopNowButton href="/gift-cards" />
             </div>
-            <div className="order-1 md:order-2">
-              <img 
+            <div className="order-1 md:order-2 relative min-h-[250px] md:min-h-[350px]">
+              <Image 
                 src="https://placehold.co/600x400/272420/FFFFFF?text=Gift+Cards" 
                 alt="Gift Cards"
-                className="w-full h-auto object-cover rounded-lg shadow-md"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover rounded-lg shadow-md"
               />
             </div>
           </div>

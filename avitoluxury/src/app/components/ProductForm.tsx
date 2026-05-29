@@ -30,6 +30,7 @@ const productSchema = z.object({
   isNewArrival: z.boolean().default(false),
   isBestBuy: z.boolean().default(false),
   featured: z.boolean().default(false),
+  isPinned: z.boolean().default(false),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -133,6 +134,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       isNewArrival: initialData.isNewArrival || false,
       isBestBuy: initialData.isBestBuy || false,
       featured: initialData.featured || false,
+      isPinned: initialData.isPinned || false,
       bulletPoints: initialData.bulletPoints || [''],
     }
   });
@@ -661,6 +663,18 @@ const ProductForm: React.FC<ProductFormProps> = ({
               />
               <label htmlFor="featured" className="ml-2 text-sm text-gray-700">
                 Featured
+              </label>
+            </div>
+            
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="isPinned"
+                {...register('isPinned')}
+                className="h-4 w-4 text-blue-600 rounded"
+              />
+              <label htmlFor="isPinned" className="ml-2 text-sm text-gray-700 font-semibold text-black">
+                Pin as First Carousel Slide 📌
               </label>
             </div>
           </div>
