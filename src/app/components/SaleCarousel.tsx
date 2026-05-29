@@ -86,13 +86,60 @@ export default function SaleCarousel() {
               discountPercentage,
               images
             };
-          })
-          // Sort by discount percentage (highest first)
-          .sort((a: any, b: any) => b.discountPercentage - a.discountPercentage)
-          // Take top 6 highest discounted products (reduced from 10)
-          .slice(0, 6);
+          });
         
-        setProducts(discountedProducts);
+        // Sort standard products by discount percentage (highest first)
+        let sortedProducts = [...discountedProducts].sort((a: any, b: any) => b.discountPercentage - a.discountPercentage);
+        
+        // Find if there is a pinned product in the entire product list
+        const pinnedProductRaw = data.products.find((p: any) => p.isPinned === true);
+        
+        if (pinnedProductRaw) {
+          // Normalize the pinned product
+          const price = convertToRupees(pinnedProductRaw.price);
+          const discountedPrice = pinnedProductRaw.comparePrice ? convertToRupees(pinnedProductRaw.comparePrice) : 0;
+          const discountPercentage = price && discountedPrice && price > discountedPrice
+            ? ((price - discountedPrice) / price * 100)
+            : 0;
+          
+          let images = [];
+          if (pinnedProductRaw.images && Array.isArray(pinnedProductRaw.images) && pinnedProductRaw.images.length > 0) {
+            images = pinnedProductRaw.images.map((img: any) => {
+              if (typeof img === 'string') {
+                return { url: img };
+              } else if (img && img.url) {
+                return img;
+              }
+              return null;
+            }).filter(Boolean);
+          }
+          
+          if (images.length === 0 && pinnedProductRaw.mainImage) {
+            images = [{ url: pinnedProductRaw.mainImage }];
+          }
+          if (images.length === 0) {
+            images = [{ url: '/perfume-placeholder.jpg' }];
+          }
+          
+          const normalizedPinned = {
+            ...pinnedProductRaw,
+            price,
+            discountedPrice,
+            discountPercentage,
+            images
+          };
+          
+          // Remove the pinned product from the regular list if it exists there to avoid duplicates
+          sortedProducts = sortedProducts.filter((p: any) => p._id !== pinnedProductRaw._id);
+          
+          // Insert at the absolute beginning of the carousel array
+          sortedProducts.unshift(normalizedPinned);
+        }
+        
+        // Take top 6 carousel slides
+        const finalCarouselProducts = sortedProducts.slice(0, 6);
+        
+        setProducts(finalCarouselProducts);
       } catch (err: any) {
         // Silent error handling for security
         setError('Failed to load products');

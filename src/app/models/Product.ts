@@ -23,6 +23,7 @@ export interface IProductBase {
   isBestSelling: boolean;
   isNewArrival: boolean;
   isBestBuy: boolean;
+  isPinned?: boolean;
   
   // Keep existing fields
   brand?: string;
@@ -161,6 +162,10 @@ const ProductSchema = new Schema({
     default: false
   },
   isBestBuy: {
+    type: Boolean,
+    default: false
+  },
+  isPinned: {
     type: Boolean,
     default: false
   },
