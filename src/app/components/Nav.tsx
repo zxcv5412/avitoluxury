@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { FiMenu, FiX, FiChevronDown, FiSearch, FiShoppingBag } from 'react-icons/fi';
 import MiniCartWithModal from './MiniCartWithModal';
 
@@ -452,9 +453,12 @@ export default function Nav() {
             {/* Logo (center) */}
             <div className="flex-shrink-0 flex flex-col items-center">
               <Link href="/store-routes" className="flex gap-2 items-center">
-                <img
+                <Image
                   src="/avito3-16.png"
                   alt="A V I T O   S C E N T S"
+                  width={200}
+                  height={80}
+                  priority
                   className="h-12 xs:h-16 sm:h-20 w-auto"
                 />
               </Link>
@@ -600,9 +604,11 @@ export default function Nav() {
           <div className="sticky top-0 bg-white border-b border-gray-200">
             <div className="container mx-auto px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <img
+                <Image
                   src="/avito3-16.png"
                   alt="A V I T O   S C E N T S"
+                  width={80}
+                  height={32}
                   className="h-8 w-auto"
                 />
               </div>

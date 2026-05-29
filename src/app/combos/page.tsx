@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Nav from '../components/Nav';
 import Footer from '../components/Footer';
 import ShopNowButton from '../components/ui/ShopNowButton';
@@ -52,12 +53,15 @@ export default function CombosPage() {
       
       {/* Hero Section */}
       <div className="relative">
-        <div className="w-full h-[40vh] bg-gray-100 flex items-center justify-center">
+        <div className="w-full h-[40vh] bg-gray-100 flex items-center justify-center relative">
           <div className="absolute inset-0 z-0 bg-gradient-to-r from-gray-900 to-transparent opacity-70"></div>
-          <img 
+          <Image 
             src="https://placehold.co/1200x600/272420/FFFFFF?text=Special+Combos" 
             alt="Special Combos"
-            className="absolute inset-0 w-full h-full object-cover z-0"
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover z-0"
           />
           <div className="text-center px-4 z-10 relative text-white">
             <h1 className="text-3xl md:text-5xl font-bold mb-4">Special Combos</h1>
@@ -132,13 +136,15 @@ export default function CombosPage() {
                   {/* Image - takes up 2/5 on large screens */}
                   <div className="lg:col-span-2">
                     <div className="relative h-full min-h-[250px]">
-                      <img 
+                      <Image 
                         src={combo.image} 
                         alt={combo.name}
-                        className="absolute inset-0 w-full h-full object-cover"
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 40vw"
+                        className="object-cover"
                       />
                       {/* Savings Badge */}
-                      <div className="absolute top-4 right-4 bg-black text-white px-3 py-2 rounded-full">
+                      <div className="absolute top-4 right-4 bg-black text-white px-3 py-2 rounded-full z-10">
                         <span className="font-bold">Save {combo.savingsPercent}%</span>
                       </div>
                     </div>
