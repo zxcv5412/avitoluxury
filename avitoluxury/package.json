@@ -15,6 +15,7 @@
     "@google-cloud/storage": "^7.16.0",
     "@hookform/resolvers": "^3.10.0",
     "@react-email/components": "^0.0.41",
+    "@vercel/analytics": "^2.0.1",
     "axios": "^1.10.0",
     "bcryptjs": "^3.0.2",
     "chart.js": "^4.4.9",

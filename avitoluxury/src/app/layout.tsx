@@ -8,6 +8,7 @@ import { Suspense } from 'react';
 import Script from "next/script";
 import ClientLayout from './components/ClientLayout';
 import WhatsAppPopupWrapper from './components/WhatsAppPopupWrapper';
+import { Analytics } from '@vercel/analytics/react';
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -82,6 +83,7 @@ export default function RootLayout({
           <AuthProvider>
             <ClientLayout>
               {children}
+              <Analytics />
             </ClientLayout>
             <WhatsAppPopupWrapper phoneNumber="919928200900" />
           </AuthProvider>
