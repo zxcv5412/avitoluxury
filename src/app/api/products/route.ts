@@ -62,10 +62,10 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    console.log('Product filter:', filter);
-    
-    // Execute query with filters - remove hardcoded sorting
-    const products = await Product.find(filter);
+    // Execute query with filters - retrieve only the catalog fields to shrink response size and optimize database load time
+    const products = await Product.find(filter).select(
+      '_id name price comparePrice mainImage images rating featured isNewArrival isBestSelling productType category subCategories volume gender'
+    );
     
     console.log(`Found ${products.length} products matching filter`);
     
