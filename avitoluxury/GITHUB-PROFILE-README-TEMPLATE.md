@@ -1,4 +1,4 @@
-# 👨‍💻 Chinesh Soni | Full-Stack Software Engineer & UI/UX Optimizer
+# 👨‍💻 Chinesh Soni | Full-Stack Web Developer
 
 Welcome to my GitHub profile! I specialize in building, optimizing, and redesigning modern web applications. I focus on bridging the gap between high-performance system-level engineering and beautiful, responsive UI/UX designs.
 
