@@ -24,6 +24,15 @@ const convertToRupees = (dollarPrice: number) => {
   return dollarPrice;
 };
 
+// Helper function to inject Cloudinary optimization transformations
+const optimizeImageUrl = (url: string, width = 800) => {
+  if (!url) return '/perfume-placeholder.jpg';
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_limit/`);
+  }
+  return url;
+};
+
 export default function SaleCarousel() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -198,7 +207,7 @@ export default function SaleCarousel() {
               <div className="order-1 md:order-1 flex items-center justify-center h-full bg-white relative">
                 <Link href={`/product/${displayProducts[currentIndex]._id}`} className="block relative w-full h-full">
                     <Image
-                      src={displayProducts[currentIndex].images && displayProducts[currentIndex].images[0]?.url || '/perfume-placeholder.jpg'}
+                      src={optimizeImageUrl(displayProducts[currentIndex].images && displayProducts[currentIndex].images[0]?.url || '/perfume-placeholder.jpg', 800)}
                       alt={displayProducts[currentIndex].name || "Perfume product"}
                       fill
                       sizes="(max-width: 768px) 100vw, 50vw"

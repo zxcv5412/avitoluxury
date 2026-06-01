@@ -34,6 +34,15 @@ interface Product {
   bulletPoints?: string[];
 }
 
+// Helper function to inject Cloudinary optimization transformations
+const optimizeImageUrl = (url: string, width = 800) => {
+  if (!url) return '/placeholder-image.jpg';
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_limit/`);
+  }
+  return url;
+};
+
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -265,7 +274,7 @@ export default function ProductDetailPage() {
         <div className="relative aspect-square overflow-hidden">
           {currentImageIndex < product.images.length ? (
             <Image
-              src={product.images[currentImageIndex]?.url || '/placeholder-image.jpg'}
+              src={optimizeImageUrl(product.images[currentImageIndex]?.url || '/placeholder-image.jpg', 800)}
               alt={`${product.name} - Image ${currentImageIndex + 1}`}
               width={600}
               height={800}
@@ -309,7 +318,7 @@ export default function ProductDetailPage() {
                 className={`w-16 h-16 flex-shrink-0 ${currentImageIndex === index ? 'ring-2 ring-black' : 'opacity-70'}`}
               >
                 <Image
-                  src={image.url}
+                  src={optimizeImageUrl(image.url, 150)}
                   alt={`Thumbnail ${index + 1}`}
                   width={100}
                   height={100}
@@ -658,7 +667,7 @@ export default function ProductDetailPage() {
                   <div className="relative overflow-hidden group">
                     <Link href={`/product/${relatedProduct._id}`}>
                       <Image 
-                        src={relatedProduct.images[0]?.url || '/placeholder-image.jpg'} 
+                        src={optimizeImageUrl(relatedProduct.images[0]?.url || '/placeholder-image.jpg', 600)} 
                         alt={relatedProduct.name}
                         width={300}
                         height={400}

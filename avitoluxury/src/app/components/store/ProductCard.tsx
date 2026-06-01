@@ -273,6 +273,15 @@ export default function ProductCard({ product }: ProductCardProps) {
     return stars;
   };
 
+  // Helper function to inject Cloudinary optimization transformations
+  const optimizeImageUrl = (url: string, width = 600) => {
+    if (!url) return '/perfume-placeholder.jpg';
+    if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+      return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_limit/`);
+    }
+    return url;
+  };
+
   // Fallback image URL - use a local image instead of external service
   const fallbackImageUrl = '/images/placeholder-product.jpg';
   
@@ -320,7 +329,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* Product Image - Link wrapper */}
       <Link href={`/product/${product._id}`} className="block relative h-48 xs:h-56 sm:h-60 md:h-64 overflow-hidden">
         <Image
-          src={imageUrl}
+          src={optimizeImageUrl(imageUrl, 600)}
           alt={product.name}
           width={400}
           height={500}
