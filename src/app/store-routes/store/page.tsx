@@ -40,6 +40,24 @@ const getProductImage = (product: any): string => {
   return product.mainImage || 'https://placehold.co/400x500';
 };
 
+// Shimmering Skeleton Loader for Product Cards Grid to prevent CLS
+const ProductGridSkeleton = () => (
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 animate-pulse">
+    {[...Array(4)].map((_, i) => (
+      <div key={i} className="h-full flex flex-col bg-white border border-gray-100 overflow-hidden relative">
+        <div className="h-48 xs:h-56 sm:h-60 md:h-64 bg-gray-200" />
+        <div className="p-3 xs:p-4 flex-grow flex flex-col space-y-2">
+          <div className="h-3 bg-gray-200 rounded w-1/4" />
+          <div className="h-4 bg-gray-200 rounded w-3/4" />
+          <div className="h-3 bg-gray-200 rounded w-1/2" />
+          <div className="h-4 bg-gray-200 rounded w-1/3 mx-auto mt-auto mb-2" />
+          <div className="h-10 bg-gray-200 w-full" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
@@ -103,9 +121,7 @@ export default function HomePage() {
         <h2 className="text-2xl md:text-3xl font-medium mb-8 text-center">Featured Products</h2>
         
         {loading ? (
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-          </div>
+          <ProductGridSkeleton />
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {featuredProducts.length > 0 ? (
@@ -130,9 +146,7 @@ export default function HomePage() {
         <h2 className="text-2xl md:text-3xl font-medium mb-8 text-center">New Arrivals</h2>
         
         {loading ? (
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-          </div>
+          <ProductGridSkeleton />
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {newArrivals.length > 0 ? (
@@ -157,9 +171,7 @@ export default function HomePage() {
         <h2 className="text-2xl md:text-3xl font-medium mb-8 text-center">Best Selling</h2>
         
         {loading ? (
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-          </div>
+          <ProductGridSkeleton />
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {topSelling.length > 0 ? (
