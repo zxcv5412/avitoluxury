@@ -29,7 +29,6 @@ export default function SaleCarousel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [imageAspects, setImageAspects] = useState<{[key: string]: 'horizontal' | 'vertical' | 'square'}>({});
 
   // Fetch products with highest discount percentage
   useEffect(() => {
@@ -204,27 +203,7 @@ export default function SaleCarousel() {
                       fill
                       sizes="(max-width: 768px) 100vw, 50vw"
                       priority={currentIndex === 0}
-                      onLoad={(e) => {
-                        const img = e.currentTarget;
-                        if (img.naturalWidth && img.naturalHeight) {
-                          const aspect = img.naturalWidth / img.naturalHeight;
-                          const productId = displayProducts[currentIndex]._id;
-                          let type: 'horizontal' | 'vertical' | 'square' = 'square';
-                          if (aspect > 1.25) {
-                            type = 'horizontal';
-                          } else if (aspect < 0.8) {
-                            type = 'vertical';
-                          }
-                          setImageAspects(prev => ({ ...prev, [productId]: type }));
-                        }
-                      }}
-                      className={`object-contain transition-all duration-300 ${
-                        imageAspects[displayProducts[currentIndex]._id] === 'horizontal'
-                          ? 'p-0.5 sm:p-1 md:p-2' 
-                          : imageAspects[displayProducts[currentIndex]._id] === 'vertical'
-                          ? 'p-6 xs:p-8 sm:p-12 md:p-16' 
-                          : 'p-3 xs:p-4 sm:p-6 md:p-8'
-                      }`}
+                      className="object-contain p-3 sm:p-4 md:p-6 lg:p-8"
                     />
                   
                   {/* Mobile-only discount badge */}
