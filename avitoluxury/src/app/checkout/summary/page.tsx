@@ -105,6 +105,9 @@ export default function CheckoutSummaryPage() {
     setIsLoading(true);
     
     try {
+      const codFee = paymentMethod === 'COD' ? 50 : 0;
+      const totalAmount = subtotal + shippingCost + codFee;
+
       // Create order
       const orderResponse = await fetch('/api/checkout/create-order', {
         method: 'POST',
@@ -119,7 +122,7 @@ export default function CheckoutSummaryPage() {
           cartItems,
           subtotal,
           shippingCost,
-          totalAmount: subtotal + shippingCost,
+          totalAmount,
           paymentMethod
         }),
       });
@@ -286,10 +289,17 @@ export default function CheckoutSummaryPage() {
                 <span className="text-gray-600">Shipping</span>
                 <span>{shippingCost > 0 ? `₹${shippingCost.toFixed(2)}` : 'Free'}</span>
               </div>
+
+              {paymentMethod === 'COD' && (
+                <div className="flex justify-between text-gray-600">
+                  <span>COD Handling Fee</span>
+                  <span>₹50.00</span>
+                </div>
+              )}
               
               <div className="border-t pt-3 flex justify-between font-medium">
                 <span>Total</span>
-                <span>₹{(subtotal + shippingCost).toFixed(2)}</span>
+                <span>₹{(subtotal + shippingCost + (paymentMethod === 'COD' ? 50 : 0)).toFixed(2)}</span>
               </div>
             </div>
             
