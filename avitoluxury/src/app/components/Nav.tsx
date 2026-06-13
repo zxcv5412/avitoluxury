@@ -315,7 +315,7 @@ export default function Nav() {
     {
       id: 'home',
       name: 'HOME',
-      path: '/store-routes',
+      path: '/',
       hasDropdown: true,
       dropdownItems: [
         { name: 'Best Selling', path: '/best-selling' },
@@ -452,7 +452,7 @@ export default function Nav() {
             </div>
             {/* Logo (center) */}
             <div className="flex-shrink-0 flex flex-col items-center">
-              <Link href="/store-routes" className="flex gap-2 items-center">
+              <Link href="/" className="flex gap-2 items-center">
                 <Image
                   src="/avito3-16.png"
                   alt="A V I T O   S C E N T S"

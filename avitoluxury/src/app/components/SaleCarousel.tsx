@@ -16,6 +16,7 @@ interface Product {
   discountedPrice: number;
   images: { url: string }[];
   discountPercentage?: number;
+  slug?: string;
 }
 
 // Convert USD to INR
@@ -144,6 +145,52 @@ export default function SaleCarousel() {
           // Insert at the absolute beginning of the carousel array
           sortedProducts.unshift(normalizedPinned);
         }
+
+        // Find if there is a second pinned product in the entire product list
+        const pinnedSecondProductRaw = data.products.find((p: any) => p.isPinnedSecond === true);
+        
+        if (pinnedSecondProductRaw) {
+          // Normalize the second pinned product
+          const price = convertToRupees(pinnedSecondProductRaw.price);
+          const discountedPrice = pinnedSecondProductRaw.comparePrice ? convertToRupees(pinnedSecondProductRaw.comparePrice) : 0;
+          const discountPercentage = price && discountedPrice && price > discountedPrice
+            ? ((price - discountedPrice) / price * 100)
+            : 0;
+          
+          let images = [];
+          if (pinnedSecondProductRaw.images && Array.isArray(pinnedSecondProductRaw.images) && pinnedSecondProductRaw.images.length > 0) {
+            images = pinnedSecondProductRaw.images.map((img: any) => {
+              if (typeof img === 'string') {
+                return { url: img };
+              } else if (img && img.url) {
+                return img;
+              }
+              return null;
+            }).filter(Boolean);
+          }
+          
+          if (images.length === 0 && pinnedSecondProductRaw.mainImage) {
+            images = [{ url: pinnedSecondProductRaw.mainImage }];
+          }
+          if (images.length === 0) {
+            images = [{ url: '/perfume-placeholder.jpg' }];
+          }
+          
+          const normalizedPinnedSecond = {
+            ...pinnedSecondProductRaw,
+            price,
+            discountedPrice,
+            discountPercentage,
+            images
+          };
+          
+          // Remove the second pinned product from the regular list if it exists there to avoid duplicates
+          sortedProducts = sortedProducts.filter((p: any) => p._id !== pinnedSecondProductRaw._id);
+          
+          // Insert at the second position of the carousel array (index 1 if array size allows, otherwise 0)
+          const insertIndex = sortedProducts.length >= 1 ? 1 : 0;
+          sortedProducts.splice(insertIndex, 0, normalizedPinnedSecond);
+        }
         
         // Take top 6 carousel slides
         const finalCarouselProducts = sortedProducts.slice(0, 6);
@@ -205,7 +252,7 @@ export default function SaleCarousel() {
             <div className="grid grid-cols-1 md:grid-cols-2 h-full">
               {/* Image - Mobile: Full screen with link, Desktop: Left side */}
               <div className="order-1 md:order-1 flex items-center justify-center h-full bg-white relative">
-                <Link href={`/product/${displayProducts[currentIndex]._id}`} className="block relative w-full h-full">
+                <Link href={`/product/${displayProducts[currentIndex].slug || displayProducts[currentIndex]._id}`} className="block relative w-full h-full">
                     <Image
                       src={optimizeImageUrl(displayProducts[currentIndex].images && displayProducts[currentIndex].images[0]?.url || '/perfume-placeholder.jpg', 800)}
                       alt={displayProducts[currentIndex].name || "Perfume product"}
@@ -252,7 +299,7 @@ export default function SaleCarousel() {
                   </div>
                   
                   <div className="mt-0.5 xs:mt-1 sm:mt-2 md:mt-4">
-                    <ShopNowButton href={`/product/${displayProducts[currentIndex]._id}`} />
+                    <ShopNowButton href={`/product/${displayProducts[currentIndex].slug || displayProducts[currentIndex]._id}`} />
                   </div>
                 </div>
               </div>

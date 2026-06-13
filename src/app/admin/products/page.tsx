@@ -41,6 +41,7 @@ interface Product {
   images?: Array<{ url: string }> | string[];
   bulletPoints?: string[];
   createdAt: string;
+  slug?: string;
 }
 
 export default function AdminProducts() {
@@ -101,7 +102,8 @@ export default function AdminProducts() {
       // Transform the data to match the expected format if needed
       const formattedProducts = (data.products || []).map((product: any) => ({
         ...product,
-        new_arrival: product.isNewProduct, // Map MongoDB field to component expected field
+        new_arrival: product.isNewArrival || product.isNewProduct || false,
+        best_seller: product.isBestSelling || false,
         images: Array.isArray(product.images) ? 
           product.images.map((img: string) => ({ url: img })) : 
           [{ url: product.mainImage || 'https://placehold.co/80x80/eee/000?text=No+Image' }]
@@ -431,7 +433,7 @@ export default function AdminProducts() {
                       </td>
                       <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
-                          <Link href={`/product/${product._id}`}>
+                          <Link href={`/product/${product.slug || product._id}`}>
                             <button className="text-indigo-600 hover:text-indigo-900">
                               <FiEye size={18} />
                             </button>

@@ -25,6 +25,7 @@ interface Product {
   images: { url: string }[];
   rating?: number;
   mainImage?: string;
+  slug?: string;
 }
 
 interface ProductCardProps {
@@ -327,7 +328,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       )}
       
       {/* Product Image - Link wrapper */}
-      <Link href={`/product/${product._id}`} className="block relative h-48 xs:h-56 sm:h-60 md:h-64 overflow-hidden">
+      <Link href={`/product/${product.slug || product._id}`} className="block relative h-48 xs:h-56 sm:h-60 md:h-64 overflow-hidden">
         <Image
           src={optimizeImageUrl(imageUrl, 600)}
           alt={product.name}
@@ -346,7 +347,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
         
         {/* Title - Link wrapper */}
-        <Link href={`/product/${product._id}`} className="block">
+        <Link href={`/product/${product.slug || product._id}`} className="block">
           <h3 className="text-xs xs:text-sm font-medium mb-1 xs:mb-2 line-clamp-1 font-lastica">
             {product.name}
           </h3>

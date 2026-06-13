@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     
     // Execute query with filters - retrieve only the catalog fields to shrink response size and optimize database load time
     const products = await Product.find(filter).select(
-      '_id name price comparePrice mainImage images rating featured isNewArrival isBestSelling productType category subCategories volume gender isPinned description'
+      '_id name slug price comparePrice mainImage images rating featured isNewArrival isBestSelling productType category subCategories volume gender isPinned isPinnedSecond description createdAt isNewProduct'
     );
     
     console.log(`Found ${products.length} products matching filter`);
@@ -137,6 +137,7 @@ export async function POST(request: Request) {
       isNewArrival: productInfo.isNewArrival || false,
       isBestBuy: productInfo.isBestBuy || false,
       isPinned: productInfo.isPinned || false,
+      isPinnedSecond: productInfo.isPinnedSecond || false,
       
       // Keep existing fields
       brand: productInfo.brand || 'A V I T O   S C E N T S',
@@ -152,6 +153,9 @@ export async function POST(request: Request) {
     // If the new product is pinned, unpin all other products first
     if (productData.isPinned === true) {
       await Product.updateMany({ isPinned: true }, { isPinned: false });
+    }
+    if (productData.isPinnedSecond === true) {
+      await Product.updateMany({ isPinnedSecond: true }, { isPinnedSecond: false });
     }
     
     // Save to database

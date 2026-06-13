@@ -16,7 +16,7 @@ export default function WhatsAppPopup({ phoneNumber, message = 'Hello, I have a 
   const pathname = usePathname();
   
   // Only show on store page
-  const isStorePage = pathname === '/store-routes/store';
+  const isStorePage = pathname === '/';
   
   // Listen for mini cart open/close events
   useEffect(() => {

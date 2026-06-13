@@ -42,21 +42,30 @@ const nextConfig = {
   // Turbopack configuration (empty to silence warning)
   turbopack: {},
   async redirects() {
-    // Basic redirects that apply in all environments
     const redirects = [
       {
+        source: '/store-routes/store',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/store-routes/product/:path*',
+        destination: '/product/:path*',
+        permanent: true,
+      },
+      {
+        source: '/store-routes',
+        destination: '/',
+        permanent: true,
+      },
+      {
         source: '/store',
-        destination: '/store-routes/store',
+        destination: '/',
         permanent: true,
       },
       {
         source: '/store/:path*',
-        destination: '/store-routes/store/:path*',
-        permanent: true,
-      },
-      {
-        source: '/product/:path*',
-        destination: '/store-routes/product/:path*',
+        destination: '/',
         permanent: true,
       },
     ];

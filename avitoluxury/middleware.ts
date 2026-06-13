@@ -91,11 +91,7 @@ export function middleware(request: NextRequest) {
         if (pathname.startsWith('/admin')) {
           return NextResponse.redirect(new URL(`https://admin.avitoluxury.in${pathname}`, request.url));
         }
-        
-        // Only redirect root to store
-        if (pathname === '/') {
-          return NextResponse.redirect(new URL('/store-routes/store', request.url));
-        }
+        // No redirect needed for root homepage, it is now served directly at /
       }
     }
     */

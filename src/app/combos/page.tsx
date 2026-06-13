@@ -22,6 +22,7 @@ interface ComboProduct {
     price: number;
     size: string;
   }[];
+  slug?: string;
 }
 
 export default function CombosPage() {
@@ -181,7 +182,7 @@ export default function CombosPage() {
                         </p>
                       </div>
                       <div>
-                        <ShopNowButton href={`/product/${combo._id}`} />
+                        <ShopNowButton href={`/product/${combo.slug || combo._id}`} />
                       </div>
                     </div>
                   </div>

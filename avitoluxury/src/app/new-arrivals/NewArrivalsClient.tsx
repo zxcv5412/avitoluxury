@@ -17,6 +17,7 @@ interface NewProduct {
   category: string;
   highlights: string[];
   preorderAvailable: boolean;
+  slug?: string;
 }
 
 export default function NewArrivalsClient() {
@@ -206,7 +207,7 @@ export default function NewArrivalsClient() {
                       
                       <div className="flex gap-3">
                         {product.preorderAvailable ? (
-                          <ShopNowButton href={`/product/${product._id}`} className="flex-1" />
+                          <ShopNowButton href={`/product/${product.slug || product._id}`} className="flex-1" />
                         ) : (
                           <button className="bg-gray-200 text-gray-800 px-8 py-3 rounded-md flex items-center justify-center hover:bg-gray-300 transition-colors flex-1">
                             Notify Me

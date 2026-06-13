@@ -8,7 +8,7 @@ export default function StoreRedirect() {
 
   useEffect(() => {
     // Redirect to the actual store page
-    router.push('/store-routes/store');
+    router.push('/');
   }, [router]);
 
   return (

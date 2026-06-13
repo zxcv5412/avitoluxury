@@ -102,6 +102,7 @@ export async function PUT(
       isNewArrival: productInfo.isNewArrival || false,
       isBestBuy: productInfo.isBestBuy || false,
       isPinned: productInfo.isPinned || false,
+      isPinnedSecond: productInfo.isPinnedSecond || false,
       
       // Keep existing fields
       brand: productInfo.brand || 'A V I T O   S C E N T S',
@@ -118,6 +119,9 @@ export async function PUT(
     // If this product is updated to be pinned, unpin all other products first
     if (productData.isPinned === true) {
       await Product.updateMany({ isPinned: true }, { isPinned: false });
+    }
+    if (productData.isPinnedSecond === true) {
+      await Product.updateMany({ isPinnedSecond: true }, { isPinnedSecond: false });
     }
     
     const product = await Product.findByIdAndUpdate(

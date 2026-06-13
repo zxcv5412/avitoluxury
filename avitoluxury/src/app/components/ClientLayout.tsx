@@ -13,7 +13,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   
   // Only show on home page
-  const isHomePage = pathname === '/store-routes/store';
+  const isHomePage = pathname === '/';
   
   // Check if device is mobile
   useEffect(() => {

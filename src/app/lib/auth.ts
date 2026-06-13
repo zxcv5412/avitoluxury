@@ -30,7 +30,7 @@ export const redirectIfAuthenticated = (router: any) => {
   if (typeof window === 'undefined') return;
   
   if (isAuthenticated()) {
-    const returnUrl = localStorage.getItem('returnUrl') || '/store-routes';
+    const returnUrl = localStorage.getItem('returnUrl') || '/';
     localStorage.removeItem('returnUrl');
     router.push(returnUrl);
   }

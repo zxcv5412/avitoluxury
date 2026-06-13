@@ -66,6 +66,7 @@ export default function EditProductPage() {
           isBestBuy: product.isBestBuy || false,
           featured: product.featured || false,
           isPinned: product.isPinned || false,
+          isPinnedSecond: product.isPinnedSecond || false,
           
           // Media
           media: [
