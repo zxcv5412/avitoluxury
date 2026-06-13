@@ -284,6 +284,19 @@ const ProductForm: React.FC<ProductFormProps> = ({
     setMedia(prev => prev.filter(item => item.id !== idToDelete));
   };
 
+  // Handle media reordering
+  const moveMedia = (index: number, direction: 'left' | 'right') => {
+    const newIndex = direction === 'left' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= media.length) return;
+    
+    const updatedMedia = [...media];
+    const temp = updatedMedia[index];
+    updatedMedia[index] = updatedMedia[newIndex];
+    updatedMedia[newIndex] = temp;
+    
+    setMedia(updatedMedia);
+  };
+
   // Add state and handlers for bulletPoints
   const [fields, setFields] = useState({ bulletPoints: initialData.bulletPoints || [''] });
   const handleBulletPointChange = (idx: number, value: string) => {
@@ -704,27 +717,60 @@ const ProductForm: React.FC<ProductFormProps> = ({
         
         <div className="flex flex-wrap gap-4 mb-4">
           {media.map((item, index) => (
-            <div key={item.id} className="relative">
-              {item.type === 'image' ? (
-                <img 
-                  src={item.url} 
-                  alt="Product" 
-                  className="w-24 h-24 object-cover rounded-md border border-gray-300"
-                />
-              ) : (
-                <video 
-                  src={item.url}
-                  className="w-24 h-24 object-cover rounded-md border border-gray-300"
-                  controls
-                />
-              )}
-              <button
-                type="button"
-                onClick={() => handleDeleteMedia(item.id)}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs"
-              >
-                <FiX />
-              </button>
+            <div key={item.id} className="relative flex flex-col items-center">
+              <div className="relative">
+                {item.type === 'image' ? (
+                  <img 
+                    src={item.url} 
+                    alt="Product" 
+                    className="w-24 h-24 object-cover rounded-md border border-gray-300"
+                  />
+                ) : (
+                  <video 
+                    src={item.url}
+                    className="w-24 h-24 object-cover rounded-md border border-gray-300"
+                    controls
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleDeleteMedia(item.id)}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs"
+                >
+                  <FiX />
+                </button>
+              </div>
+              <div className="flex justify-between w-full mt-1 px-1 gap-1">
+                <button
+                  type="button"
+                  onClick={() => moveMedia(index, 'left')}
+                  disabled={index === 0}
+                  className={`text-xs px-1 py-0.5 rounded border border-gray-300 ${
+                    index === 0 
+                      ? 'text-gray-300 bg-gray-50 cursor-not-allowed' 
+                      : 'text-gray-600 bg-white hover:bg-gray-100'
+                  }`}
+                  title="Move Left"
+                >
+                  &larr;
+                </button>
+                <span className="text-[10px] text-gray-400 self-center">
+                  {index === 0 ? 'Cover' : `#${index + 1}`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => moveMedia(index, 'right')}
+                  disabled={index === media.length - 1}
+                  className={`text-xs px-1 py-0.5 rounded border border-gray-300 ${
+                    index === media.length - 1 
+                      ? 'text-gray-300 bg-gray-50 cursor-not-allowed' 
+                      : 'text-gray-600 bg-white hover:bg-gray-100'
+                  }`}
+                  title="Move Right"
+                >
+                  &rarr;
+                </button>
+              </div>
             </div>
           ))}
         </div>

@@ -116,6 +116,37 @@ export default function HomePage() {
       {/* Sale Carousel */}
       <SaleCarousel />
       
+      {/* Brand Tagline */}
+      <div className="text-center py-6 border-b border-gray-100">
+        <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">A Scent Beyond Time</p>
+        <h2 className="text-lg md:text-xl font-light italic font-serif">Exquisite Organic Attars & Premium Perfumes</h2>
+      </div>
+
+      {/* Trust Badge Ribbon */}
+      <div className="bg-gray-50 py-4 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 flex justify-around items-center text-center gap-2">
+          <div className="flex flex-col items-center">
+            <span className="text-base">🌱</span>
+            <span className="text-[10px] md:text-xs font-medium text-gray-600 uppercase tracking-wider mt-1">100% Organic</span>
+          </div>
+          <div className="border-r border-gray-300 h-6"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-base">⏳</span>
+            <span className="text-[10px] md:text-xs font-medium text-gray-600 uppercase tracking-wider mt-1">Long Lasting</span>
+          </div>
+          <div className="border-r border-gray-300 h-6"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-base">🇮🇳</span>
+            <span className="text-[10px] md:text-xs font-medium text-gray-600 uppercase tracking-wider mt-1">Crafted in India</span>
+          </div>
+          <div className="border-r border-gray-300 h-6"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-base">🐰</span>
+            <span className="text-[10px] md:text-xs font-medium text-gray-600 uppercase tracking-wider mt-1">Cruelty Free</span>
+          </div>
+        </div>
+      </div>
+      
       {/* Featured Products */}
       <section className="py-10 px-4 max-w-7xl mx-auto">
         <h2 className="text-2xl md:text-3xl font-medium mb-8 text-center">Featured Products</h2>

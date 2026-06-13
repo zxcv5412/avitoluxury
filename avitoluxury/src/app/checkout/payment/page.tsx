@@ -24,6 +24,17 @@ export default function PaymentPage() {
   // Load order ID from session storage
   useEffect(() => {
     try {
+      const params = new URLSearchParams(window.location.search);
+      const isCod = params.get('method') === 'COD';
+      const codTrackingId = params.get('trackingId');
+      
+      if (isCod && codTrackingId) {
+        setPaymentStatus('success');
+        setTrackingId(codTrackingId);
+        setIsLoading(false);
+        return;
+      }
+
       const storedOrderId = sessionStorage.getItem('checkout_order_id');
       if (!storedOrderId) {
         // Redirect to checkout page if order ID doesn't exist

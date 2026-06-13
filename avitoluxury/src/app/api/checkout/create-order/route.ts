@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
         phone: userData.phone
       },
       alternatePhone: userData.alternatePhone,
-      paymentMethod: 'Razorpay',
+      paymentMethod: body.paymentMethod || 'Razorpay',
       itemsPrice: subtotal,
       shippingPrice: shippingCost,
       totalPrice: totalAmount,
