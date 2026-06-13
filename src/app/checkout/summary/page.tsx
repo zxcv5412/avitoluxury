@@ -36,6 +36,7 @@ export default function CheckoutSummaryPage() {
   const [subtotal, setSubtotal] = useState(0);
   const [shippingCost, setShippingCost] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'Razorpay' | 'COD'>('Razorpay');
   
   // Load form data from session storage and cart items from localStorage
   useEffect(() => {
@@ -104,7 +105,7 @@ export default function CheckoutSummaryPage() {
     setIsLoading(true);
     
     try {
-      // Create Razorpay order
+      // Create order
       const orderResponse = await fetch('/api/checkout/create-order', {
         method: 'POST',
         headers: {
@@ -118,7 +119,8 @@ export default function CheckoutSummaryPage() {
           cartItems,
           subtotal,
           shippingCost,
-          totalAmount: subtotal + shippingCost
+          totalAmount: subtotal + shippingCost,
+          paymentMethod
         }),
       });
       
@@ -128,11 +130,26 @@ export default function CheckoutSummaryPage() {
         throw new Error(orderData.error || 'Failed to create order');
       }
       
-      // Store order ID in session storage
-      sessionStorage.setItem('checkout_order_id', orderData.orderId);
-      
-      // Redirect to payment page
-      router.push('/checkout/payment');
+      if (paymentMethod === 'COD') {
+        // Clear cart
+        localStorage.setItem('cart', '[]');
+        
+        // Clear checkout details from session storage
+        sessionStorage.removeItem('checkout_form_data');
+        sessionStorage.removeItem('checkout_order_id');
+        
+        // Dispatch event to update cart count in header
+        window.dispatchEvent(new Event('storage'));
+        
+        // Redirect to payment success page for COD directly
+        router.push(`/checkout/payment?method=COD&trackingId=${orderData.trackingId}`);
+      } else {
+        // Store order ID in session storage
+        sessionStorage.setItem('checkout_order_id', orderData.orderId);
+        
+        // Redirect to payment page
+        router.push('/checkout/payment');
+      }
       
     } catch (error) {
       console.error('Error creating order:', error);
@@ -276,6 +293,42 @@ export default function CheckoutSummaryPage() {
               </div>
             </div>
             
+            {/* Payment Method Selection */}
+            <div className="mb-6 border-t pt-4">
+              <h3 className="text-sm font-medium mb-3">Choose Payment Method</h3>
+              <div className="space-y-2">
+                <label className="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="Razorpay"
+                    checked={paymentMethod === 'Razorpay'}
+                    onChange={() => setPaymentMethod('Razorpay')}
+                    className="mr-3 text-black focus:ring-black"
+                  />
+                  <div>
+                    <span className="text-sm font-medium block">Pay Online</span>
+                    <span className="text-xs text-gray-500">UPI, Cards, NetBanking, Wallets</span>
+                  </div>
+                </label>
+                
+                <label className="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="COD"
+                    checked={paymentMethod === 'COD'}
+                    onChange={() => setPaymentMethod('COD')}
+                    className="mr-3 text-black focus:ring-black"
+                  />
+                  <div>
+                    <span className="text-sm font-medium block">Cash on Delivery (COD)</span>
+                    <span className="text-xs text-gray-500">Pay when your order is delivered</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+            
             <button
               onClick={handlePayment}
               disabled={isLoading}
@@ -283,12 +336,12 @@ export default function CheckoutSummaryPage() {
                 isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-black hover:bg-gray-800'
               }`}
             >
-              {isLoading ? 'Processing...' : 'Pay Now'}
+              {isLoading ? 'Processing...' : paymentMethod === 'COD' ? 'Confirm Order' : 'Proceed to Payment'}
             </button>
             
             <div className="mt-4 text-xs text-gray-500 flex items-center justify-center">
               <FiCheck className="text-green-500 mr-1" />
-              Secure payment via Razorpay
+              {paymentMethod === 'COD' ? '100% safe Cash on Delivery' : 'Secure payment via Razorpay'}
             </div>
           </div>
         </div>
