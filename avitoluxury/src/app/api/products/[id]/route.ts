@@ -79,10 +79,17 @@ export async function PUT(
     // Set main image or default if none provided
     const mainImage = productInfo.mainImage || (images.length > 0 ? images[0] : '/placeholder.jpg');
     
+    // Generate clean unique slug
+    let base = productInfo.slug || productInfo.name;
+    if (/-\d{6}$/.test(base)) {
+      base = base.replace(/-\d{6}$/, '');
+    }
+    const cleanSlug = await generateUniqueSlug(base, id);
+
     // Create product data with all fields
     const productData = {
       name: productInfo.name,
-      slug: productInfo.slug || (productInfo.name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now().toString().slice(-6)),
+      slug: cleanSlug,
       description: productInfo.description,
       price: parseFloat(productInfo.price.toString()),
       comparePrice: productInfo.comparePrice ? parseFloat(productInfo.comparePrice.toString()) : 0,
@@ -188,4 +195,39 @@ export async function DELETE(
     console.error('Error deleting product:', error);
     return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 });
   }
+}
+
+async function generateUniqueSlug(nameOrSlug: string, excludeProductId?: string) {
+  let baseSlug = nameOrSlug
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
+  
+  if (!baseSlug) {
+    baseSlug = 'product';
+  }
+
+  let slug = baseSlug;
+  let counter = 1;
+  
+  while (true) {
+    const query: any = { slug };
+    if (excludeProductId) {
+      if (mongoose.Types.ObjectId.isValid(excludeProductId)) {
+        query._id = { $ne: new mongoose.Types.ObjectId(excludeProductId) };
+      } else {
+        query._id = { $ne: excludeProductId };
+      }
+    }
+    
+    const existingProduct = await Product.findOne(query);
+    if (!existingProduct) {
+      break;
+    }
+    
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+  
+  return slug;
 } 
