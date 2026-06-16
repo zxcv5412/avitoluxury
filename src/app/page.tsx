@@ -96,11 +96,10 @@ export default function HomePage() {
           images: [{ url: getProductImage(product) }]
         }));
         
-        // Filter products correctly by their flags
-        // Shuffle the products list to show random featured products on each refresh
+        // Filter and shuffle products correctly by their flags to show random products on each refresh
         const featured = shuffleArray(products);
-        const newArrival = products.filter((p: any) => p.new_arrival === true || p.category?.includes('New Arrival'));
-        const bestSeller = products.filter((p: any) => p.best_seller === true || p.category?.includes('Bestseller'));
+        const newArrival = shuffleArray(products.filter((p: any) => p.new_arrival === true || p.category?.includes('New Arrival')));
+        const bestSeller = shuffleArray(products.filter((p: any) => p.best_seller === true || p.category?.includes('Bestseller')));
         
         // Set products for each section
         setFeaturedProducts(featured);
