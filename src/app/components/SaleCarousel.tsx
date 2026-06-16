@@ -238,88 +238,102 @@ export default function SaleCarousel() {
   }
   
   return (
-    <div className="relative w-full overflow-hidden bg-white h-auto md:h-[500px] lg:h-[600px]">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentIndex}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-          className="relative w-full h-auto md:h-full"
-        >
-          {displayProducts[currentIndex] && (
-            <div className="grid grid-cols-1 md:grid-cols-2 h-auto md:h-full">
-              {/* Image - Mobile: Full screen with link, Desktop: Left side */}
-              <div className="order-1 md:order-1 flex items-center justify-center h-auto md:h-full bg-white relative w-full">
-                
-                {/* Mobile fluid display: stretch to full width, adapt container height dynamically */}
-                <div className="block md:hidden w-full relative">
-                  <Link href={`/product/${displayProducts[currentIndex].slug || displayProducts[currentIndex]._id}`} className="block w-full">
-                    <img
-                      src={optimizeImageUrl(displayProducts[currentIndex].images && displayProducts[currentIndex].images[0]?.url || '/perfume-placeholder.jpg', 800)}
-                      alt={displayProducts[currentIndex].name || "Perfume product"}
-                      className="w-full h-auto block"
-                    />
-                    {/* Mobile-only discount badge */}
-                    <div className="absolute top-4 left-4 bg-red-600 text-white inline-block px-1.5 xs:px-2 py-0.5 text-xs uppercase tracking-wider z-10">
-                      {Math.round(displayProducts[currentIndex].discountPercentage || 0)}% OFF
-                    </div>
-                    {/* Mobile-only product name overlay at bottom */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-center z-10">
-                      <h3 className="text-sm xs:text-base font-medium truncate">{displayProducts[currentIndex].name}</h3>
-                    </div>
-                  </Link>
-                </div>
+    <motion.div
+      layout="size"
+      transition={{ duration: 0.4, ease: "easeInOut" }}
+      className="relative w-full overflow-hidden bg-white h-auto md:h-[500px] lg:h-[600px]"
+    >
+      <div className="relative w-full h-auto md:h-full">
+        {displayProducts.map((product, index) => {
+          const isActive = index === currentIndex;
+          return (
+            <motion.div
+              key={product._id}
+              initial={false}
+              animate={{
+                opacity: isActive ? 1 : 0,
+                zIndex: isActive ? 10 : 0,
+              }}
+              transition={{ duration: 0.4 }}
+              className={`${
+                isActive ? 'relative' : 'absolute inset-0'
+              } w-full h-auto md:h-full`}
+              style={{
+                pointerEvents: isActive ? 'auto' : 'none',
+              }}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 h-auto md:h-full">
+                {/* Image - Mobile: Full screen with link, Desktop: Left side */}
+                <div className="order-1 md:order-1 flex items-center justify-center h-auto md:h-full bg-white relative w-full">
+                  
+                  {/* Mobile fluid display: stretch to full width, adapt container height dynamically */}
+                  <div className="block md:hidden w-full relative">
+                    <Link href={`/product/${product.slug || product._id}`} className="block w-full">
+                      <img
+                        src={optimizeImageUrl(product.images && product.images[0]?.url || '/perfume-placeholder.jpg', 800)}
+                        alt={product.name || "Perfume product"}
+                        className="w-full h-auto block"
+                      />
+                      {/* Mobile-only discount badge */}
+                      <div className="absolute top-4 left-4 bg-red-600 text-white inline-block px-1.5 xs:px-2 py-0.5 text-xs uppercase tracking-wider z-10">
+                        {Math.round(product.discountPercentage || 0)}% OFF
+                      </div>
+                      {/* Mobile-only product name overlay at bottom */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-center z-10">
+                        <h3 className="text-sm xs:text-base font-medium truncate">{product.name}</h3>
+                      </div>
+                    </Link>
+                  </div>
 
-                {/* Desktop layout: keep original fixed-height container and Next.js Image cover details */}
-                <div className="hidden md:block relative w-full h-full">
-                  <Link href={`/product/${displayProducts[currentIndex].slug || displayProducts[currentIndex]._id}`} className="block relative w-full h-full">
-                    <Image
-                      src={optimizeImageUrl(displayProducts[currentIndex].images && displayProducts[currentIndex].images[0]?.url || '/perfume-placeholder.jpg', 800)}
-                      alt={displayProducts[currentIndex].name || "Perfume product"}
-                      fill
-                      sizes="50vw"
-                      priority={currentIndex === 0}
-                      className="object-contain p-4 md:p-6 lg:p-8"
-                    />
-                  </Link>
-                </div>
-              </div>
-              
-              {/* Content - Hidden on mobile, Visible on Desktop: Right side */}
-              <div className="hidden md:flex order-2 md:order-2 flex-col items-center justify-center p-1 xs:p-2 sm:p-4 md:p-6 lg:p-8">
-                <div className="text-center space-y-0.5 xs:space-y-1 sm:space-y-2 md:space-y-4 max-w-sm mx-auto">
-                  <div className="bg-red-600 text-white inline-block px-1.5 xs:px-2 py-0.5 text-xs uppercase tracking-wider mb-0.5 xs:mb-1 md:mb-2">
-                    {Math.round(displayProducts[currentIndex].discountPercentage || 0)}% OFF
-                  </div>
-                  
-                  <h2 className="text-sm xs:text-base sm:text-xl md:text-2xl lg:text-3xl font-bold font-serif">
-                    {displayProducts[currentIndex].name}
-                  </h2>
-                  
-                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-1 sm:line-clamp-2">
-                    {displayProducts[currentIndex].description}
-                  </p>
-                  
-                  <div className="flex flex-row items-center justify-center gap-1 xs:gap-2 md:gap-4 my-0.5 xs:my-1 sm:my-2 md:my-4">
-                    <span className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-bold">
-                      ₹{displayProducts[currentIndex].discountedPrice}
-                    </span>
-                    <span className="text-xs sm:text-sm text-gray-500 line-through">
-                      ₹{displayProducts[currentIndex].price}
-                    </span>
-                  </div>
-                  
-                  <div className="mt-0.5 xs:mt-1 sm:mt-2 md:mt-4">
-                    <ShopNowButton href={`/product/${displayProducts[currentIndex].slug || displayProducts[currentIndex]._id}`} />
+                  {/* Desktop layout: keep original fixed-height container and Next.js Image cover details */}
+                  <div className="hidden md:block relative w-full h-full">
+                    <Link href={`/product/${product.slug || product._id}`} className="block relative w-full h-full">
+                      <Image
+                        src={optimizeImageUrl(product.images && product.images[0]?.url || '/perfume-placeholder.jpg', 800)}
+                        alt={product.name || "Perfume product"}
+                        fill
+                        sizes="50vw"
+                        priority={index === 0}
+                        className="object-contain p-4 md:p-6 lg:p-8"
+                      />
+                    </Link>
                   </div>
                 </div>
+                
+                {/* Content - Hidden on mobile, Visible on Desktop: Right side */}
+                <div className="hidden md:flex order-2 md:order-2 flex-col items-center justify-center p-1 xs:p-2 sm:p-4 md:p-6 lg:p-8">
+                  <div className="text-center space-y-0.5 xs:space-y-1 sm:space-y-2 md:space-y-4 max-w-sm mx-auto">
+                    <div className="bg-red-600 text-white inline-block px-1.5 xs:px-2 py-0.5 text-xs uppercase tracking-wider mb-0.5 xs:mb-1 md:mb-2">
+                      {Math.round(product.discountPercentage || 0)}% OFF
+                    </div>
+                    
+                    <h2 className="text-sm xs:text-base sm:text-xl md:text-2xl lg:text-3xl font-bold font-serif">
+                      {product.name}
+                    </h2>
+                    
+                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-1 sm:line-clamp-2">
+                      {product.description}
+                    </p>
+                    
+                    <div className="flex flex-row items-center justify-center gap-1 xs:gap-2 md:gap-4 my-0.5 xs:my-1 sm:my-2 md:my-4">
+                      <span className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-bold">
+                        ₹{product.discountedPrice}
+                      </span>
+                      <span className="text-xs sm:text-sm text-gray-500 line-through">
+                        ₹{product.price}
+                      </span>
+                    </div>
+                    
+                    <div className="mt-0.5 xs:mt-1 sm:mt-2 md:mt-4">
+                      <ShopNowButton href={`/product/${product.slug || product._id}`} />
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
-        </motion.div>
-      </AnimatePresence>
+            </motion.div>
+          );
+        })}
+      </div>
       
       {/* Navigation arrows - hidden on small screens, visible on medium and up */}
       <button
@@ -351,6 +365,6 @@ export default function SaleCarousel() {
           />
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
