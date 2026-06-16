@@ -238,7 +238,7 @@ export default function SaleCarousel() {
   }
   
   return (
-    <div className="relative w-full overflow-hidden bg-white h-[300px] xs:h-[350px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
+    <div className="relative w-full overflow-hidden bg-white h-auto md:h-[500px] lg:h-[600px]">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
@@ -246,32 +246,45 @@ export default function SaleCarousel() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="relative w-full h-full"
+          className="relative w-full h-auto md:h-full"
         >
           {displayProducts[currentIndex] && (
-            <div className="grid grid-cols-1 md:grid-cols-2 h-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 h-auto md:h-full">
               {/* Image - Mobile: Full screen with link, Desktop: Left side */}
-              <div className="order-1 md:order-1 flex items-center justify-center h-full bg-white relative">
-                <Link href={`/product/${displayProducts[currentIndex].slug || displayProducts[currentIndex]._id}`} className="block relative w-full h-full">
+              <div className="order-1 md:order-1 flex items-center justify-center h-auto md:h-full bg-white relative w-full">
+                
+                {/* Mobile fluid display: stretch to full width, adapt container height dynamically */}
+                <div className="block md:hidden w-full relative">
+                  <Link href={`/product/${displayProducts[currentIndex].slug || displayProducts[currentIndex]._id}`} className="block w-full">
+                    <img
+                      src={optimizeImageUrl(displayProducts[currentIndex].images && displayProducts[currentIndex].images[0]?.url || '/perfume-placeholder.jpg', 800)}
+                      alt={displayProducts[currentIndex].name || "Perfume product"}
+                      className="w-full h-auto block"
+                    />
+                    {/* Mobile-only discount badge */}
+                    <div className="absolute top-4 left-4 bg-red-600 text-white inline-block px-1.5 xs:px-2 py-0.5 text-xs uppercase tracking-wider z-10">
+                      {Math.round(displayProducts[currentIndex].discountPercentage || 0)}% OFF
+                    </div>
+                    {/* Mobile-only product name overlay at bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-center z-10">
+                      <h3 className="text-sm xs:text-base font-medium truncate">{displayProducts[currentIndex].name}</h3>
+                    </div>
+                  </Link>
+                </div>
+
+                {/* Desktop layout: keep original fixed-height container and Next.js Image cover details */}
+                <div className="hidden md:block relative w-full h-full">
+                  <Link href={`/product/${displayProducts[currentIndex].slug || displayProducts[currentIndex]._id}`} className="block relative w-full h-full">
                     <Image
                       src={optimizeImageUrl(displayProducts[currentIndex].images && displayProducts[currentIndex].images[0]?.url || '/perfume-placeholder.jpg', 800)}
                       alt={displayProducts[currentIndex].name || "Perfume product"}
                       fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
+                      sizes="50vw"
                       priority={currentIndex === 0}
-                      className="object-contain p-3 sm:p-4 md:p-6 lg:p-8"
+                      className="object-contain p-4 md:p-6 lg:p-8"
                     />
-                  
-                  {/* Mobile-only discount badge */}
-                  <div className="md:hidden absolute top-4 left-4 bg-red-600 text-white inline-block px-1.5 xs:px-2 py-0.5 text-xs uppercase tracking-wider z-10">
-                    {Math.round(displayProducts[currentIndex].discountPercentage || 0)}% OFF
-                  </div>
-                  
-                  {/* Mobile-only product name overlay at bottom */}
-                  <div className="md:hidden absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-center z-10">
-                    <h3 className="text-sm xs:text-base font-medium truncate">{displayProducts[currentIndex].name}</h3>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
               </div>
               
               {/* Content - Hidden on mobile, Visible on Desktop: Right side */}

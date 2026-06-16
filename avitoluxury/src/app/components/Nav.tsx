@@ -429,8 +429,27 @@ export default function Nav() {
     <>
       {/* Announcement Bar */}
       {componentSettings.announcement && (
-        <div className="bg-black text-white text-center py-2 text-sm">
-          Free shipping on orders above ₹500
+        <div className="bg-black text-white py-2 text-sm overflow-hidden whitespace-nowrap relative w-full select-none">
+          <div className="flex w-max animate-marquee-loop">
+            <div className="px-4 text-center">
+              Free shipping on orders above ₹500 &nbsp;&nbsp;•&nbsp;&nbsp; Cash on Delivery (COD) Now Available 🚚 &nbsp;&nbsp;•&nbsp;&nbsp; Crafted in France, Bottled in India 🇫🇷
+            </div>
+            <div className="px-4 text-center">
+              Free shipping on orders above ₹500 &nbsp;&nbsp;•&nbsp;&nbsp; Cash on Delivery (COD) Now Available 🚚 &nbsp;&nbsp;•&nbsp;&nbsp; Crafted in France, Bottled in India 🇫🇷
+            </div>
+            <div className="px-4 text-center">
+              Free shipping on orders above ₹500 &nbsp;&nbsp;•&nbsp;&nbsp; Cash on Delivery (COD) Now Available 🚚 &nbsp;&nbsp;•&nbsp;&nbsp; Crafted in France, Bottled in India 🇫🇷
+            </div>
+          </div>
+          <style dangerouslySetInnerHTML={{ __html: `
+            @keyframes marqueeLoop {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-33.333%); }
+            }
+            .animate-marquee-loop {
+              animation: marqueeLoop 25s linear infinite;
+            }
+          `}} />
         </div>
       )}
       

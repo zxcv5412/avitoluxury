@@ -58,6 +58,16 @@ const ProductGridSkeleton = () => (
   </div>
 );
 
+// Helper to shuffle array (Fisher-Yates algorithm)
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
@@ -75,7 +85,7 @@ export default function HomePage() {
         }
         
         const data = await response.json();
-        let products = data.products.map((product: any) => ({
+        let products: Product[] = data.products.map((product: any) => ({
           ...product,
           price: convertToRupees(product.price),
           discountedPrice: product.comparePrice ? convertToRupees(product.comparePrice) : 0,
@@ -87,7 +97,8 @@ export default function HomePage() {
         }));
         
         // Filter products correctly by their flags
-        const featured = products.filter((p: any) => p.featured === true);
+        // Shuffle the products list to show random featured products on each refresh
+        const featured = shuffleArray(products);
         const newArrival = products.filter((p: any) => p.new_arrival === true || p.category?.includes('New Arrival'));
         const bestSeller = products.filter((p: any) => p.best_seller === true || p.category?.includes('Bestseller'));
         
