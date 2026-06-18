@@ -126,11 +126,7 @@ export default function HomePage() {
         {/* Sale Carousel */}
         <SaleCarousel />
         
-        {/* Brand Tagline */}
-        <div className="text-center py-6 border-b border-gray-100">
-          <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">A Scent Beyond Time</p>
-          <h2 className="text-lg md:text-xl font-light italic font-serif">Crafted in France, Bottled in India</h2>
-        </div>
+
 
         {/* Trust Badge Ribbon */}
         <div className="bg-gray-50 py-4 border-b border-gray-100">
