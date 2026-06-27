@@ -1,11 +1,10 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ProductCard from './components/store/ProductCard';
 import SaleCarousel from '@/app/components/SaleCarousel';
 import Nav from '@/app/components/Nav';
 import Footer from '@/app/components/Footer';
+import connectMongoDB from '@/app/lib/mongodb';
+import ProductModel from '@/app/models/Product';
 
 interface Product {
   _id: string;
@@ -22,11 +21,6 @@ interface Product {
   productType: string;
 }
 
-// Helper to convert prices
-const convertToRupees = (dollarPrice: number) => {
-  return dollarPrice;
-};
-
 // Helper function to safely get image URL from product
 const getProductImage = (product: any): string => {
   if (product.images && product.images.length > 0) {
@@ -40,24 +34,6 @@ const getProductImage = (product: any): string => {
   return product.mainImage || 'https://placehold.co/400x500';
 };
 
-// Shimmering Skeleton Loader for Product Cards Grid
-const ProductGridSkeleton = () => (
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 animate-pulse">
-    {[...Array(4)].map((_, i) => (
-      <div key={i} className="h-full flex flex-col bg-white border border-gray-100 overflow-hidden relative">
-        <div className="h-48 xs:h-56 sm:h-60 md:h-64 bg-gray-200" />
-        <div className="p-3 xs:p-4 flex-grow flex flex-col space-y-2">
-          <div className="h-3 bg-gray-200 rounded w-1/4" />
-          <div className="h-4 bg-gray-200 rounded w-3/4" />
-          <div className="h-3 bg-gray-200 rounded w-1/2" />
-          <div className="h-4 bg-gray-200 rounded w-1/3 mx-auto mt-auto mb-2" />
-          <div className="h-10 bg-gray-200 w-full" />
-        </div>
-      </div>
-    ))}
-  </div>
-);
-
 // Helper to shuffle array (Fisher-Yates algorithm)
 const shuffleArray = <T,>(array: T[]): T[] => {
   const arr = [...array];
@@ -68,56 +44,43 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return arr;
 };
 
-export default function HomePage() {
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [newArrivals, setNewArrivals] = useState<Product[]>([]);
-  const [topSelling, setTopSelling] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        // Fetch real products from API
-        const response = await fetch('/api/products');
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
-        }
-        
-        const data = await response.json();
-        let products: Product[] = data.products.map((product: any) => ({
-          ...product,
-          price: convertToRupees(product.price),
-          discountedPrice: product.comparePrice ? convertToRupees(product.comparePrice) : 0,
-          featured: product.featured || false,
-          new_arrival: product.isNewArrival || false,
-          best_seller: product.isBestSelling || false,
-          productType: product.productType || 'perfume',
-          images: [{ url: getProductImage(product) }]
-        }));
-        
-        // Filter and shuffle products correctly by their flags to show random products on each refresh
-        const featured = shuffleArray(products);
-        const newArrival = shuffleArray(products.filter((p: any) => p.new_arrival === true || p.category?.includes('New Arrival')));
-        const bestSeller = shuffleArray(products.filter((p: any) => p.best_seller === true || p.category?.includes('Bestseller')));
-        
-        // Set products for each section
-        setFeaturedProducts(featured);
-        setNewArrivals(newArrival);
-        setTopSelling(bestSeller);
-        
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        setFeaturedProducts([]);
-        setNewArrivals([]);
-        setTopSelling([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+export const dynamic = 'force-dynamic'; // Ensures the page fetches fresh data on load
+
+export default async function HomePage() {
+  let featuredProducts: Product[] = [];
+  let newArrivals: Product[] = [];
+  let topSelling: Product[] = [];
+
+  try {
+    await connectMongoDB();
     
-    fetchProducts();
-  }, []);
+    // Fetch products directly from database on the server
+    const dbProducts = await ProductModel.find({}).lean();
+    
+    // Map to the required interface
+    const products: Product[] = dbProducts.map((product: any) => ({
+      _id: product._id.toString(),
+      name: product.name,
+      description: product.description || '',
+      price: product.price,
+      discountedPrice: product.comparePrice || 0,
+      category: product.category || '',
+      rating: product.rating || 0,
+      featured: product.featured || false,
+      new_arrival: product.isNewArrival || false,
+      best_seller: product.isBestSelling || false,
+      productType: product.productType || 'perfume',
+      images: [{ url: getProductImage(product) }]
+    }));
+    
+    // Filter and shuffle products correctly
+    featuredProducts = shuffleArray(products).slice(0, 4);
+    newArrivals = shuffleArray(products.filter((p) => p.new_arrival || p.category?.includes('New Arrival'))).slice(0, 4);
+    topSelling = shuffleArray(products.filter((p) => p.best_seller || p.category?.includes('Bestseller'))).slice(0, 4);
+    
+  } catch (error) {
+    console.error('Error fetching products during SSR:', error);
+  }
   
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
@@ -126,8 +89,6 @@ export default function HomePage() {
         {/* Sale Carousel */}
         <SaleCarousel />
         
-
-
         {/* Trust Badge Ribbon */}
         <div className="bg-gray-50 py-4 border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-4 flex justify-around items-center text-center gap-2">
@@ -157,19 +118,15 @@ export default function HomePage() {
         <section className="py-10 px-4 max-w-7xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-medium mb-8 text-center">Featured Products</h2>
           
-          {loading ? (
-            <ProductGridSkeleton />
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {featuredProducts.length > 0 ? (
-                featuredProducts.slice(0, 4).map((product) => (
-                  <ProductCard key={product._id} product={product} />
-                ))
-              ) : (
-                <p className="col-span-full text-center text-gray-500">No featured products available</p>
-              )}
-            </div>
-          )}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {featuredProducts.length > 0 ? (
+              featuredProducts.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))
+            ) : (
+              <p className="col-span-full text-center text-gray-500">No featured products available</p>
+            )}
+          </div>
           
           <div className="text-center mt-8">
             <Link href="/collection" className="inline-block border border-black px-6 py-2 hover:bg-black hover:text-white transition duration-300">
@@ -182,19 +139,15 @@ export default function HomePage() {
         <section className="py-10 px-4 max-w-7xl mx-auto bg-gray-50">
           <h2 className="text-2xl md:text-3xl font-medium mb-8 text-center">New Arrivals</h2>
           
-          {loading ? (
-            <ProductGridSkeleton />
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {newArrivals.length > 0 ? (
-                newArrivals.slice(0, 4).map((product) => (
-                  <ProductCard key={product._id} product={product} />
-                ))
-              ) : (
-                <p className="col-span-full text-center text-gray-500">No new arrivals available</p>
-              )}
-            </div>
-          )}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {newArrivals.length > 0 ? (
+              newArrivals.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))
+            ) : (
+              <p className="col-span-full text-center text-gray-500">No new arrivals available</p>
+            )}
+          </div>
           
           <div className="text-center mt-8">
             <Link href="/new-arrivals" className="inline-block border border-black px-6 py-2 hover:bg-black hover:text-white transition duration-300">
@@ -207,19 +160,15 @@ export default function HomePage() {
         <section className="py-10 px-4 max-w-7xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-medium mb-8 text-center">Best Selling</h2>
           
-          {loading ? (
-            <ProductGridSkeleton />
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {topSelling.length > 0 ? (
-                topSelling.slice(0, 4).map((product) => (
-                  <ProductCard key={product._id} product={product} />
-                ))
-              ) : (
-                <p className="col-span-full text-center text-gray-500">No best selling products available</p>
-              )}
-            </div>
-          )}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {topSelling.length > 0 ? (
+              topSelling.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))
+            ) : (
+              <p className="col-span-full text-center text-gray-500">No best selling products available</p>
+            )}
+          </div>
           
           <div className="text-center mt-8">
             <Link href="/best-selling" className="inline-block border border-black px-6 py-2 hover:bg-black hover:text-white transition duration-300">

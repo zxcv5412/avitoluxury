@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Nav from '../components/Nav';
 import Footer from '../components/Footer';
+import Image from 'next/image';
 import LeadershipTeam from '../components/LeadershipTeam';
 import FAQAccordion from '../components/FAQAccordion';
 import { FiArrowRight } from 'react-icons/fi';
@@ -127,10 +128,12 @@ export default function AboutUsPage() {
       <div className="relative">
         <div className="w-full h-[80vh] bg-gray-100 flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-black to-transparent opacity-70 z-10"></div>
-          <img 
+          <Image 
             src="/2.svg" 
             alt="About Us"
-            className="absolute inset-0 w-full h-full object-cover"
+            fill
+            className="absolute inset-0 object-cover"
+            priority
           />
           <div className="text-center px-4 z-20 relative text-white">
             <h1 className="text-3xl md:text-5xl text-red-100 font-bold mb-4">Our Story</h1>
@@ -197,9 +200,11 @@ export default function AboutUsPage() {
               </a>
             </div>
             <div>
-              <img 
+              <Image 
                 src="/team.jpg" 
                 alt="Career Opportunities"
+                width={800}
+                height={600}
                 className="w-full h-auto rounded-lg shadow-md"
               />
             </div>

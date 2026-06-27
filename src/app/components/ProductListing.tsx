@@ -170,6 +170,7 @@ interface ProductListingProps {
   gender?: string;
   title: string;
   description?: string;
+  initialProducts?: Product[];
 }
 
 export default function ProductListing({
@@ -179,13 +180,14 @@ export default function ProductListing({
   tag,
   gender,
   title,
-  description
+  description,
+  initialProducts
 }: ProductListingProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>(initialProducts || []);
+  const [loading, setLoading] = useState(!initialProducts || initialProducts.length === 0);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -214,6 +216,14 @@ export default function ProductListing({
   // Fetch products based on category, productType, subCategory, or tag
   useEffect(() => {
     const fetchProducts = async () => {
+      // If SSR provided products, skip fetching on initial load
+      if (initialProducts && initialProducts.length > 0) {
+        setProducts(initialProducts);
+        extractFilterOptions(initialProducts);
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         

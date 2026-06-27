@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IoClose } from 'react-icons/io5';
+import Image from 'next/image';
 
 interface LeadershipProps {
   name: string;
@@ -79,9 +80,11 @@ export default function LeadershipCard({ name, title, image, bio }: LeadershipPr
         <div className="relative mb-4 overflow-hidden rounded-lg">
           <div className="absolute inset-0 bg-gradient-to-tr from-purple-300/30 to-blue-300/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
           <div className="absolute inset-0 bg-gradient-to-bl from-yellow-300/30 to-pink-300/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 mix-blend-overlay"></div>
-          <img 
+          <Image 
             src={image} 
             alt={name}
+            width={400}
+            height={500}
             className="w-full h-auto transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 z-0"></div>
@@ -120,11 +123,12 @@ export default function LeadershipCard({ name, title, image, bio }: LeadershipPr
               </button>
               
               <div className="md:w-2/5 bg-gradient-to-br from-gray-900 to-gray-800 flex flex-col items-center justify-center p-6 sticky top-0">
-                <div className="w-full max-w-xs aspect-square overflow-hidden rounded-full mb-6 border-4 border-white/10 shadow-xl">
-                  <img 
+                <div className="w-full max-w-xs aspect-square overflow-hidden rounded-full mb-6 border-4 border-white/10 shadow-xl relative">
+                  <Image 
                     src={image} 
                     alt={name}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 </div>
                 <h2 className="text-xl font-bold text-white text-center">{name}</h2>
