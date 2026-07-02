@@ -156,14 +156,15 @@ export default function SaleCarousel({ initialProducts, exactMode = false }: { i
   const [error, setError] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Fetch products if initialProducts is not provided
+  // Fetch products if initialProducts is not provided, or sync state when initialProducts changes
   useEffect(() => {
+    if (initialProducts && initialProducts.length > 0) {
+      setProducts(processCarouselProducts(initialProducts, exactMode));
+      setLoading(false);
+      return;
+    }
+    
     const fetchProducts = async () => {
-      // If we already have initial products and they were processed synchronously, skip fetch
-      if (initialProducts && initialProducts.length > 0) {
-        return;
-      }
-      
       try {
         setLoading(true);
         const response = await fetch('/api/products');
@@ -180,7 +181,7 @@ export default function SaleCarousel({ initialProducts, exactMode = false }: { i
     };
     
     fetchProducts();
-  }, [initialProducts]);
+  }, [initialProducts, exactMode]);
   
   const goToPrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? products.length - 1 : prev - 1));
