@@ -157,6 +157,11 @@ export default function StorefrontSettings() {
   };
 
   const deleteCarousel = (id: string) => {
+    const coreIds = ['hero-carousel', 'featured-products', 'new-arrivals', 'best-sellers'];
+    if (coreIds.includes(id)) {
+      alert('System carousels cannot be deleted');
+      return;
+    }
     if (confirm('Are you sure you want to delete this carousel?')) {
       const updated = carousels.filter(c => c.id !== id);
       setCarousels(updated);
@@ -323,26 +328,37 @@ export default function StorefrontSettings() {
                 {carousels.length === 0 ? (
                   <p className="text-gray-500 text-sm">No carousels created yet.</p>
                 ) : (
-                  carousels.map((carousel) => (
-                    <div 
-                      key={carousel.id}
-                      onClick={() => setSelectedCarouselId(carousel.id)}
-                      className={`p-3 rounded-lg border cursor-pointer flex justify-between items-center transition ${selectedCarouselId === carousel.id ? 'border-blue-500 bg-blue-50/50' : 'border-gray-200 hover:bg-gray-50'}`}
-                    >
-                      <div>
-                        <div className="font-semibold text-gray-800">{carousel.title}</div>
-                        <div className="text-xs text-gray-500 font-mono mt-1">ID: {carousel.id}</div>
+                  carousels.map((carousel) => {
+                    const coreIds = ['hero-carousel', 'featured-products', 'new-arrivals', 'best-sellers'];
+                    const isCore = coreIds.includes(carousel.id);
+                    return (
+                      <div 
+                        key={carousel.id}
+                        onClick={() => setSelectedCarouselId(carousel.id)}
+                        className={`p-3 rounded-lg border cursor-pointer flex justify-between items-center transition ${selectedCarouselId === carousel.id ? 'border-blue-500 bg-blue-50/50' : 'border-gray-200 hover:bg-gray-50'}`}
+                      >
+                        <div>
+                          <div className="font-semibold text-gray-800 flex items-center gap-2 flex-wrap">
+                            {carousel.title}
+                            {isCore ? (
+                              <span className="px-1.5 py-0.5 text-[9px] bg-blue-50 text-blue-600 border border-blue-200 rounded font-semibold uppercase tracking-wider">System</span>
+                            ) : (
+                              <span className="px-1.5 py-0.5 text-[9px] bg-gray-50 text-gray-600 border border-gray-200 rounded font-semibold uppercase tracking-wider">Custom</span>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500 font-mono mt-1">ID: {carousel.id}</div>
+                        </div>
+                        {selectedCarouselId === carousel.id && !isCore && (
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); deleteCarousel(carousel.id); }}
+                            className="text-red-600 p-1.5 hover:bg-red-50 rounded-lg transition"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        )}
                       </div>
-                      {selectedCarouselId === carousel.id && (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); deleteCarousel(carousel.id); }}
-                          className="text-red-600 p-1.5 hover:bg-red-550 rounded-lg transition"
-                        >
-                          <FiTrash2 />
-                        </button>
-                      )}
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>

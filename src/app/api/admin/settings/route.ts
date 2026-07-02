@@ -22,27 +22,41 @@ export async function GET(request: Request) {
     await connectToDatabase();
     
     // Attempt to find existing settings
-    let settings = await SiteSettings.findOne({ settingId: 'global' }).populate({
+    let settings = await SiteSettings.findOne({ settingId: 'global' });
+    
+    const coreCarousels = [
+      { id: 'hero-carousel', title: 'Main Hero Carousel', products: [] },
+      { id: 'featured-products', title: 'Featured Products Section', products: [] },
+      { id: 'new-arrivals', title: 'New Arrivals Section', products: [] },
+      { id: 'best-sellers', title: 'Best Sellers Section', products: [] }
+    ];
+    
+    if (!settings) {
+      settings = await SiteSettings.create({
+        settingId: 'global',
+        carousels: coreCarousels
+      });
+    } else {
+      let hasChanges = false;
+      for (const core of coreCarousels) {
+        if (!settings.carousels.some((c: any) => c.id === core.id)) {
+          settings.carousels.push(core);
+          hasChanges = true;
+        }
+      }
+      if (hasChanges) {
+        await settings.save();
+      }
+    }
+
+    // Populate the settings after ensuring core carousels are present
+    const populatedSettings = await SiteSettings.findOne({ settingId: 'global' }).populate({
       path: 'carousels.products.product',
       model: Product,
       select: 'name slug mainImage images price comparePrice discountedPrice isPinnedFirst isPinnedSecond isPinnedThird isPinnedFourth'
     });
-    
-    if (!settings) {
-      // Create default if it doesn't exist
-      settings = await SiteSettings.create({
-        settingId: 'global',
-        carousels: [
-          {
-            id: 'hero-carousel',
-            title: 'Main Hero Carousel',
-            products: []
-          }
-        ]
-      });
-    }
 
-    return NextResponse.json(settings);
+    return NextResponse.json(populatedSettings);
   } catch (error) {
     console.error('Error in GET /api/admin/settings:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
