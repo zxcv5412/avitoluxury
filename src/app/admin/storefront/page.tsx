@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FiBox, FiShoppingBag, FiUsers, FiLogOut, FiSettings, FiLayout, FiPlus, FiTrash2, FiMove, FiSearch, FiSave, FiMail } from 'react-icons/fi';
-import { useAdminAuth, getAdminToken } from '@/app/lib/admin-auth';
+import { FiBox, FiShoppingBag, FiUsers, FiLogOut, FiSettings, FiPlus, FiTrash2, FiMove, FiSearch, FiSave, FiMail } from 'react-icons/fi';
+import { useAdminAuth, getAdminToken, adminLogout } from '@/app/lib/admin-auth';
 
 interface CarouselProduct {
   product: {
@@ -73,9 +73,7 @@ export default function StorefrontSettings() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    router.push('/admin/login');
+    adminLogout(router);
   };
 
   const searchProducts = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -228,54 +226,57 @@ export default function StorefrontSettings() {
   };
 
   if (authLoading || loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex">
-      {/* Sidebar (Left Menu) */}
-      <div className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col hidden md:flex">
-        <div className="p-6 border-b border-gray-800">
-          <h2 className="text-2xl font-bold text-white tracking-wider">A V I T O</h2>
-          <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">Admin Panel</p>
+    <div className="min-h-screen bg-gray-100 flex text-gray-900">
+      {/* Sidebar - EXACT COPY OF THE ORIGINAL LAYOUT */}
+      <div className="w-64 bg-white shadow-lg">
+        <div className="p-6 bg-gradient-to-r from-blue-900 to-indigo-800">
+          <img src="/logoo1.png" alt="Logo" className="h-20 mx-auto" />
         </div>
         
-        <nav className="flex-1 py-4">
-          <Link href="/admin/dashboard" className="block py-3 px-6 text-gray-400 font-medium hover:bg-gray-800 hover:text-white">
+        <nav className="mt-6">
+          <Link href="/admin/dashboard" className="block py-3 px-4 text-gray-600 font-medium hover:bg-gray-100 hover:text-gray-900">
             <div className="flex items-center">
-              <FiLayout className="mr-3" /> Dashboard
+              <FiBox className="mr-3" /> Dashboard
             </div>
           </Link>
-          <Link href="/admin/orders" className="block py-3 px-6 text-gray-400 font-medium hover:bg-gray-800 hover:text-white">
+          <Link href="/admin/products" className="block py-3 px-4 text-gray-600 font-medium hover:bg-gray-100 hover:text-gray-900">
+            <div className="flex items-center">
+              <FiShoppingBag className="mr-3" /> Products
+            </div>
+          </Link>
+          <Link href="/admin/orders" className="block py-3 px-4 text-gray-600 font-medium hover:bg-gray-100 hover:text-gray-900">
             <div className="flex items-center">
               <FiShoppingBag className="mr-3" /> Orders
             </div>
           </Link>
-          <Link href="/admin/products" className="block py-3 px-6 text-gray-400 font-medium hover:bg-gray-800 hover:text-white">
-            <div className="flex items-center">
-              <FiBox className="mr-3" /> Products
-            </div>
-          </Link>
-          <Link href="/admin/users" className="block py-3 px-6 text-gray-400 font-medium hover:bg-gray-800 hover:text-white">
+          <Link href="/admin/users" className="block py-3 px-4 text-gray-600 font-medium hover:bg-gray-100 hover:text-gray-900">
             <div className="flex items-center">
               <FiUsers className="mr-3" /> Users
             </div>
           </Link>
-          <Link href="/admin/contacts" className="block py-3 px-6 text-gray-400 font-medium hover:bg-gray-800 hover:text-white">
+          <Link href="/admin/contacts" className="block py-3 px-4 text-gray-600 font-medium hover:bg-gray-100 hover:text-gray-900">
             <div className="flex items-center">
               <FiMail className="mr-3" /> Contacts
             </div>
           </Link>
-          <Link href="/admin/storefront" className="block py-3 px-6 text-white bg-blue-600/10 border-r-4 border-blue-500 font-medium">
+          <Link href="/admin/storefront" className="block py-3 px-4 text-gray-900 font-medium bg-gray-100 hover:bg-gray-200 border-l-4 border-blue-600">
             <div className="flex items-center">
-              <FiSettings className="mr-3 text-blue-500" /> Storefront
+              <FiSettings className="mr-3 text-blue-600" /> Storefront
             </div>
           </Link>
           <button 
             onClick={handleLogout}
-            className="w-full text-left py-3 px-6 text-gray-400 font-medium hover:bg-gray-800 hover:text-white"
+            className="w-full text-left py-3 px-4 text-gray-600 font-medium hover:bg-gray-100 hover:text-gray-900"
           >
             <div className="flex items-center">
               <FiLogOut className="mr-3" /> Logout
@@ -285,34 +286,34 @@ export default function StorefrontSettings() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8 bg-gray-950">
+      <div className="flex-1 p-8 overflow-y-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white">Storefront Settings</h1>
-            <p className="text-gray-400">Manage your homepage carousels with drag and drop.</p>
+            <h1 className="text-2xl font-bold text-gray-900">Storefront Settings</h1>
+            <p className="text-gray-600">Manage your homepage carousels with drag and drop.</p>
           </div>
           <button 
             onClick={saveSettings}
             disabled={saving}
-            className="px-6 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 disabled:opacity-50 flex items-center transition"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 disabled:opacity-50 flex items-center transition duration-150"
           >
             <FiSave className="mr-2" />
             {saving ? 'Saving...' : 'Save Settings'}
           </button>
         </div>
 
-        {error && <div className="mb-4 p-4 bg-red-900/30 border border-red-800 text-red-400 rounded">{error}</div>}
-        {success && <div className="mb-4 p-4 bg-green-900/30 border border-green-800 text-green-400 rounded">{success}</div>}
+        {error && <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r shadow-sm">{error}</div>}
+        {success && <div className="mb-4 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-r shadow-sm">{success}</div>}
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Column: Carousel Selector */}
           <div className="w-full lg:w-1/3">
-            <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+            <div className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-white">Your Carousels</h2>
+                <h2 className="text-lg font-bold text-gray-900">Your Carousels</h2>
                 <button 
                   onClick={() => setShowNewModal(true)}
-                  className="text-blue-400 hover:bg-blue-500/10 px-3 py-1.5 rounded flex items-center text-sm font-medium transition"
+                  className="text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg flex items-center text-sm font-semibold transition"
                 >
                   <FiPlus className="mr-1" /> New
                 </button>
@@ -326,16 +327,16 @@ export default function StorefrontSettings() {
                     <div 
                       key={carousel.id}
                       onClick={() => setSelectedCarouselId(carousel.id)}
-                      className={`p-3 rounded border cursor-pointer flex justify-between items-center transition ${selectedCarouselId === carousel.id ? 'border-blue-500 bg-blue-500/5' : 'border-gray-800 hover:bg-gray-800/50'}`}
+                      className={`p-3 rounded-lg border cursor-pointer flex justify-between items-center transition ${selectedCarouselId === carousel.id ? 'border-blue-500 bg-blue-50/50' : 'border-gray-200 hover:bg-gray-50'}`}
                     >
                       <div>
-                        <div className="font-semibold text-gray-200">{carousel.title}</div>
+                        <div className="font-semibold text-gray-800">{carousel.title}</div>
                         <div className="text-xs text-gray-500 font-mono mt-1">ID: {carousel.id}</div>
                       </div>
                       {selectedCarouselId === carousel.id && (
                         <button 
                           onClick={(e) => { e.stopPropagation(); deleteCarousel(carousel.id); }}
-                          className="text-red-400 p-1.5 hover:bg-red-500/10 rounded transition"
+                          className="text-red-600 p-1.5 hover:bg-red-550 rounded-lg transition"
                         >
                           <FiTrash2 />
                         </button>
@@ -350,13 +351,13 @@ export default function StorefrontSettings() {
           {/* Right Column: Carousel Editor */}
           <div className="w-full lg:w-2/3">
             {!activeCarousel ? (
-              <div className="bg-gray-900 rounded-lg border border-gray-800 p-12 text-center text-gray-500">
+              <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500 border border-gray-100">
                 Select or create a carousel to manage its products.
               </div>
             ) : (
-              <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
-                <h2 className="text-lg font-bold text-white mb-1">Editing: {activeCarousel.title}</h2>
-                <p className="text-sm text-gray-400 mb-6">Drag and drop products to reorder them.</p>
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-lg font-bold text-gray-900 mb-1">Editing: {activeCarousel.title}</h2>
+                <p className="text-sm text-gray-500 mb-6">Drag and drop products to reorder them.</p>
 
                 {/* Product Search */}
                 <div className="mb-8 relative">
@@ -365,7 +366,7 @@ export default function StorefrontSettings() {
                     <input 
                       type="text" 
                       placeholder="Search products to add..."
-                      className="w-full pl-10 pr-4 py-2 bg-gray-950 border border-gray-800 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                      className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                       value={searchTerm}
                       onChange={searchProducts}
                     />
@@ -373,7 +374,7 @@ export default function StorefrontSettings() {
                   
                   {/* Search Results Dropdown */}
                   {searchTerm.length >= 2 && (
-                    <div className="absolute z-10 w-full mt-1 bg-gray-900 border border-gray-800 rounded-md shadow-xl max-h-60 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                       {searching ? (
                         <div className="p-4 text-center text-gray-500 text-sm">Searching...</div>
                       ) : searchResults.length === 0 ? (
@@ -383,19 +384,19 @@ export default function StorefrontSettings() {
                           <div 
                             key={product._id} 
                             onClick={() => addProductToCarousel(product)}
-                            className="p-3 hover:bg-gray-800 cursor-pointer border-b border-gray-800 last:border-b-0 flex items-center"
+                            className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 flex items-center"
                           >
                             <img 
                               src={product.images?.[0]?.url || product.images?.[0] || product.mainImage || '/perfume-placeholder.jpg'} 
                               alt={product.name}
-                              className="w-10 h-10 object-cover rounded mr-3 bg-gray-950"
+                              className="w-10 h-10 object-cover rounded mr-3 bg-gray-50 border"
                             />
                             <div>
-                              <div className="font-medium text-sm text-white">{product.name}</div>
-                              <div className="text-xs text-gray-400">₹{product.price}</div>
+                              <div className="font-semibold text-sm text-gray-900">{product.name}</div>
+                              <div className="text-xs text-gray-500">₹{product.price}</div>
                             </div>
                             <div className="ml-auto">
-                              <button className="text-blue-400 text-sm font-medium hover:underline">Add</button>
+                              <button className="text-blue-600 text-sm font-semibold hover:underline">Add</button>
                             </div>
                           </div>
                         ))
@@ -407,7 +408,7 @@ export default function StorefrontSettings() {
                 {/* Draggable Product List */}
                 <div className="space-y-3">
                   {activeCarousel.products.length === 0 ? (
-                    <div className="text-center py-10 border-2 border-dashed border-gray-800 rounded-lg text-gray-500">
+                    <div className="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg text-gray-400">
                       No products in this carousel. Search above to add some!
                     </div>
                   ) : (
@@ -422,20 +423,20 @@ export default function StorefrontSettings() {
                           onDragStart={(e) => handleDragStart(e, index)}
                           onDragOver={(e) => e.preventDefault()}
                           onDrop={(e) => handleDrop(e, index)}
-                          className="flex items-center p-3 border border-gray-800 rounded-lg bg-gray-950 hover:border-gray-700 cursor-move transition"
+                          className="flex items-center p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-move transition duration-150"
                         >
-                          <div className="text-gray-500 mr-4 ml-1">
+                          <div className="text-gray-400 mr-4 ml-1">
                             <FiMove size={20} />
                           </div>
-                          <div className="font-bold text-gray-600 w-6">{index + 1}.</div>
-                          <img src={imageUrl} alt={p.name} className="w-12 h-12 object-cover rounded mr-4 bg-gray-900" />
+                          <div className="font-bold text-gray-500 w-6">{index + 1}.</div>
+                          <img src={imageUrl} alt={p.name} className="w-12 h-12 object-cover rounded mr-4 bg-white border" />
                           <div className="flex-1">
-                            <div className="font-medium text-white line-clamp-1">{p.name}</div>
-                            <div className="text-sm text-gray-400">₹{p.price}</div>
+                            <div className="font-semibold text-gray-900 line-clamp-1">{p.name}</div>
+                            <div className="text-sm text-gray-500">₹{p.price}</div>
                           </div>
                           <button 
                             onClick={() => removeProductFromCarousel(p._id)}
-                            className="p-2 text-red-400 hover:bg-red-500/10 rounded ml-4 transition"
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg ml-4 transition"
                             title="Remove from carousel"
                           >
                             <FiTrash2 />
@@ -453,29 +454,29 @@ export default function StorefrontSettings() {
 
       {/* New Carousel Modal */}
       {showNewModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-full max-w-md shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-4">Create New Carousel</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-2xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Create New Carousel</h3>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-400 mb-1">Carousel Title</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Carousel Title</label>
               <input 
                 type="text" 
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="e.g. Summer Sale"
-                className="w-full bg-gray-950 border border-gray-800 rounded p-2 text-white outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-white border border-gray-300 rounded-lg p-2 text-gray-900 outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-400 mb-1">Carousel ID (for code)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Carousel ID (for code)</label>
               <input 
                 type="text" 
                 value={newId}
                 onChange={(e) => setNewId(e.target.value)}
                 placeholder="e.g. hero-carousel"
-                className="w-full bg-gray-950 border border-gray-800 rounded p-2 text-white font-mono text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-white border border-gray-300 rounded-lg p-2 text-gray-900 font-mono text-sm outline-none focus:ring-2 focus:ring-blue-500"
               />
               <p className="text-xs text-gray-500 mt-1">Must be unique. Only lowercase letters and hyphens.</p>
             </div>
@@ -483,14 +484,14 @@ export default function StorefrontSettings() {
             <div className="flex justify-end space-x-3">
               <button 
                 onClick={() => setShowNewModal(false)}
-                className="px-4 py-2 border border-gray-800 rounded text-gray-400 hover:bg-gray-800 transition"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition"
               >
                 Cancel
               </button>
               <button 
                 onClick={createCarousel}
                 disabled={!newTitle || !newId}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
               >
                 Create
               </button>

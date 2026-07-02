@@ -179,17 +179,49 @@ export default async function HomePage() {
 
     topSelling = bestSellersOverrideProducts.length > 0 ? bestSellersOverrideProducts : defaultTopSelling;
 
+    // 5. Custom Carousels Check (e.g. Summer Sale, etc.)
+    const coreIds = ['hero-carousel', 'featured-products', 'new-arrivals', 'best-sellers'];
+    const customCarousels = carousels.filter((c: any) => !coreIds.includes(c.id)).map((c: any) => {
+      const mappedProducts = c.products?.map((item: any) => {
+        const p = item.product;
+        if (!p) return null;
+        return {
+          _id: p._id.toString(),
+          slug: p.slug,
+          name: p.name,
+          description: p.description || '',
+          price: p.price,
+          discountedPrice: p.comparePrice || p.discountedPrice || p.price,
+          category: p.category || '',
+          rating: p.rating || 0,
+          featured: p.featured || false,
+          new_arrival: p.isNewArrival || false,
+          best_seller: p.isBestSelling || false,
+          productType: p.productType || 'perfume',
+          images: [{ url: getProductImage(p) }]
+        };
+      }).filter(Boolean) || [];
+
+      return {
+        id: c.id,
+        title: c.title,
+        products: mappedProducts
+      };
+    }).filter((c: any) => c.products.length > 0);
+
     // Store custom hero mode and override array on scope
     (HomePage as any).overrideHeroProducts = overrideHeroProducts;
     (HomePage as any).isExactHero = heroProducts.length > 0;
+    (HomePage as any).customCarousels = customCarousels;
     
   } catch (error) {
     console.error('Error fetching products during SSR:', error);
   }
 
-  // Retrieve hero variables
+  // Retrieve hero and custom carousel variables
   const finalHeroProducts = (HomePage as any).overrideHeroProducts || dbProducts;
   const isExactHero = (HomePage as any).isExactHero || false;
+  const customCarousels = (HomePage as any).customCarousels || [];
   
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
@@ -285,6 +317,14 @@ export default async function HomePage() {
             </Link>
           </div>
         </section>
+
+        {/* Custom Carousels (e.g. Summer Sale, etc.) */}
+        {customCarousels.map((carousel: any) => (
+          <section key={carousel.id} className="py-10 px-4 max-w-7xl mx-auto border-t border-gray-100">
+            <h2 className="text-2xl md:text-3xl font-medium mb-8 text-center">{carousel.title}</h2>
+            <SaleCarousel initialProducts={carousel.products} exactMode={true} />
+          </section>
+        ))}
         
         {/* About Section */}
         <section className="py-16 bg-gray-50">

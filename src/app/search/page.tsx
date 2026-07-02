@@ -60,6 +60,11 @@ export default function SearchPage() {
   const [availableGenders, setAvailableGenders] = useState<string[]>([]);
   const [availableML, setAvailableML] = useState<number[]>([]);
   
+  // Sync search input state with the URL query parameter when it changes
+  useEffect(() => {
+    setSearchQuery(query);
+  }, [query]);
+
   // Fetch products using the search API
   useEffect(() => {
     async function fetchProducts() {
@@ -128,7 +133,10 @@ export default function SearchPage() {
   
   // Apply filters when any filter changes or on initial load
   useEffect(() => {
-    if (products.length === 0) return;
+    if (products.length === 0) {
+      setFilteredProducts([]);
+      return;
+    }
     
     // Filter products based on all criteria
     const filtered = products.filter(product => {
