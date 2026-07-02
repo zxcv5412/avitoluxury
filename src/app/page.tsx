@@ -53,6 +53,9 @@ export default async function HomePage() {
   let newArrivals: Product[] = [];
   let topSelling: Product[] = [];
   let dbProducts: any[] = [];
+  let overrideHeroProducts: any[] = [];
+  let isExactHero = false;
+  let customCarousels: any[] = [];
 
   try {
     await connectMongoDB();
@@ -181,7 +184,7 @@ export default async function HomePage() {
 
     // 5. Custom Carousels Check (e.g. Summer Sale, etc.)
     const coreIds = ['hero-carousel', 'featured-products', 'new-arrivals', 'best-sellers'];
-    const customCarousels = carousels.filter((c: any) => !coreIds.includes(c.id)).map((c: any) => {
+    customCarousels = carousels.filter((c: any) => !coreIds.includes(c.id)).map((c: any) => {
       const mappedProducts = c.products?.map((item: any) => {
         const p = item.product;
         if (!p) return null;
@@ -209,19 +212,16 @@ export default async function HomePage() {
       };
     }).filter((c: any) => c.products.length > 0);
 
-    // Store custom hero mode and override array on scope
-    (HomePage as any).overrideHeroProducts = overrideHeroProducts;
-    (HomePage as any).isExactHero = heroProducts.length > 0;
-    (HomePage as any).customCarousels = customCarousels;
+    // Set custom hero mode and override array variables
+    overrideHeroProducts = heroProducts.length > 0 ? heroProducts : dbProducts;
+    isExactHero = heroProducts.length > 0;
     
   } catch (error) {
     console.error('Error fetching products during SSR:', error);
   }
 
   // Retrieve hero and custom carousel variables
-  const finalHeroProducts = (HomePage as any).overrideHeroProducts || dbProducts;
-  const isExactHero = (HomePage as any).isExactHero || false;
-  const customCarousels = (HomePage as any).customCarousels || [];
+  const finalHeroProducts = overrideHeroProducts.length > 0 ? overrideHeroProducts : dbProducts;
   
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
