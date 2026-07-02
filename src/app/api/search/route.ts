@@ -66,18 +66,46 @@ export async function GET(request: NextRequest) {
     
     console.log('Search filter:', filter);
     
-    // Execute query with filters - remove hardcoded sorting
-    const products = await Product.find(filter);
+    // Execute query with filters
+    const products = await Product.find(filter).lean();
     
     console.log(`Found ${products.length} products matching search query`);
     
+    // Sort products by search relevance
+    const qLower = query.toLowerCase().trim();
+    const sortedProducts = [...products].sort((a: any, b: any) => {
+      const aName = (a.name || '').toLowerCase();
+      const bName = (b.name || '').toLowerCase();
+      
+      // 1. Exact name match gets highest priority
+      const aExact = aName === qLower;
+      const bExact = bName === qLower;
+      if (aExact && !bExact) return -1;
+      if (!aExact && bExact) return 1;
+      
+      // 2. Name starting with query gets next priority
+      const aStarts = aName.startsWith(qLower);
+      const bStarts = bName.startsWith(qLower);
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+      
+      // 3. Name containing query gets next priority
+      const aContains = aName.includes(qLower);
+      const bContains = bName.includes(qLower);
+      if (aContains && !bContains) return -1;
+      if (!aContains && bContains) return 1;
+      
+      // 4. Default order
+      return 0;
+    });
+    
     return NextResponse.json({ 
       success: true, 
-      products,
+      products: sortedProducts,
       query,
       type,
       category,
-      count: products.length
+      count: sortedProducts.length
     }, { status: 200 });
   } catch (err) {
     console.error('Error searching products:', err);
