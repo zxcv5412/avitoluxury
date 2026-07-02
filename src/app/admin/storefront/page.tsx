@@ -85,7 +85,7 @@ export default function StorefrontSettings() {
     }
     setSearching(true);
     try {
-      const res = await fetch(`/api/products?search=${encodeURIComponent(val)}`);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(val)}`);
       if (res.ok) {
         const data = await res.json();
         setSearchResults(data.products || data);
