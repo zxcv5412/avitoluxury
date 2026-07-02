@@ -226,6 +226,15 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
       <Nav />
+      {/* 
+        DEBUG INFO (View Source):
+        Settings Found: {settings ? 'YES' : 'NO'}
+        Carousels Count: {carousels.length}
+        Hero Products Count: {heroProducts.length}
+        isExactHero: {isExactHero ? 'YES' : 'NO'}
+        Custom Carousels Count: {customCarousels.length}
+        DB Products Count: {dbProducts.length}
+      */}
       <main className="flex-grow pb-10">
         {/* Sale Carousel */}
         <SaleCarousel initialProducts={JSON.parse(JSON.stringify(finalHeroProducts))} exactMode={isExactHero} />
