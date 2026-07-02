@@ -5,6 +5,7 @@ import Nav from '@/app/components/Nav';
 import Footer from '@/app/components/Footer';
 import connectMongoDB from '@/app/lib/mongodb';
 import ProductModel from '@/app/models/Product';
+import SiteSettings from '@/app/models/SiteSettings';
 
 interface Product {
   _id: string;
@@ -76,24 +77,67 @@ export default async function HomePage() {
       images: [{ url: getProductImage(product) }]
     }));
     
-    // Filter and shuffle products correctly
-    featuredProducts = shuffleArray(products).slice(0, 4);
-    newArrivals = shuffleArray(products.filter((p) => p.new_arrival || p.category?.includes('New Arrival'))).slice(0, 4);
-    topSelling = shuffleArray(products.filter((p) => p.best_seller || p.category?.includes('Bestseller'))).slice(0, 4);
-    
+    // We no longer shuffle dbProducts for the old grids,
+    // we rely entirely on the exact products from SiteSettings.
   } catch (error) {
     console.error('Error fetching products during SSR:', error);
   }
-  
+
+  let siteSettings: any = null;
+  try {
+    siteSettings = await SiteSettings.findOne({ settingId: 'global' }).populate({
+      path: 'carousels.products.product',
+      model: ProductModel
+    }).lean();
+  } catch (error) {
+    console.error('Error fetching site settings:', error);
+  }
+
+  const carousels = siteSettings?.carousels || [];
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
       <Nav />
       <main className="flex-grow pb-10">
-        {/* Sale Carousel */}
-        <SaleCarousel initialProducts={JSON.parse(JSON.stringify(dbProducts))} />
+        
+        {/* Dynamic Carousels from Admin Storefront Settings */}
+        {carousels.length > 0 ? (
+          carousels.map((carousel: any, index: number) => {
+            const mappedProducts = carousel.products.map((item: any) => {
+              const p = item.product;
+              return {
+                _id: p._id.toString(),
+                slug: p.slug,
+                name: p.name,
+                description: p.description || '',
+                price: p.price,
+                discountedPrice: p.comparePrice || p.discountedPrice || p.price,
+                category: p.category || '',
+                images: p.images && p.images.length > 0 ? p.images : [{ url: p.mainImage || 'https://placehold.co/400x500' }],
+              };
+            });
+
+            if (mappedProducts.length === 0) return null;
+
+            return (
+              <div key={carousel.id} className={index > 0 ? "mt-16" : ""}>
+                {index > 0 && (
+                  <h2 className="text-2xl md:text-3xl font-medium mb-8 text-center px-4 max-w-7xl mx-auto">
+                    {carousel.title}
+                  </h2>
+                )}
+                <SaleCarousel initialProducts={mappedProducts} exactMode={true} />
+              </div>
+            );
+          })
+        ) : (
+          <div className="py-20 text-center text-gray-500">
+            <p>No storefront carousels configured.</p>
+            <p className="text-sm mt-2">Go to the Admin Panel &gt; Storefront to add carousels.</p>
+          </div>
+        )}
         
         {/* Trust Badge Ribbon */}
-        <div className="bg-gray-50 py-4 border-b border-gray-100">
+        <div className="bg-gray-50 py-8 border-b border-gray-100 mt-10">
           <div className="max-w-7xl mx-auto px-4 flex justify-around items-center text-center gap-2">
             <div className="flex flex-col items-center">
               <span className="text-base">🌱</span>
@@ -116,69 +160,6 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-        
-        {/* Featured Products */}
-        <section className="py-10 px-4 max-w-7xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-medium mb-8 text-center">Featured Products</h2>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {featuredProducts.length > 0 ? (
-              featuredProducts.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))
-            ) : (
-              <p className="col-span-full text-center text-gray-500">No featured products available</p>
-            )}
-          </div>
-          
-          <div className="text-center mt-8">
-            <Link href="/collection" className="inline-block border border-black px-6 py-2 hover:bg-black hover:text-white transition duration-300">
-              View All Products
-            </Link>
-          </div>
-        </section>
-        
-        {/* New Arrivals */}
-        <section className="py-10 px-4 max-w-7xl mx-auto bg-gray-50">
-          <h2 className="text-2xl md:text-3xl font-medium mb-8 text-center">New Arrivals</h2>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {newArrivals.length > 0 ? (
-              newArrivals.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))
-            ) : (
-              <p className="col-span-full text-center text-gray-500">No new arrivals available</p>
-            )}
-          </div>
-          
-          <div className="text-center mt-8">
-            <Link href="/new-arrivals" className="inline-block border border-black px-6 py-2 hover:bg-black hover:text-white transition duration-300">
-              View All New Arrivals
-            </Link>
-          </div>
-        </section>
-        
-        {/* Best Selling */}
-        <section className="py-10 px-4 max-w-7xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-medium mb-8 text-center">Best Selling</h2>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {topSelling.length > 0 ? (
-              topSelling.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))
-            ) : (
-              <p className="col-span-full text-center text-gray-500">No best selling products available</p>
-            )}
-          </div>
-          
-          <div className="text-center mt-8">
-            <Link href="/best-selling" className="inline-block border border-black px-6 py-2 hover:bg-black hover:text-white transition duration-300">
-              View All Best Sellers
-            </Link>
-          </div>
-        </section>
         
         {/* About Section */}
         <section className="py-16 bg-gray-50">
