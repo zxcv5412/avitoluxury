@@ -34,60 +34,51 @@ const optimizeImageUrl = (url: string, width = 800) => {
   return url;
 };
 
-export default function SaleCarousel() {
+export default function SaleCarousel({ initialProducts }: { initialProducts?: any[] } = {}) {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialProducts || initialProducts.length === 0);
   const [error, setError] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Fetch products with highest discount percentage
+  // Process products for the carousel
   useEffect(() => {
-    const fetchProducts = async () => {
+    const processProducts = async () => {
       try {
-        const response = await fetch('/api/products');
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
+        let sourceProducts = [];
+        
+        if (initialProducts && initialProducts.length > 0) {
+          sourceProducts = initialProducts;
+        } else {
+          setLoading(true);
+          const response = await fetch('/api/products');
+          if (!response.ok) throw new Error('Failed to fetch products');
+          const data = await response.json();
+          sourceProducts = data.products;
         }
-        const data = await response.json();
         
         // Filter for products with discount and calculate discount percentage
-        const discountedProducts = data.products
+        const discountedProducts = sourceProducts
           .filter((product: any) => {
-            // Ensure both price and discounted price exist and are valid numbers
-            return product.price && product.comparePrice && 
-                  product.price > 0 && product.comparePrice > 0 &&
-                  product.price > product.comparePrice;
+            return product.price && (product.comparePrice || product.discountedPrice) && 
+                  product.price > 0 && (product.comparePrice || product.discountedPrice) > 0 &&
+                  product.price > (product.comparePrice || product.discountedPrice);
           })
           .map((product: any) => {
-            // Convert prices to rupees
             const price = convertToRupees(product.price);
-            const discountedPrice = convertToRupees(product.comparePrice);
-            
-            // Calculate discount percentage
+            const discountedPrice = convertToRupees(product.comparePrice || product.discountedPrice);
             const discountPercentage = ((price - discountedPrice) / price * 100);
             
-            // Normalize the product images structure
             let images = [];
             if (product.images && Array.isArray(product.images) && product.images.length > 0) {
               images = product.images.map((img: any) => {
-                if (typeof img === 'string') {
-                  return { url: img };
-                } else if (img && img.url) {
-                  return img;
-                }
+                if (typeof img === 'string') return { url: img };
+                else if (img && img.url) return img;
                 return null;
               }).filter(Boolean);
             }
-            
-            // If no valid images found, use mainImage as fallback
-            if (images.length === 0 && product.mainImage) {
-              images = [{ url: product.mainImage }];
-            }
-            
-            // If still no images, use placeholder
-            if (images.length === 0) {
-              images = [{ url: '/perfume-placeholder.jpg' }];
-            }
+            if (images.length === 0 && product.mainImage) images = [{ url: product.mainImage }];
+            if (images.length === 0) images = [{ url: '/perfume-placeholder.jpg' }];
             
             return {
               ...product,
@@ -98,114 +89,63 @@ export default function SaleCarousel() {
             };
           });
         
-        // Sort standard products by discount percentage (highest first)
         let sortedProducts = [...discountedProducts].sort((a: any, b: any) => b.discountPercentage - a.discountPercentage);
         
-        // Find if there is a pinned product in the entire product list
-        const pinnedProductRaw = data.products.find((p: any) => p.isPinned === true);
-        
+        const pinnedProductRaw = sourceProducts.find((p: any) => p.isPinned === true);
         if (pinnedProductRaw) {
-          // Normalize the pinned product
           const price = convertToRupees(pinnedProductRaw.price);
-          const discountedPrice = pinnedProductRaw.comparePrice ? convertToRupees(pinnedProductRaw.comparePrice) : 0;
-          const discountPercentage = price && discountedPrice && price > discountedPrice
-            ? ((price - discountedPrice) / price * 100)
-            : 0;
+          const discountedPrice = pinnedProductRaw.comparePrice ? convertToRupees(pinnedProductRaw.comparePrice) : (pinnedProductRaw.discountedPrice || 0);
+          const discountPercentage = price && discountedPrice && price > discountedPrice ? ((price - discountedPrice) / price * 100) : 0;
           
           let images = [];
           if (pinnedProductRaw.images && Array.isArray(pinnedProductRaw.images) && pinnedProductRaw.images.length > 0) {
             images = pinnedProductRaw.images.map((img: any) => {
-              if (typeof img === 'string') {
-                return { url: img };
-              } else if (img && img.url) {
-                return img;
-              }
+              if (typeof img === 'string') return { url: img };
+              else if (img && img.url) return img;
               return null;
             }).filter(Boolean);
           }
+          if (images.length === 0 && pinnedProductRaw.mainImage) images = [{ url: pinnedProductRaw.mainImage }];
+          if (images.length === 0) images = [{ url: '/perfume-placeholder.jpg' }];
           
-          if (images.length === 0 && pinnedProductRaw.mainImage) {
-            images = [{ url: pinnedProductRaw.mainImage }];
-          }
-          if (images.length === 0) {
-            images = [{ url: '/perfume-placeholder.jpg' }];
-          }
-          
-          const normalizedPinned = {
-            ...pinnedProductRaw,
-            price,
-            discountedPrice,
-            discountPercentage,
-            images
-          };
-          
-          // Remove the pinned product from the regular list if it exists there to avoid duplicates
+          const normalizedPinned = { ...pinnedProductRaw, price, discountedPrice, discountPercentage, images };
           sortedProducts = sortedProducts.filter((p: any) => p._id !== pinnedProductRaw._id);
-          
-          // Insert at the absolute beginning of the carousel array
           sortedProducts.unshift(normalizedPinned);
         }
 
-        // Find if there is a second pinned product in the entire product list
-        const pinnedSecondProductRaw = data.products.find((p: any) => p.isPinnedSecond === true);
-        
+        const pinnedSecondProductRaw = sourceProducts.find((p: any) => p.isPinnedSecond === true);
         if (pinnedSecondProductRaw) {
-          // Normalize the second pinned product
           const price = convertToRupees(pinnedSecondProductRaw.price);
-          const discountedPrice = pinnedSecondProductRaw.comparePrice ? convertToRupees(pinnedSecondProductRaw.comparePrice) : 0;
-          const discountPercentage = price && discountedPrice && price > discountedPrice
-            ? ((price - discountedPrice) / price * 100)
-            : 0;
+          const discountedPrice = pinnedSecondProductRaw.comparePrice ? convertToRupees(pinnedSecondProductRaw.comparePrice) : (pinnedSecondProductRaw.discountedPrice || 0);
+          const discountPercentage = price && discountedPrice && price > discountedPrice ? ((price - discountedPrice) / price * 100) : 0;
           
           let images = [];
           if (pinnedSecondProductRaw.images && Array.isArray(pinnedSecondProductRaw.images) && pinnedSecondProductRaw.images.length > 0) {
             images = pinnedSecondProductRaw.images.map((img: any) => {
-              if (typeof img === 'string') {
-                return { url: img };
-              } else if (img && img.url) {
-                return img;
-              }
+              if (typeof img === 'string') return { url: img };
+              else if (img && img.url) return img;
               return null;
             }).filter(Boolean);
           }
+          if (images.length === 0 && pinnedSecondProductRaw.mainImage) images = [{ url: pinnedSecondProductRaw.mainImage }];
+          if (images.length === 0) images = [{ url: '/perfume-placeholder.jpg' }];
           
-          if (images.length === 0 && pinnedSecondProductRaw.mainImage) {
-            images = [{ url: pinnedSecondProductRaw.mainImage }];
-          }
-          if (images.length === 0) {
-            images = [{ url: '/perfume-placeholder.jpg' }];
-          }
-          
-          const normalizedPinnedSecond = {
-            ...pinnedSecondProductRaw,
-            price,
-            discountedPrice,
-            discountPercentage,
-            images
-          };
-          
-          // Remove the second pinned product from the regular list if it exists there to avoid duplicates
+          const normalizedPinnedSecond = { ...pinnedSecondProductRaw, price, discountedPrice, discountPercentage, images };
           sortedProducts = sortedProducts.filter((p: any) => p._id !== pinnedSecondProductRaw._id);
-          
-          // Insert at the second position of the carousel array (index 1 if array size allows, otherwise 0)
           const insertIndex = sortedProducts.length >= 1 ? 1 : 0;
           sortedProducts.splice(insertIndex, 0, normalizedPinnedSecond);
         }
         
-        // Take top 6 carousel slides
-        const finalCarouselProducts = sortedProducts.slice(0, 6);
-        
-        setProducts(finalCarouselProducts);
+        setProducts(sortedProducts.slice(0, 6));
       } catch (err: any) {
-        // Silent error handling for security
         setError('Failed to load products');
       } finally {
         setLoading(false);
       }
     };
     
-    fetchProducts();
-  }, []);
+    processProducts();
+  }, [initialProducts]);
   
   const goToPrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? products.length - 1 : prev - 1));

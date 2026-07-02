@@ -1,5 +1,4 @@
-import Nav from '@/app/components/Nav';
-import Footer from '@/app/components/Footer';
+
 
 export const metadata = {
   title: 'Luxury Fragrance Collection | Premium Perfumes',
@@ -14,11 +13,9 @@ export default function CollectionLayout({
 }) {
   return (
     <div className="bg-white text-black font-sans min-h-screen flex flex-col">
-      <Nav />
       <main className="flex-grow">
         {children}
       </main>
-      <Footer />
     </div>
   );
 } 

@@ -50,12 +50,13 @@ export default async function HomePage() {
   let featuredProducts: Product[] = [];
   let newArrivals: Product[] = [];
   let topSelling: Product[] = [];
+  let dbProducts: any[] = [];
 
   try {
     await connectMongoDB();
     
     // Fetch products directly from database on the server
-    const dbProducts = await ProductModel.find({}).lean();
+    dbProducts = await ProductModel.find({}).lean();
     
     // Map to the required interface
     const products: Product[] = dbProducts.map((product: any) => ({
@@ -87,7 +88,7 @@ export default async function HomePage() {
       <Nav />
       <main className="flex-grow pb-10">
         {/* Sale Carousel */}
-        <SaleCarousel />
+        <SaleCarousel initialProducts={JSON.parse(JSON.stringify(dbProducts))} />
         
         {/* Trust Badge Ribbon */}
         <div className="bg-gray-50 py-4 border-b border-gray-100">
