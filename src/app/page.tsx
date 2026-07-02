@@ -8,6 +8,7 @@ import ProductModel from '@/app/models/Product';
 
 interface Product {
   _id: string;
+  slug?: string;
   name: string;
   description: string;
   price: number;
@@ -61,6 +62,7 @@ export default async function HomePage() {
     // Map to the required interface
     const products: Product[] = dbProducts.map((product: any) => ({
       _id: product._id.toString(),
+      slug: product.slug,
       name: product.name,
       description: product.description || '',
       price: product.price,
