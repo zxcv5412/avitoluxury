@@ -43,13 +43,11 @@ const optimizeImageUrl = (url: string, width = 800) => {
   return url;
 };
 
-export default function ProductDetailPage() {
-  const params = useParams();
+export default function ProductClient({ initialProduct, id }: { initialProduct: any, id: string }) {
   const router = useRouter();
-  const id = params?.id as string;
   
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState<Product | null>(initialProduct || null);
+  const [loading, setLoading] = useState(!initialProduct);
   const [error, setError] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -155,10 +153,13 @@ export default function ProductDetailPage() {
       }
     }
     
-    if (id) {
+    if (!initialProduct && id) {
       fetchProduct();
+    } else if (initialProduct) {
+      // If we already have the product, just fetch related products
+      fetchRelatedProducts(initialProduct.productType, initialProduct._id);
     }
-  }, [id]);
+  }, [id, initialProduct]);
   
   // Handle add to cart
   const handleAddToCart = () => {
