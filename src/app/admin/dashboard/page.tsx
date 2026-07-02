@@ -141,6 +141,11 @@ export default function AdminDashboard() {
               <FiMail className="mr-3" /> Contacts
             </div>
           </Link>
+          <Link href="/admin/storefront" className="block py-3 px-4 text-gray-600 font-medium hover:bg-gray-100 hover:text-gray-900">
+            <div className="flex items-center">
+              <FiSettings className="mr-3" /> Storefront
+            </div>
+          </Link>
           {/* <Link href="/admin/settings" className="block py-3 px-4 text-gray-600 font-medium hover:bg-gray-100 hover:text-gray-900">
             <div className="flex items-center">
               <FiSettings className="mr-3" /> Settings

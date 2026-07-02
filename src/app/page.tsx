@@ -5,6 +5,7 @@ import Nav from '@/app/components/Nav';
 import Footer from '@/app/components/Footer';
 import connectMongoDB from '@/app/lib/mongodb';
 import ProductModel from '@/app/models/Product';
+import SiteSettings from '@/app/models/SiteSettings';
 
 interface Product {
   _id: string;
@@ -76,21 +77,126 @@ export default async function HomePage() {
       images: [{ url: getProductImage(product) }]
     }));
     
-    // Filter and shuffle products correctly
-    featuredProducts = shuffleArray(products).slice(0, 4);
-    newArrivals = shuffleArray(products.filter((p) => p.new_arrival || p.category?.includes('New Arrival'))).slice(0, 4);
-    topSelling = shuffleArray(products.filter((p) => p.best_seller || p.category?.includes('Bestseller'))).slice(0, 4);
+    // Filter and shuffle products correctly (as fallback options)
+    const defaultFeatured = shuffleArray(products).slice(0, 4);
+    const defaultNewArrivals = shuffleArray(products.filter((p) => p.new_arrival || p.category?.includes('New Arrival'))).slice(0, 4);
+    const defaultTopSelling = shuffleArray(products.filter((p) => p.best_seller || p.category?.includes('Bestseller'))).slice(0, 4);
+
+    // Fetch site settings from database to check for overrides
+    let settings: any = null;
+    try {
+      settings = await SiteSettings.findOne({ settingId: 'global' }).populate({
+        path: 'carousels.products.product',
+        model: ProductModel
+      }).lean();
+    } catch (err) {
+      console.error('Error fetching storefront settings:', err);
+    }
+
+    const carousels = settings?.carousels || [];
+
+    // 1. Hero Override Check
+    const heroConfig = carousels.find((c: any) => c.id === 'hero-carousel');
+    const heroProducts = heroConfig?.products?.map((item: any) => item.product).filter(Boolean) || [];
+
+    // If hero override has products, we'll format them to match expected structure
+    let overrideHeroProducts: any[] = [];
+    if (heroProducts.length > 0) {
+      overrideHeroProducts = heroProducts;
+    } else {
+      overrideHeroProducts = dbProducts; // Fallback to all products (SaleCarousel handles filtering)
+    }
+
+    // 2. Featured Override Check
+    const featuredConfig = carousels.find((c: any) => c.id === 'featured-products');
+    const featuredOverrideProducts = featuredConfig?.products?.map((item: any) => {
+      const p = item.product;
+      if (!p) return null;
+      return {
+        _id: p._id.toString(),
+        slug: p.slug,
+        name: p.name,
+        description: p.description || '',
+        price: p.price,
+        discountedPrice: p.comparePrice || p.discountedPrice || 0,
+        category: p.category || '',
+        rating: p.rating || 0,
+        featured: p.featured || false,
+        new_arrival: p.isNewArrival || false,
+        best_seller: p.isBestSelling || false,
+        productType: p.productType || 'perfume',
+        images: [{ url: getProductImage(p) }]
+      };
+    }).filter(Boolean) || [];
+    
+    featuredProducts = featuredOverrideProducts.length > 0 ? featuredOverrideProducts : defaultFeatured;
+
+    // 3. New Arrivals Override Check
+    const newArrivalsConfig = carousels.find((c: any) => c.id === 'new-arrivals');
+    const newArrivalsOverrideProducts = newArrivalsConfig?.products?.map((item: any) => {
+      const p = item.product;
+      if (!p) return null;
+      return {
+        _id: p._id.toString(),
+        slug: p.slug,
+        name: p.name,
+        description: p.description || '',
+        price: p.price,
+        discountedPrice: p.comparePrice || p.discountedPrice || 0,
+        category: p.category || '',
+        rating: p.rating || 0,
+        featured: p.featured || false,
+        new_arrival: p.isNewArrival || false,
+        best_seller: p.isBestSelling || false,
+        productType: p.productType || 'perfume',
+        images: [{ url: getProductImage(p) }]
+      };
+    }).filter(Boolean) || [];
+
+    newArrivals = newArrivalsOverrideProducts.length > 0 ? newArrivalsOverrideProducts : defaultNewArrivals;
+
+    // 4. Best Sellers Override Check
+    const bestSellersConfig = carousels.find((c: any) => c.id === 'best-sellers');
+    const bestSellersOverrideProducts = bestSellersConfig?.products?.map((item: any) => {
+      const p = item.product;
+      if (!p) return null;
+      return {
+        _id: p._id.toString(),
+        slug: p.slug,
+        name: p.name,
+        description: p.description || '',
+        price: p.price,
+        discountedPrice: p.comparePrice || p.discountedPrice || 0,
+        category: p.category || '',
+        rating: p.rating || 0,
+        featured: p.featured || false,
+        new_arrival: p.isNewArrival || false,
+        best_seller: p.isBestSelling || false,
+        productType: p.productType || 'perfume',
+        images: [{ url: getProductImage(p) }]
+      };
+    }).filter(Boolean) || [];
+
+    topSelling = bestSellersOverrideProducts.length > 0 ? bestSellersOverrideProducts : defaultTopSelling;
+
+    // Store custom hero mode and override array on scope
+    (HomePage as any).overrideHeroProducts = overrideHeroProducts;
+    (HomePage as any).isExactHero = heroProducts.length > 0;
     
   } catch (error) {
     console.error('Error fetching products during SSR:', error);
   }
+
+  // Retrieve hero variables
+  const finalHeroProducts = (HomePage as any).overrideHeroProducts || dbProducts;
+  const isExactHero = (HomePage as any).isExactHero || false;
   
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
       <Nav />
       <main className="flex-grow pb-10">
         {/* Sale Carousel */}
-        <SaleCarousel initialProducts={JSON.parse(JSON.stringify(dbProducts))} />
+        <SaleCarousel initialProducts={JSON.parse(JSON.stringify(finalHeroProducts))} exactMode={isExactHero} />
         
         {/* Trust Badge Ribbon */}
         <div className="bg-gray-50 py-4 border-b border-gray-100">
