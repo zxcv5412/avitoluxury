@@ -97,9 +97,17 @@ export default async function HomePage() {
     }
 
     const carousels = settings?.carousels || [];
+    
+    // Get slots map, defaulting to core IDs if missing
+    const slots = settings?.slots || {
+      hero: 'hero-carousel',
+      featured: 'featured-products',
+      newArrivals: 'new-arrivals',
+      bestSellers: 'best-sellers'
+    };
 
     // 1. Hero Override Check
-    const heroConfig = carousels.find((c: any) => c.id === 'hero-carousel');
+    const heroConfig = carousels.find((c: any) => c.id === slots.hero);
     const heroProducts = heroConfig?.products?.map((item: any) => item.product).filter(Boolean) || [];
 
     // If hero override has products, we'll format them to match expected structure
@@ -111,7 +119,7 @@ export default async function HomePage() {
     }
 
     // 2. Featured Override Check
-    const featuredConfig = carousels.find((c: any) => c.id === 'featured-products');
+    const featuredConfig = carousels.find((c: any) => c.id === slots.featured);
     const featuredOverrideProducts = featuredConfig?.products?.map((item: any) => {
       const p = item.product;
       if (!p) return null;
@@ -135,7 +143,7 @@ export default async function HomePage() {
     featuredProducts = featuredOverrideProducts.length > 0 ? featuredOverrideProducts : defaultFeatured;
 
     // 3. New Arrivals Override Check
-    const newArrivalsConfig = carousels.find((c: any) => c.id === 'new-arrivals');
+    const newArrivalsConfig = carousels.find((c: any) => c.id === slots.newArrivals);
     const newArrivalsOverrideProducts = newArrivalsConfig?.products?.map((item: any) => {
       const p = item.product;
       if (!p) return null;
@@ -159,7 +167,7 @@ export default async function HomePage() {
     newArrivals = newArrivalsOverrideProducts.length > 0 ? newArrivalsOverrideProducts : defaultNewArrivals;
 
     // 4. Best Sellers Override Check
-    const bestSellersConfig = carousels.find((c: any) => c.id === 'best-sellers');
+    const bestSellersConfig = carousels.find((c: any) => c.id === slots.bestSellers);
     const bestSellersOverrideProducts = bestSellersConfig?.products?.map((item: any) => {
       const p = item.product;
       if (!p) return null;
@@ -182,9 +190,9 @@ export default async function HomePage() {
 
     topSelling = bestSellersOverrideProducts.length > 0 ? bestSellersOverrideProducts : defaultTopSelling;
 
-    // 5. Custom Carousels Check (e.g. Summer Sale, etc.)
-    const coreIds = ['hero-carousel', 'featured-products', 'new-arrivals', 'best-sellers'];
-    customCarousels = carousels.filter((c: any) => !coreIds.includes(c.id)).map((c: any) => {
+    // 5. Custom Carousels Check (only those not assigned to active slots)
+    const assignedIds = [slots.hero, slots.featured, slots.newArrivals, slots.bestSellers];
+    customCarousels = carousels.filter((c: any) => !assignedIds.includes(c.id)).map((c: any) => {
       const mappedProducts = c.products?.map((item: any) => {
         const p = item.product;
         if (!p) return null;

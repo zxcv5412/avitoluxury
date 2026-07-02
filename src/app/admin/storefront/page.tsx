@@ -29,6 +29,12 @@ export default function StorefrontSettings() {
   const { isAuthenticated, loading: authLoading } = useAdminAuth();
   const [carousels, setCarousels] = useState<CarouselConfig[]>([]);
   const [selectedCarouselId, setSelectedCarouselId] = useState<string>('');
+  const [slots, setSlots] = useState({
+    hero: 'hero-carousel',
+    featured: 'featured-products',
+    newArrivals: 'new-arrivals',
+    bestSellers: 'best-sellers'
+  });
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -61,6 +67,9 @@ export default function StorefrontSettings() {
       if (res.ok) {
         const data = await res.json();
         setCarousels(data.carousels || []);
+        if (data.slots) {
+          setSlots(data.slots);
+        }
         if (data.carousels && data.carousels.length > 0) {
           setSelectedCarouselId(data.carousels[0].id);
         }
@@ -189,7 +198,7 @@ export default function StorefrontSettings() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}` 
         },
-        body: JSON.stringify({ carousels: payloadCarousels })
+        body: JSON.stringify({ carousels: payloadCarousels, slots })
       });
       
       if (res.ok) {
@@ -360,6 +369,55 @@ export default function StorefrontSettings() {
                     );
                   })
                 )}
+              </div>
+            </div>
+
+            {/* Slot Assignments Card */}
+            <div className="bg-white rounded-lg shadow p-6 mt-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-1">Active Homepage Slots</h2>
+              <p className="text-xs text-gray-500 mb-4">Choose which preset displays in each homepage slot.</p>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wider">Top Hero Banner</label>
+                  <select 
+                    value={slots.hero}
+                    onChange={(e) => setSlots({ ...slots, hero: e.target.value })}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  >
+                    {carousels.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wider">Featured Products Section</label>
+                  <select 
+                    value={slots.featured}
+                    onChange={(e) => setSlots({ ...slots, featured: e.target.value })}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  >
+                    {carousels.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wider">New Arrivals Section</label>
+                  <select 
+                    value={slots.newArrivals}
+                    onChange={(e) => setSlots({ ...slots, newArrivals: e.target.value })}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  >
+                    {carousels.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wider">Best Sellers Section</label>
+                  <select 
+                    value={slots.bestSellers}
+                    onChange={(e) => setSlots({ ...slots, bestSellers: e.target.value })}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  >
+                    {carousels.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                  </select>
+                </div>
               </div>
             </div>
           </div>

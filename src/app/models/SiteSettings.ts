@@ -27,7 +27,13 @@ const SiteSettingsSchema = new mongoose.Schema({
     default: 'global',
     unique: true
   },
-  carousels: [CarouselConfigSchema]
+  carousels: [CarouselConfigSchema],
+  slots: {
+    hero: { type: String, default: 'hero-carousel' },
+    featured: { type: String, default: 'featured-products' },
+    newArrivals: { type: String, default: 'new-arrivals' },
+    bestSellers: { type: String, default: 'best-sellers' }
+  }
 }, {
   timestamps: true
 });

@@ -54,7 +54,17 @@ export async function GET(request: Request) {
       path: 'carousels.products.product',
       model: Product,
       select: 'name slug mainImage images price comparePrice discountedPrice isPinnedFirst isPinnedSecond isPinnedThird isPinnedFourth'
-    });
+    }).lean() as any;
+
+    // Ensure slots has defaults if missing
+    if (populatedSettings && !populatedSettings.slots) {
+      populatedSettings.slots = {
+        hero: 'hero-carousel',
+        featured: 'featured-products',
+        newArrivals: 'new-arrivals',
+        bestSellers: 'best-sellers'
+      };
+    }
 
     return NextResponse.json(populatedSettings);
   } catch (error) {
@@ -79,7 +89,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { carousels } = body;
+    const { carousels, slots } = body;
 
     if (!carousels || !Array.isArray(carousels)) {
       return NextResponse.json({ error: 'Invalid payload: carousels must be an array' }, { status: 400 });
@@ -87,10 +97,15 @@ export async function POST(request: Request) {
 
     await connectToDatabase();
     
+    const updateData: any = { carousels };
+    if (slots) {
+      updateData.slots = slots;
+    }
+    
     // Update or create the global settings
     const updatedSettings = await SiteSettings.findOneAndUpdate(
       { settingId: 'global' },
-      { carousels },
+      updateData,
       { new: true, upsert: true }
     );
 
