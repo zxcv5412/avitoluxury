@@ -8,13 +8,30 @@ const CarouselProductSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
+const CarouselConfigSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    required: true,
+    index: true
+  },
+  title: {
+    type: String,
+    required: true
+  },
+  products: [CarouselProductSchema]
+}, { _id: false });
+
 const SiteSettingsSchema = new mongoose.Schema({
   settingId: {
     type: String,
     default: 'global',
     unique: true
   },
-  heroProducts: [CarouselProductSchema]
+  presets: [CarouselConfigSchema],
+  activePresetId: {
+    type: String,
+    default: 'default'
+  }
 }, {
   timestamps: true
 });

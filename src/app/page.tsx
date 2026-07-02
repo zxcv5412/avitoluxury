@@ -88,14 +88,17 @@ export default async function HomePage() {
     // Fetch site settings from database to check for hero override list
     try {
       settings = await SiteSettings.findOne({ settingId: 'global' }).populate({
-        path: 'heroProducts.product',
+        path: 'presets.products.product',
         model: ProductModel
       }).lean();
     } catch (err) {
       console.error('Error fetching storefront settings:', err);
     }
 
-    const fetchedHero = settings?.heroProducts || [];
+    const presets = settings?.presets || [];
+    const activePresetId = settings?.activePresetId || 'default';
+    const activePreset = presets.find((p: any) => p.id === activePresetId);
+    const fetchedHero = activePreset?.products || [];
     heroProducts = fetchedHero.map((item: any) => item.product).filter(Boolean);
     isExactHero = heroProducts.length > 0;
     
@@ -112,6 +115,7 @@ export default async function HomePage() {
       {/* 
         DEBUG INFO (View Source):
         Settings Found: {settings ? 'YES' : 'NO'}
+        Active Preset: {activePresetId}
         Hero Products Count: {heroProducts.length}
         isExactHero: {isExactHero ? 'YES' : 'NO'}
         DB Products Count: {dbProducts.length}

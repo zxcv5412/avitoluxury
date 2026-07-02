@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     
     // Attempt to find existing settings
     let settings = await SiteSettings.findOne({ settingId: 'global' }).populate({
-      path: 'heroProducts.product',
+      path: 'presets.products.product',
       model: Product,
       select: 'name slug mainImage images price comparePrice discountedPrice isPinnedFirst isPinnedSecond isPinnedThird isPinnedFourth'
     });
@@ -34,7 +34,14 @@ export async function GET(request: Request) {
       // Create default if it doesn't exist
       settings = await SiteSettings.create({
         settingId: 'global',
-        heroProducts: []
+        presets: [
+          {
+            id: 'default',
+            title: 'Main',
+            products: []
+          }
+        ],
+        activePresetId: 'default'
       });
     }
 
@@ -61,18 +68,23 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { heroProducts } = body;
+    const { presets, activePresetId } = body;
 
-    if (!heroProducts || !Array.isArray(heroProducts)) {
-      return NextResponse.json({ error: 'Invalid payload: heroProducts must be an array' }, { status: 400 });
+    if (!presets || !Array.isArray(presets)) {
+      return NextResponse.json({ error: 'Invalid payload: presets must be an array' }, { status: 400 });
     }
 
     await connectToDatabase();
     
+    const updateData: any = { presets };
+    if (activePresetId) {
+      updateData.activePresetId = activePresetId;
+    }
+
     // Update or create the global settings
     const updatedSettings = await SiteSettings.findOneAndUpdate(
       { settingId: 'global' },
-      { heroProducts },
+      updateData,
       { new: true, upsert: true }
     );
 

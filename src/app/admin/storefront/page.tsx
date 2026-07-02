@@ -18,12 +18,20 @@ interface CarouselProduct {
   };
 }
 
+interface PresetConfig {
+  id: string;
+  title: string;
+  products: CarouselProduct[];
+}
+
 export default function StorefrontSettings() {
   const router = useRouter();
   const { isAuthenticated, loading: authLoading } = useAdminAuth();
   
-  // Hero Products State
-  const [heroProducts, setHeroProducts] = useState<CarouselProduct[]>([]);
+  // Presets State
+  const [presets, setPresets] = useState<PresetConfig[]>([]);
+  const [selectedPresetId, setSelectedPresetId] = useState<string>('');
+  const [activePresetId, setActivePresetId] = useState<string>('default');
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -34,6 +42,11 @@ export default function StorefrontSettings() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+
+  // New Preset Modal State
+  const [showNewModal, setShowNewModal] = useState(false);
+  const [newId, setNewId] = useState('');
+  const [newTitle, setNewTitle] = useState('');
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -50,7 +63,17 @@ export default function StorefrontSettings() {
       });
       if (res.ok) {
         const data = await res.json();
-        setHeroProducts(data.heroProducts || []);
+        const loadedPresets = data.presets || [];
+        setPresets(loadedPresets);
+        setActivePresetId(data.activePresetId || 'default');
+        
+        if (loadedPresets.length > 0) {
+          // If previous selection is invalid or empty, set to first preset
+          const hasSelected = loadedPresets.some((p: any) => p.id === selectedPresetId);
+          if (!hasSelected) {
+            setSelectedPresetId(loadedPresets[0].id);
+          }
+        }
       }
     } catch (err) {
       setError('Failed to load settings');
@@ -84,19 +107,88 @@ export default function StorefrontSettings() {
     }
   };
 
-  const addProductToCarousel = (product: any) => {
-    // Check if already in products list
-    if (heroProducts.some(p => p.product._id === product._id)) {
+  const activePreset = presets.find(p => p.id === selectedPresetId);
+
+  const addProductToPreset = (product: any) => {
+    if (!selectedPresetId) return;
+    
+    // Check if already in preset
+    const currentProducts = activePreset?.products || [];
+    if (currentProducts.some(p => p.product._id === product._id)) {
       return;
     }
 
-    setHeroProducts([...heroProducts, { product }]);
+    const updatedPresets = presets.map(p => {
+      if (p.id === selectedPresetId) {
+        return {
+          ...p,
+          products: [...p.products, { product }]
+        };
+      }
+      return p;
+    });
+
+    setPresets(updatedPresets);
     setSearchTerm('');
     setSearchResults([]);
   };
 
-  const removeProductFromCarousel = (productId: string) => {
-    setHeroProducts(heroProducts.filter(p => p.product._id !== productId));
+  const removeProductFromPreset = (productId: string) => {
+    if (!selectedPresetId) return;
+
+    const updatedPresets = presets.map(p => {
+      if (p.id === selectedPresetId) {
+        return {
+          ...p,
+          products: p.products.filter(item => item.product._id !== productId)
+        };
+      }
+      return p;
+    });
+
+    setPresets(updatedPresets);
+  };
+
+  const createPreset = () => {
+    if (!newId || !newTitle) return;
+    const formattedId = newId.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    
+    if (presets.some(p => p.id === formattedId)) {
+      alert('A preset with this ID already exists');
+      return;
+    }
+
+    const newPreset: PresetConfig = {
+      id: formattedId,
+      title: newTitle,
+      products: []
+    };
+
+    setPresets([...presets, newPreset]);
+    setSelectedPresetId(formattedId);
+    setShowNewModal(false);
+    setNewId('');
+    setNewTitle('');
+  };
+
+  const deletePreset = (id: string) => {
+    if (id === 'default') {
+      alert('The Main preset cannot be deleted');
+      return;
+    }
+    if (confirm('Are you sure you want to delete this preset?')) {
+      const updated = presets.filter(p => p.id !== id);
+      setPresets(updated);
+      
+      // If we deleted the active preset, fall back active preset to default
+      if (activePresetId === id) {
+        setActivePresetId('default');
+      }
+
+      if (selectedPresetId === id) {
+        setSelectedPresetId(updated.length > 0 ? updated[0].id : '');
+      }
+    }
   };
 
   const saveSettings = async () => {
@@ -105,7 +197,11 @@ export default function StorefrontSettings() {
     setSuccess('');
     try {
       const token = getAdminToken();
-      const payloadProducts = heroProducts.map(p => ({ product: p.product._id }));
+      const payloadPresets = presets.map(p => ({
+        id: p.id,
+        title: p.title,
+        products: p.products.map(item => ({ product: item.product._id }))
+      }));
 
       const res = await fetch('/api/admin/settings', {
         method: 'POST',
@@ -113,11 +209,11 @@ export default function StorefrontSettings() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}` 
         },
-        body: JSON.stringify({ heroProducts: payloadProducts })
+        body: JSON.stringify({ presets: payloadPresets, activePresetId })
       });
       
       if (res.ok) {
-        setSuccess('Homepage Hero Carousel saved successfully!');
+        setSuccess('Storefront settings saved successfully!');
         setTimeout(() => setSuccess(''), 3000);
       } else {
         throw new Error('Failed to save');
@@ -136,15 +232,29 @@ export default function StorefrontSettings() {
 
   const handleDrop = (e: React.DragEvent, targetIndex: number) => {
     const draggedIndexStr = e.dataTransfer.getData('draggedIndex');
-    if (!draggedIndexStr) return;
+    if (!draggedIndexStr || !selectedPresetId) return;
     const draggedIndex = parseInt(draggedIndexStr, 10);
     
     if (draggedIndex === targetIndex) return;
 
-    const newProducts = [...heroProducts];
+    const currentPreset = presets.find(p => p.id === selectedPresetId);
+    if (!currentPreset) return;
+
+    const newProducts = [...currentPreset.products];
     const [draggedItem] = newProducts.splice(draggedIndex, 1);
     newProducts.splice(targetIndex, 0, draggedItem);
-    setHeroProducts(newProducts);
+
+    const updatedPresets = presets.map(p => {
+      if (p.id === selectedPresetId) {
+        return {
+          ...p,
+          products: newProducts
+        };
+      }
+      return p;
+    });
+
+    setPresets(updatedPresets);
   };
 
   if (authLoading || loading) {
@@ -212,7 +322,7 @@ export default function StorefrontSettings() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Storefront Hero Banner</h1>
-            <p className="text-gray-600">Manage the sliding banner products shown at the very top of your homepage.</p>
+            <p className="text-gray-600">Manage sliding hero banner presets and swap which one is live.</p>
           </div>
           <button 
             onClick={saveSettings}
@@ -227,97 +337,226 @@ export default function StorefrontSettings() {
         {error && <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r shadow-sm">{error}</div>}
         {success && <div className="mb-4 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-r shadow-sm">{success}</div>}
 
-        <div className="bg-white rounded-lg shadow p-6 max-w-4xl">
-          <h2 className="text-lg font-bold text-gray-900 mb-1">Banner Products List</h2>
-          <p className="text-sm text-gray-500 mb-6">Search and add products to show on the top banner, then drag and drop to reorder.</p>
-
-          {/* Product Search */}
-          <div className="mb-8 relative">
-            <div className="relative">
-              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="Search products to add..."
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                value={searchTerm}
-                onChange={searchProducts}
-              />
-            </div>
-            
-            {/* Search Results Dropdown */}
-            {searchTerm.length >= 2 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                {searching ? (
-                  <div className="p-4 text-center text-gray-500 text-sm">Searching...</div>
-                ) : searchResults.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500 text-sm">No products found</div>
-                ) : (
-                  searchResults.map(product => (
-                    <div 
-                      key={product._id}
-                      onClick={() => addProductToCarousel(product)}
-                      className="p-3 hover:bg-gray-550 cursor-pointer flex justify-between items-center border-b border-gray-100 last:border-0 hover:bg-gray-50 transition"
-                    >
-                      <div className="flex items-center">
-                        <img 
-                          src={product.mainImage || '/perfume-placeholder.jpg'} 
-                          alt={product.name} 
-                          className="w-8 h-8 object-cover rounded mr-3"
-                        />
-                        <div>
-                          <div className="font-semibold text-sm text-gray-900">{product.name}</div>
-                          <div className="text-xs text-gray-500">₹{product.price}</div>
-                        </div>
-                      </div>
-                      <span className="text-xs text-blue-600 font-semibold px-2.5 py-1 bg-blue-50 rounded-full">Add</span>
-                    </div>
-                  ))
-                )}
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left Column: Preset Selector */}
+          <div className="w-full lg:w-1/3">
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-bold text-gray-900">Your Presets</h2>
+                <button 
+                  onClick={() => setShowNewModal(true)}
+                  className="text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg flex items-center text-sm font-semibold transition"
+                >
+                  <FiPlus className="mr-1" /> New
+                </button>
               </div>
-            )}
+
+              <div className="space-y-2">
+                {presets.map((preset) => {
+                  const isDefault = preset.id === 'default';
+                  return (
+                    <div 
+                      key={preset.id}
+                      onClick={() => setSelectedPresetId(preset.id)}
+                      className={`p-3 rounded-lg border cursor-pointer flex justify-between items-center transition ${selectedPresetId === preset.id ? 'border-blue-500 bg-blue-50/50' : 'border-gray-200 hover:bg-gray-50'}`}
+                    >
+                      <div>
+                        <div className="font-semibold text-gray-800 flex items-center gap-2 flex-wrap">
+                          {preset.title}
+                          {activePresetId === preset.id && (
+                            <span className="px-1.5 py-0.5 text-[9px] bg-green-50 text-green-600 border border-green-200 rounded font-semibold uppercase tracking-wider">Active</span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500 font-mono mt-1">ID: {preset.id}</div>
+                      </div>
+                      {selectedPresetId === preset.id && !isDefault && (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); deletePreset(preset.id); }}
+                          className="text-red-600 p-1.5 hover:bg-red-50 rounded-lg transition"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Active Switcher Card */}
+            <div className="bg-white rounded-lg shadow p-6 mt-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-1">Active Banner Preset</h2>
+              <p className="text-xs text-gray-500 mb-4">Choose which preset is currently live on your website.</p>
+              
+              <div>
+                <select 
+                  value={activePresetId}
+                  onChange={(e) => setActivePresetId(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                >
+                  {presets.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.title} {p.id === 'default' ? '(Main)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
 
-          {/* Products List */}
-          <div className="space-y-3">
-            {heroProducts.length === 0 ? (
-              <div className="p-12 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
-                No products added yet. Use the search bar above to select products to feature on your top banner.
+          {/* Right Column: Preset Editor */}
+          <div className="w-full lg:w-2/3">
+            {!activePreset ? (
+              <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500 border border-gray-100">
+                Select or create a preset to manage its products.
               </div>
             ) : (
-              heroProducts.map((p, index) => (
-                <div 
-                  key={p.product._id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => handleDrop(e, index)}
-                  className="p-4 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between cursor-move hover:bg-gray-100/50 transition group"
-                >
-                  <div className="flex items-center">
-                    <FiMove className="text-gray-400 mr-4 cursor-grab group-hover:text-gray-600 transition" />
-                    <span className="text-sm font-semibold text-gray-500 mr-4 font-mono">{index + 1}.</span>
-                    <img 
-                      src={p.product.mainImage || '/perfume-placeholder.jpg'} 
-                      alt={p.product.name} 
-                      className="w-12 h-12 object-cover rounded mr-4 border border-gray-200"
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-lg font-bold text-gray-900 mb-1">Editing Preset: {activePreset.title}</h2>
+                <p className="text-sm text-gray-500 mb-6">Search and add products to this preset, then drag and drop to reorder.</p>
+
+                {/* Product Search */}
+                <div className="mb-8 relative">
+                  <div className="relative">
+                    <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input 
+                      type="text" 
+                      placeholder="Search products to add..."
+                      className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                      value={searchTerm}
+                      onChange={searchProducts}
                     />
-                    <div>
-                      <div className="font-bold text-gray-900">{p.product.name}</div>
-                      <div className="text-sm text-gray-500">₹{p.product.price}</div>
-                    </div>
                   </div>
-                  <button 
-                    onClick={() => removeProductFromCarousel(p.product._id)}
-                    className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition"
-                  >
-                    <FiTrash2 className="h-5 w-5" />
-                  </button>
+                  
+                  {/* Search Results Dropdown */}
+                  {searchTerm.length >= 2 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {searching ? (
+                        <div className="p-4 text-center text-gray-500 text-sm">Searching...</div>
+                      ) : searchResults.length === 0 ? (
+                        <div className="p-4 text-center text-gray-500 text-sm">No products found</div>
+                      ) : (
+                        searchResults.map(product => (
+                          <div 
+                            key={product._id}
+                            onClick={() => addProductToPreset(product)}
+                            className="p-3 cursor-pointer flex justify-between items-center border-b border-gray-100 last:border-0 hover:bg-gray-50 transition"
+                          >
+                            <div className="flex items-center">
+                              <img 
+                                src={product.mainImage || '/perfume-placeholder.jpg'} 
+                                alt={product.name} 
+                                className="w-8 h-8 object-cover rounded mr-3"
+                              />
+                              <div>
+                                <div className="font-semibold text-sm text-gray-900">{product.name}</div>
+                                <div className="text-xs text-gray-500">₹{product.price}</div>
+                              </div>
+                            </div>
+                            <span className="text-xs text-blue-600 font-semibold px-2.5 py-1 bg-blue-50 rounded-full">Add</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </div>
-              ))
+
+                {/* Products List */}
+                <div className="space-y-3">
+                  {activePreset.products.length === 0 ? (
+                    <div className="p-12 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+                      No products in this preset yet. Use the search bar above to add products.
+                    </div>
+                  ) : (
+                    activePreset.products.map((p, index) => (
+                      <div 
+                        key={p.product._id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => handleDrop(e, index)}
+                        className="p-4 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between cursor-move hover:bg-gray-100/50 transition group"
+                      >
+                        <div className="flex items-center">
+                          <FiMove className="text-gray-400 mr-4 cursor-grab group-hover:text-gray-600 transition" />
+                          <span className="text-sm font-semibold text-gray-500 mr-4 font-mono">{index + 1}.</span>
+                          <img 
+                            src={p.product.mainImage || '/perfume-placeholder.jpg'} 
+                            alt={p.product.name} 
+                            className="w-12 h-12 object-cover rounded mr-4 border border-gray-200"
+                          />
+                          <div>
+                            <div className="font-bold text-gray-900">{p.product.name}</div>
+                            <div className="text-sm text-gray-500">₹{p.product.price}</div>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => removeProductFromPreset(p.product._id)}
+                          className="text-red-500 hover:text-red-700 p-2 hover:bg-red-550 rounded-lg transition"
+                        >
+                          <FiTrash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* New Preset Modal */}
+      {showNewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Create New Hero Preset</h3>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Preset Name</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Summer Deals"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 outline-none focus:ring-2 focus:ring-blue-500"
+                  value={newTitle}
+                  onChange={(e) => {
+                    setNewTitle(e.target.value);
+                    if (!newId) {
+                      setNewId(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '-'));
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Preset ID (URL Safe)</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. summer-deals"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs"
+                  value={newId}
+                  onChange={(e) => setNewId(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setShowNewModal(false)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={createPreset}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+              >
+                Create Preset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
