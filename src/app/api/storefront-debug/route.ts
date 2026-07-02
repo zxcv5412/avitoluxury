@@ -10,7 +10,7 @@ export async function GET() {
     await connectMongoDB();
     
     const settings = await SiteSettings.findOne({ settingId: 'global' }).populate({
-      path: 'carousels.products.product',
+      path: 'presets.products.product',
       model: Product
     }).lean();
     
