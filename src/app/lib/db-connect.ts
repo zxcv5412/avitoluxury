@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 // Use environment variables for connection
 const MONGODB_URI = process.env.MONGODB_URI;
-const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'ecommerce';
+const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME;
 
 // Initialize mongoose connection cache
 let cached: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null } = {
@@ -27,15 +27,18 @@ export async function connectToDatabase() {
         throw new Error('MONGODB_URI environment variable is not set');
       }
 
-      const opts = {
+      const opts: any = {
         bufferCommands: true,
         autoIndex: true,
         maxPoolSize: 10,
         serverSelectionTimeoutMS: 10000,
         socketTimeoutMS: 45000,
         family: 4, // Use IPv4, skip trying IPv6
-        dbName: MONGODB_DB_NAME
       };
+
+      if (MONGODB_DB_NAME) {
+        opts.dbName = MONGODB_DB_NAME;
+      }
 
       // Create the connection promise with proper typing
       cached.promise = mongoose
