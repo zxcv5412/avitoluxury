@@ -34,109 +34,117 @@ const optimizeImageUrl = (url: string, width = 800) => {
   return url;
 };
 
+const processCarouselProducts = (sourceProducts: any[]) => {
+  // Filter for products with discount and calculate discount percentage
+  const discountedProducts = sourceProducts
+    .filter((product: any) => {
+      return product.price && (product.comparePrice || product.discountedPrice) && 
+            product.price > 0 && (product.comparePrice || product.discountedPrice) > 0 &&
+            product.price > (product.comparePrice || product.discountedPrice);
+    })
+    .map((product: any) => {
+      const price = convertToRupees(product.price);
+      const discountedPrice = convertToRupees(product.comparePrice || product.discountedPrice);
+      const discountPercentage = ((price - discountedPrice) / price * 100);
+      
+      let images = [];
+      if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        images = product.images.map((img: any) => {
+          if (typeof img === 'string') return { url: img };
+          else if (img && img.url) return img;
+          return null;
+        }).filter(Boolean);
+      }
+      if (images.length === 0 && product.mainImage) images = [{ url: product.mainImage }];
+      if (images.length === 0) images = [{ url: '/perfume-placeholder.jpg' }];
+      
+      return {
+        ...product,
+        price,
+        discountedPrice,
+        discountPercentage,
+        images
+      };
+    });
+  
+  let sortedProducts = [...discountedProducts].sort((a: any, b: any) => b.discountPercentage - a.discountPercentage);
+  
+  const pinnedProductRaw = sourceProducts.find((p: any) => p.isPinned === true);
+  if (pinnedProductRaw) {
+    const price = convertToRupees(pinnedProductRaw.price);
+    const discountedPrice = pinnedProductRaw.comparePrice ? convertToRupees(pinnedProductRaw.comparePrice) : (pinnedProductRaw.discountedPrice || 0);
+    const discountPercentage = price && discountedPrice && price > discountedPrice ? ((price - discountedPrice) / price * 100) : 0;
+    
+    let images = [];
+    if (pinnedProductRaw.images && Array.isArray(pinnedProductRaw.images) && pinnedProductRaw.images.length > 0) {
+      images = pinnedProductRaw.images.map((img: any) => {
+        if (typeof img === 'string') return { url: img };
+        else if (img && img.url) return img;
+        return null;
+      }).filter(Boolean);
+    }
+    if (images.length === 0 && pinnedProductRaw.mainImage) images = [{ url: pinnedProductRaw.mainImage }];
+    if (images.length === 0) images = [{ url: '/perfume-placeholder.jpg' }];
+    
+    const normalizedPinned = { ...pinnedProductRaw, price, discountedPrice, discountPercentage, images };
+    sortedProducts = sortedProducts.filter((p: any) => p._id !== pinnedProductRaw._id);
+    sortedProducts.unshift(normalizedPinned);
+  }
+
+  const pinnedSecondProductRaw = sourceProducts.find((p: any) => p.isPinnedSecond === true);
+  if (pinnedSecondProductRaw) {
+    const price = convertToRupees(pinnedSecondProductRaw.price);
+    const discountedPrice = pinnedSecondProductRaw.comparePrice ? convertToRupees(pinnedSecondProductRaw.comparePrice) : (pinnedSecondProductRaw.discountedPrice || 0);
+    const discountPercentage = price && discountedPrice && price > discountedPrice ? ((price - discountedPrice) / price * 100) : 0;
+    
+    let images = [];
+    if (pinnedSecondProductRaw.images && Array.isArray(pinnedSecondProductRaw.images) && pinnedSecondProductRaw.images.length > 0) {
+      images = pinnedSecondProductRaw.images.map((img: any) => {
+        if (typeof img === 'string') return { url: img };
+        else if (img && img.url) return img;
+        return null;
+      }).filter(Boolean);
+    }
+    if (images.length === 0 && pinnedSecondProductRaw.mainImage) images = [{ url: pinnedSecondProductRaw.mainImage }];
+    if (images.length === 0) images = [{ url: '/perfume-placeholder.jpg' }];
+    
+    const normalizedPinnedSecond = { ...pinnedSecondProductRaw, price, discountedPrice, discountPercentage, images };
+    sortedProducts = sortedProducts.filter((p: any) => p._id !== pinnedSecondProductRaw._id);
+    const insertIndex = sortedProducts.length >= 1 ? 1 : 0;
+    sortedProducts.splice(insertIndex, 0, normalizedPinnedSecond);
+  }
+  
+  return sortedProducts.slice(0, 6);
+};
+
 export default function SaleCarousel({ initialProducts }: { initialProducts?: any[] } = {}) {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(() => {
+    if (initialProducts && initialProducts.length > 0) {
+      return processCarouselProducts(initialProducts);
+    }
+    return [];
+  });
+  
   const [loading, setLoading] = useState(!initialProducts || initialProducts.length === 0);
   const [error, setError] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Fetch products with highest discount percentage
-  // Process products for the carousel
+  // Fetch products if initialProducts is not provided
   useEffect(() => {
-    const processProducts = async () => {
+    const fetchProducts = async () => {
+      // If we already have initial products and they were processed synchronously, skip fetch
+      if (initialProducts && initialProducts.length > 0) {
+        return;
+      }
+      
       try {
-        let sourceProducts = [];
+        setLoading(true);
+        const response = await fetch('/api/products');
+        if (!response.ok) throw new Error('Failed to fetch products');
+        const data = await response.json();
         
-        if (initialProducts && initialProducts.length > 0) {
-          sourceProducts = initialProducts;
-        } else {
-          setLoading(true);
-          const response = await fetch('/api/products');
-          if (!response.ok) throw new Error('Failed to fetch products');
-          const data = await response.json();
-          sourceProducts = data.products;
-        }
-        
-        // Filter for products with discount and calculate discount percentage
-        const discountedProducts = sourceProducts
-          .filter((product: any) => {
-            return product.price && (product.comparePrice || product.discountedPrice) && 
-                  product.price > 0 && (product.comparePrice || product.discountedPrice) > 0 &&
-                  product.price > (product.comparePrice || product.discountedPrice);
-          })
-          .map((product: any) => {
-            const price = convertToRupees(product.price);
-            const discountedPrice = convertToRupees(product.comparePrice || product.discountedPrice);
-            const discountPercentage = ((price - discountedPrice) / price * 100);
-            
-            let images = [];
-            if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-              images = product.images.map((img: any) => {
-                if (typeof img === 'string') return { url: img };
-                else if (img && img.url) return img;
-                return null;
-              }).filter(Boolean);
-            }
-            if (images.length === 0 && product.mainImage) images = [{ url: product.mainImage }];
-            if (images.length === 0) images = [{ url: '/perfume-placeholder.jpg' }];
-            
-            return {
-              ...product,
-              price,
-              discountedPrice,
-              discountPercentage,
-              images
-            };
-          });
-        
-        let sortedProducts = [...discountedProducts].sort((a: any, b: any) => b.discountPercentage - a.discountPercentage);
-        
-        const pinnedProductRaw = sourceProducts.find((p: any) => p.isPinned === true);
-        if (pinnedProductRaw) {
-          const price = convertToRupees(pinnedProductRaw.price);
-          const discountedPrice = pinnedProductRaw.comparePrice ? convertToRupees(pinnedProductRaw.comparePrice) : (pinnedProductRaw.discountedPrice || 0);
-          const discountPercentage = price && discountedPrice && price > discountedPrice ? ((price - discountedPrice) / price * 100) : 0;
-          
-          let images = [];
-          if (pinnedProductRaw.images && Array.isArray(pinnedProductRaw.images) && pinnedProductRaw.images.length > 0) {
-            images = pinnedProductRaw.images.map((img: any) => {
-              if (typeof img === 'string') return { url: img };
-              else if (img && img.url) return img;
-              return null;
-            }).filter(Boolean);
-          }
-          if (images.length === 0 && pinnedProductRaw.mainImage) images = [{ url: pinnedProductRaw.mainImage }];
-          if (images.length === 0) images = [{ url: '/perfume-placeholder.jpg' }];
-          
-          const normalizedPinned = { ...pinnedProductRaw, price, discountedPrice, discountPercentage, images };
-          sortedProducts = sortedProducts.filter((p: any) => p._id !== pinnedProductRaw._id);
-          sortedProducts.unshift(normalizedPinned);
-        }
-
-        const pinnedSecondProductRaw = sourceProducts.find((p: any) => p.isPinnedSecond === true);
-        if (pinnedSecondProductRaw) {
-          const price = convertToRupees(pinnedSecondProductRaw.price);
-          const discountedPrice = pinnedSecondProductRaw.comparePrice ? convertToRupees(pinnedSecondProductRaw.comparePrice) : (pinnedSecondProductRaw.discountedPrice || 0);
-          const discountPercentage = price && discountedPrice && price > discountedPrice ? ((price - discountedPrice) / price * 100) : 0;
-          
-          let images = [];
-          if (pinnedSecondProductRaw.images && Array.isArray(pinnedSecondProductRaw.images) && pinnedSecondProductRaw.images.length > 0) {
-            images = pinnedSecondProductRaw.images.map((img: any) => {
-              if (typeof img === 'string') return { url: img };
-              else if (img && img.url) return img;
-              return null;
-            }).filter(Boolean);
-          }
-          if (images.length === 0 && pinnedSecondProductRaw.mainImage) images = [{ url: pinnedSecondProductRaw.mainImage }];
-          if (images.length === 0) images = [{ url: '/perfume-placeholder.jpg' }];
-          
-          const normalizedPinnedSecond = { ...pinnedSecondProductRaw, price, discountedPrice, discountPercentage, images };
-          sortedProducts = sortedProducts.filter((p: any) => p._id !== pinnedSecondProductRaw._id);
-          const insertIndex = sortedProducts.length >= 1 ? 1 : 0;
-          sortedProducts.splice(insertIndex, 0, normalizedPinnedSecond);
-        }
-        
-        setProducts(sortedProducts.slice(0, 6));
+        const processed = processCarouselProducts(data.products);
+        setProducts(processed);
       } catch (err: any) {
         setError('Failed to load products');
       } finally {
@@ -144,7 +152,7 @@ export default function SaleCarousel({ initialProducts }: { initialProducts?: an
       }
     };
     
-    processProducts();
+    fetchProducts();
   }, [initialProducts]);
   
   const goToPrev = () => {

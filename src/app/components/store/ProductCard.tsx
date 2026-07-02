@@ -316,7 +316,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     
   return (
     <div
-      className="h-full flex flex-col premium-card overflow-hidden relative group"
+      className="h-full flex flex-col premium-card overflow-hidden relative group transition-all duration-500 ease-out hover:shadow-2xl hover:-translate-y-1 bg-white border border-transparent hover:border-gray-100"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

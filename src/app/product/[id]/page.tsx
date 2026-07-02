@@ -56,6 +56,22 @@ export default function ProductDetailPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { user } = useAuth();
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [showStickyCart, setShowStickyCart] = useState(false);
+  
+  // Handle scroll for sticky cart
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show sticky cart when scrolled past 600px
+      if (window.scrollY > 600) {
+        setShowStickyCart(true);
+      } else {
+        setShowStickyCart(false);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   
   // Check user login status
   useEffect(() => {
@@ -681,6 +697,42 @@ export default function ProductDetailPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sticky Add to Cart Bottom Bar */}
+      {product && (
+        <div 
+          className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] transition-transform duration-300 z-50 flex justify-between items-center ${
+            showStickyCart ? 'translate-y-0' : 'translate-y-full'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:block w-12 h-12 relative rounded overflow-hidden">
+              <Image 
+                src={optimizeImageUrl(product.images[0]?.url || '', 100)} 
+                alt={product.name}
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div>
+              <h4 className="text-sm font-medium font-lastica line-clamp-1 max-w-[150px] sm:max-w-xs">{product.name}</h4>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-red-600">₹{product.discountedPrice > 0 ? product.discountedPrice : product.price}</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex-shrink-0 w-32 sm:w-48">
+            <AddToCartButton
+              productId={product._id}
+              productName={product.name}
+              productPrice={product.discountedPrice > 0 ? product.discountedPrice : product.price}
+              productImage={product.images[0]?.url || ''}
+              className="w-full bg-black text-white py-2 px-4 hover:bg-gray-800 text-sm font-medium rounded-none"
+              showIcon={true}
+            />
           </div>
         </div>
       )}
