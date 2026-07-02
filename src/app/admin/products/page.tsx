@@ -109,8 +109,13 @@ export default function AdminProducts() {
           [{ url: product.mainImage || 'https://placehold.co/80x80/eee/000?text=No+Image' }]
       }));
       
-      setProducts(formattedProducts);
-      setFilteredProducts(formattedProducts);
+      // Sort products by date added (newest first)
+      const sortedProducts = [...formattedProducts].sort((a: any, b: any) => {
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      });
+      
+      setProducts(sortedProducts);
+      setFilteredProducts(sortedProducts);
       
       // Extract unique categories
       const uniqueCategories = [...new Set(formattedProducts.map((product: Product) => product.category))].filter(Boolean) as string[];
