@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.avitoluxury.in'),
   title: {
     template: '%s - A V I T O   S C E N T S',
     default: 'A V I T O   S C E N T S | Premium Perfumes & Fragrances'

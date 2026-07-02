@@ -2,8 +2,14 @@ import ProductListing from '../components/ProductListing';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Unisex Perfumes | A V I T O   S C E N T S',
+  title: 'Unisex Perfumes | A V I T O   S C E N T S',
   description: 'Explore our exclusive collection of premium unisex fragrances. Find the perfect scent for every occasion.',
+  openGraph: {
+    title: 'Unisex Perfumes | A V I T O   S C E N T S',
+    description: 'Explore our exclusive collection of premium unisex fragrances. Find the perfect scent for every occasion.',
+    url: 'https://www.avitoluxury.in/unisex',
+    type: 'website',
+  },
 };
 
 export default async function UnisexPage() {

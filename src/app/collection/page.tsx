@@ -5,7 +5,13 @@ import ProductModel from '@/app/models/Product';
 
 export const metadata: Metadata = {
   title: 'Collection | A V I T O   S C E N T S',
-  description: 'Discover premium perfumes crafted with the finest ingredients from around the world.',
+  description: 'Discover our complete collection of premium perfumes, luxury attars, and exquisite fragrances crafted with the finest ingredients.',
+  openGraph: {
+    title: 'Our Complete Collection | A V I T O   S C E N T S',
+    description: 'Explore the full range of Avito Scents. From best-selling perfumes to exclusive luxury attars, find your signature scent today.',
+    url: 'https://www.avitoluxury.in/collection',
+    type: 'website',
+  },
 };
 
 export const dynamic = 'force-dynamic';
@@ -48,11 +54,31 @@ export default async function CollectionPage() {
     console.error('Error fetching collection for SSR:', error);
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Avito Scents Complete Collection',
+    description: 'Discover our complete collection of premium perfumes and fragrances.',
+    url: 'https://www.avitoluxury.in/collection',
+    hasPart: products.slice(0, 10).map((product) => ({
+      '@type': 'Product',
+      name: product.name,
+      url: `https://www.avitoluxury.in/product/${product.slug || product._id}`,
+      image: product.images[0]?.url || product.mainImage,
+    })),
+  };
+
   return (
-    <ProductListing 
-      title="Our Luxury Fragrance Collection"
-      description="Discover premium perfumes crafted with the finest ingredients from around the world."
-      initialProducts={products as any}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ProductListing 
+        title="Our Luxury Fragrance Collection"
+        description="Discover premium perfumes crafted with the finest ingredients from around the world."
+        initialProducts={products as any}
+      />
+    </>
   );
 }

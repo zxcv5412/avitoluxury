@@ -2,8 +2,14 @@ import ProductListing from '../components/ProductListing';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Best Selling Products | A V I T O   S C E N T S',
+  title: 'Best Selling Products | A V I T O   S C E N T S',
   description: 'Discover our most popular and best-selling fragrances loved by customers across India.',
+  openGraph: {
+    title: 'Best Selling Products | A V I T O   S C E N T S',
+    description: 'Discover our most popular and best-selling fragrances loved by customers across India.',
+    url: 'https://www.avitoluxury.in/best-selling',
+    type: 'website',
+  },
 };
 
 export default async function BestSellingPage() {

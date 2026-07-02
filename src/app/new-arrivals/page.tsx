@@ -5,7 +5,13 @@ import ProductModel from '@/app/models/Product';
 
 export const metadata: Metadata = {
   title: 'New Arrivals | A V I T O   S C E N T S',
-  description: 'Discover our latest fragrance creations and be the first to experience our newest scents.',
+  description: 'Discover our latest fragrance creations and be the first to experience our newest luxury scents.',
+  openGraph: {
+    title: 'New Arrivals | A V I T O   S C E N T S',
+    description: 'Discover our latest fragrance creations and be the first to experience our newest luxury scents.',
+    url: 'https://www.avitoluxury.in/new-arrivals',
+    type: 'website',
+  },
 };
 
 export const dynamic = 'force-dynamic';
@@ -48,12 +54,32 @@ export default async function NewArrivalsPage() {
     console.error('Error fetching new arrivals for SSR:', error);
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'New Arrivals - Avito Scents',
+    description: 'Discover our latest fragrance creations.',
+    url: 'https://www.avitoluxury.in/new-arrivals',
+    hasPart: products.slice(0, 10).map((product) => ({
+      '@type': 'Product',
+      name: product.name,
+      url: `https://www.avitoluxury.in/product/${product.slug || product._id}`,
+      image: product.images[0]?.url,
+    })),
+  };
+
   return (
-    <ProductListing 
-      tag="new-arrival"
-      title="New Arrivals"
-      description="Discover our latest fragrance creations and be the first to experience our newest scents."
-      initialProducts={products as any}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ProductListing 
+        tag="new-arrival"
+        title="New Arrivals"
+        description="Discover our latest fragrance creations and be the first to experience our newest scents."
+        initialProducts={products as any}
+      />
+    </>
   );
 }

@@ -2,8 +2,14 @@ import ProductListing from '../components/ProductListing';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Perfumes for Her | A V I T O   S C E N T S',
+  title: 'Perfumes for Her | A V I T O   S C E N T S',
   description: 'Explore our exclusive collection of premium fragrances for women. Find the perfect scent for every occasion.',
+  openGraph: {
+    title: 'Perfumes for Her | A V I T O   S C E N T S',
+    description: 'Explore our exclusive collection of premium fragrances for women. Find the perfect scent for every occasion.',
+    url: 'https://www.avitoluxury.in/her',
+    type: 'website',
+  },
 };
 
 export default async function HerPage() {
