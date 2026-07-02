@@ -18,23 +18,12 @@ interface CarouselProduct {
   };
 }
 
-interface CarouselConfig {
-  id: string;
-  title: string;
-  products: CarouselProduct[];
-}
-
 export default function StorefrontSettings() {
   const router = useRouter();
   const { isAuthenticated, loading: authLoading } = useAdminAuth();
-  const [carousels, setCarousels] = useState<CarouselConfig[]>([]);
-  const [selectedCarouselId, setSelectedCarouselId] = useState<string>('');
-  const [slots, setSlots] = useState({
-    hero: 'hero-carousel',
-    featured: 'featured-products',
-    newArrivals: 'new-arrivals',
-    bestSellers: 'best-sellers'
-  });
+  
+  // Hero Products State
+  const [heroProducts, setHeroProducts] = useState<CarouselProduct[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -45,11 +34,6 @@ export default function StorefrontSettings() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
-
-  // New Carousel State
-  const [showNewModal, setShowNewModal] = useState(false);
-  const [newId, setNewId] = useState('');
-  const [newTitle, setNewTitle] = useState('');
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -66,13 +50,7 @@ export default function StorefrontSettings() {
       });
       if (res.ok) {
         const data = await res.json();
-        setCarousels(data.carousels || []);
-        if (data.slots) {
-          setSlots(data.slots);
-        }
-        if (data.carousels && data.carousels.length > 0) {
-          setSelectedCarouselId(data.carousels[0].id);
-        }
+        setHeroProducts(data.heroProducts || []);
       }
     } catch (err) {
       setError('Failed to load settings');
@@ -106,78 +84,19 @@ export default function StorefrontSettings() {
     }
   };
 
-  const activeCarousel = carousels.find(c => c.id === selectedCarouselId);
-
   const addProductToCarousel = (product: any) => {
-    if (!activeCarousel) return;
-    
-    // Check if already in carousel
-    if (activeCarousel.products.some(p => p.product._id === product._id)) {
+    // Check if already in products list
+    if (heroProducts.some(p => p.product._id === product._id)) {
       return;
     }
 
-    const updatedCarousels = carousels.map(c => {
-      if (c.id === selectedCarouselId) {
-        return {
-          ...c,
-          products: [...c.products, { product }]
-        };
-      }
-      return c;
-    });
-    setCarousels(updatedCarousels);
+    setHeroProducts([...heroProducts, { product }]);
     setSearchTerm('');
     setSearchResults([]);
   };
 
   const removeProductFromCarousel = (productId: string) => {
-    const updatedCarousels = carousels.map(c => {
-      if (c.id === selectedCarouselId) {
-        return {
-          ...c,
-          products: c.products.filter(p => p.product._id !== productId)
-        };
-      }
-      return c;
-    });
-    setCarousels(updatedCarousels);
-  };
-
-  const createCarousel = () => {
-    if (!newId || !newTitle) return;
-    const formattedId = newId.toLowerCase().replace(/[^a-z0-9-]/g, '-');
-    
-    if (carousels.some(c => c.id === formattedId)) {
-      alert('A carousel with this ID already exists');
-      return;
-    }
-
-    const newCarousel: CarouselConfig = {
-      id: formattedId,
-      title: newTitle,
-      products: []
-    };
-
-    setCarousels([...carousels, newCarousel]);
-    setSelectedCarouselId(formattedId);
-    setShowNewModal(false);
-    setNewId('');
-    setNewTitle('');
-  };
-
-  const deleteCarousel = (id: string) => {
-    const coreIds = ['hero-carousel', 'featured-products', 'new-arrivals', 'best-sellers'];
-    if (coreIds.includes(id)) {
-      alert('System carousels cannot be deleted');
-      return;
-    }
-    if (confirm('Are you sure you want to delete this carousel?')) {
-      const updated = carousels.filter(c => c.id !== id);
-      setCarousels(updated);
-      if (selectedCarouselId === id) {
-        setSelectedCarouselId(updated.length > 0 ? updated[0].id : '');
-      }
-    }
+    setHeroProducts(heroProducts.filter(p => p.product._id !== productId));
   };
 
   const saveSettings = async () => {
@@ -186,11 +105,7 @@ export default function StorefrontSettings() {
     setSuccess('');
     try {
       const token = getAdminToken();
-      const payloadCarousels = carousels.map(c => ({
-        id: c.id,
-        title: c.title,
-        products: c.products.map(p => ({ product: p.product._id }))
-      }));
+      const payloadProducts = heroProducts.map(p => ({ product: p.product._id }));
 
       const res = await fetch('/api/admin/settings', {
         method: 'POST',
@@ -198,11 +113,11 @@ export default function StorefrontSettings() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}` 
         },
-        body: JSON.stringify({ carousels: payloadCarousels, slots })
+        body: JSON.stringify({ heroProducts: payloadProducts })
       });
       
       if (res.ok) {
-        setSuccess('Storefront settings saved successfully!');
+        setSuccess('Homepage Hero Carousel saved successfully!');
         setTimeout(() => setSuccess(''), 3000);
       } else {
         throw new Error('Failed to save');
@@ -224,19 +139,12 @@ export default function StorefrontSettings() {
     if (!draggedIndexStr) return;
     const draggedIndex = parseInt(draggedIndexStr, 10);
     
-    if (draggedIndex === targetIndex || !activeCarousel) return;
+    if (draggedIndex === targetIndex) return;
 
-    const newProducts = [...activeCarousel.products];
+    const newProducts = [...heroProducts];
     const [draggedItem] = newProducts.splice(draggedIndex, 1);
     newProducts.splice(targetIndex, 0, draggedItem);
-
-    const updatedCarousels = carousels.map(c => {
-      if (c.id === selectedCarouselId) {
-        return { ...c, products: newProducts };
-      }
-      return c;
-    });
-    setCarousels(updatedCarousels);
+    setHeroProducts(newProducts);
   };
 
   if (authLoading || loading) {
@@ -265,7 +173,7 @@ export default function StorefrontSettings() {
           </Link>
           <Link href="/admin/products" className="block py-3 px-4 text-gray-600 font-medium hover:bg-gray-100 hover:text-gray-900">
             <div className="flex items-center">
-              <FiShoppingBag className="mr-3" /> Products
+              <FiBox className="mr-3" /> Products
             </div>
           </Link>
           <Link href="/admin/orders" className="block py-3 px-4 text-gray-600 font-medium hover:bg-gray-100 hover:text-gray-900">
@@ -303,8 +211,8 @@ export default function StorefrontSettings() {
       <div className="flex-1 p-8 overflow-y-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Storefront Settings</h1>
-            <p className="text-gray-600">Manage your homepage carousels with drag and drop.</p>
+            <h1 className="text-2xl font-bold text-gray-900">Storefront Hero Banner</h1>
+            <p className="text-gray-600">Manage the sliding banner products shown at the very top of your homepage.</p>
           </div>
           <button 
             onClick={saveSettings}
@@ -319,260 +227,97 @@ export default function StorefrontSettings() {
         {error && <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r shadow-sm">{error}</div>}
         {success && <div className="mb-4 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-r shadow-sm">{success}</div>}
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Column: Carousel Selector */}
-          <div className="w-full lg:w-1/3">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-gray-900">Your Carousels</h2>
-                <button 
-                  onClick={() => setShowNewModal(true)}
-                  className="text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg flex items-center text-sm font-semibold transition"
-                >
-                  <FiPlus className="mr-1" /> New
-                </button>
-              </div>
+        <div className="bg-white rounded-lg shadow p-6 max-w-4xl">
+          <h2 className="text-lg font-bold text-gray-900 mb-1">Banner Products List</h2>
+          <p className="text-sm text-gray-500 mb-6">Search and add products to show on the top banner, then drag and drop to reorder.</p>
 
-              <div className="space-y-2">
-                {carousels.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No carousels created yet.</p>
+          {/* Product Search */}
+          <div className="mb-8 relative">
+            <div className="relative">
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input 
+                type="text" 
+                placeholder="Search products to add..."
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                value={searchTerm}
+                onChange={searchProducts}
+              />
+            </div>
+            
+            {/* Search Results Dropdown */}
+            {searchTerm.length >= 2 && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                {searching ? (
+                  <div className="p-4 text-center text-gray-500 text-sm">Searching...</div>
+                ) : searchResults.length === 0 ? (
+                  <div className="p-4 text-center text-gray-500 text-sm">No products found</div>
                 ) : (
-                  carousels.map((carousel) => {
-                    const coreIds = ['hero-carousel', 'featured-products', 'new-arrivals', 'best-sellers'];
-                    const isCore = coreIds.includes(carousel.id);
-                    return (
-                      <div 
-                        key={carousel.id}
-                        onClick={() => setSelectedCarouselId(carousel.id)}
-                        className={`p-3 rounded-lg border cursor-pointer flex justify-between items-center transition ${selectedCarouselId === carousel.id ? 'border-blue-500 bg-blue-50/50' : 'border-gray-200 hover:bg-gray-50'}`}
-                      >
+                  searchResults.map(product => (
+                    <div 
+                      key={product._id}
+                      onClick={() => addProductToCarousel(product)}
+                      className="p-3 hover:bg-gray-550 cursor-pointer flex justify-between items-center border-b border-gray-100 last:border-0 hover:bg-gray-50 transition"
+                    >
+                      <div className="flex items-center">
+                        <img 
+                          src={product.mainImage || '/perfume-placeholder.jpg'} 
+                          alt={product.name} 
+                          className="w-8 h-8 object-cover rounded mr-3"
+                        />
                         <div>
-                          <div className="font-semibold text-gray-800 flex items-center gap-2 flex-wrap">
-                            {carousel.title}
-                            {isCore ? (
-                              <span className="px-1.5 py-0.5 text-[9px] bg-blue-50 text-blue-600 border border-blue-200 rounded font-semibold uppercase tracking-wider">System</span>
-                            ) : (
-                              <span className="px-1.5 py-0.5 text-[9px] bg-gray-50 text-gray-600 border border-gray-200 rounded font-semibold uppercase tracking-wider">Custom</span>
-                            )}
-                          </div>
-                          <div className="text-xs text-gray-500 font-mono mt-1">ID: {carousel.id}</div>
+                          <div className="font-semibold text-sm text-gray-900">{product.name}</div>
+                          <div className="text-xs text-gray-500">₹{product.price}</div>
                         </div>
-                        {selectedCarouselId === carousel.id && !isCore && (
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); deleteCarousel(carousel.id); }}
-                            className="text-red-600 p-1.5 hover:bg-red-50 rounded-lg transition"
-                          >
-                            <FiTrash2 />
-                          </button>
-                        )}
                       </div>
-                    );
-                  })
+                      <span className="text-xs text-blue-600 font-semibold px-2.5 py-1 bg-blue-50 rounded-full">Add</span>
+                    </div>
+                  ))
                 )}
               </div>
-            </div>
-
-            {/* Slot Assignments Card */}
-            <div className="bg-white rounded-lg shadow p-6 mt-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-1">Active Homepage Slots</h2>
-              <p className="text-xs text-gray-500 mb-4">Choose which preset displays in each homepage slot.</p>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wider">Top Hero Banner</label>
-                  <select 
-                    value={slots.hero}
-                    onChange={(e) => setSlots({ ...slots, hero: e.target.value })}
-                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  >
-                    {carousels.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wider">Featured Products Section</label>
-                  <select 
-                    value={slots.featured}
-                    onChange={(e) => setSlots({ ...slots, featured: e.target.value })}
-                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  >
-                    {carousels.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wider">New Arrivals Section</label>
-                  <select 
-                    value={slots.newArrivals}
-                    onChange={(e) => setSlots({ ...slots, newArrivals: e.target.value })}
-                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  >
-                    {carousels.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wider">Best Sellers Section</label>
-                  <select 
-                    value={slots.bestSellers}
-                    onChange={(e) => setSlots({ ...slots, bestSellers: e.target.value })}
-                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  >
-                    {carousels.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-                  </select>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
 
-          {/* Right Column: Carousel Editor */}
-          <div className="w-full lg:w-2/3">
-            {!activeCarousel ? (
-              <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500 border border-gray-100">
-                Select or create a carousel to manage its products.
+          {/* Products List */}
+          <div className="space-y-3">
+            {heroProducts.length === 0 ? (
+              <div className="p-12 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+                No products added yet. Use the search bar above to select products to feature on your top banner.
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-1">Editing: {activeCarousel.title}</h2>
-                <p className="text-sm text-gray-500 mb-6">Drag and drop products to reorder them.</p>
-
-                {/* Product Search */}
-                <div className="mb-8 relative">
-                  <div className="relative">
-                    <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input 
-                      type="text" 
-                      placeholder="Search products to add..."
-                      className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                      value={searchTerm}
-                      onChange={searchProducts}
+              heroProducts.map((p, index) => (
+                <div 
+                  key={p.product._id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => handleDrop(e, index)}
+                  className="p-4 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between cursor-move hover:bg-gray-100/50 transition group"
+                >
+                  <div className="flex items-center">
+                    <FiMove className="text-gray-400 mr-4 cursor-grab group-hover:text-gray-600 transition" />
+                    <span className="text-sm font-semibold text-gray-500 mr-4 font-mono">{index + 1}.</span>
+                    <img 
+                      src={p.product.mainImage || '/perfume-placeholder.jpg'} 
+                      alt={p.product.name} 
+                      className="w-12 h-12 object-cover rounded mr-4 border border-gray-200"
                     />
+                    <div>
+                      <div className="font-bold text-gray-900">{p.product.name}</div>
+                      <div className="text-sm text-gray-500">₹{p.product.price}</div>
+                    </div>
                   </div>
-                  
-                  {/* Search Results Dropdown */}
-                  {searchTerm.length >= 2 && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      {searching ? (
-                        <div className="p-4 text-center text-gray-500 text-sm">Searching...</div>
-                      ) : searchResults.length === 0 ? (
-                        <div className="p-4 text-center text-gray-500 text-sm">No products found</div>
-                      ) : (
-                        searchResults.map(product => (
-                          <div 
-                            key={product._id} 
-                            onClick={() => addProductToCarousel(product)}
-                            className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 flex items-center"
-                          >
-                            <img 
-                              src={product.images?.[0]?.url || product.images?.[0] || product.mainImage || '/perfume-placeholder.jpg'} 
-                              alt={product.name}
-                              className="w-10 h-10 object-cover rounded mr-3 bg-gray-50 border"
-                            />
-                            <div>
-                              <div className="font-semibold text-sm text-gray-900">{product.name}</div>
-                              <div className="text-xs text-gray-500">₹{product.price}</div>
-                            </div>
-                            <div className="ml-auto">
-                              <button className="text-blue-600 text-sm font-semibold hover:underline">Add</button>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
+                  <button 
+                    onClick={() => removeProductFromCarousel(p.product._id)}
+                    className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition"
+                  >
+                    <FiTrash2 className="h-5 w-5" />
+                  </button>
                 </div>
-
-                {/* Draggable Product List */}
-                <div className="space-y-3">
-                  {activeCarousel.products.length === 0 ? (
-                    <div className="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg text-gray-400">
-                      No products in this carousel. Search above to add some!
-                    </div>
-                  ) : (
-                    activeCarousel.products.map((item, index) => {
-                      const p = item.product;
-                      const imageUrl = p.images?.[0] ? (typeof p.images[0] === 'string' ? p.images[0] : (p.images[0] as any).url) : p.mainImage || '/perfume-placeholder.jpg';
-                      
-                      return (
-                        <div 
-                          key={p._id}
-                          draggable
-                          onDragStart={(e) => handleDragStart(e, index)}
-                          onDragOver={(e) => e.preventDefault()}
-                          onDrop={(e) => handleDrop(e, index)}
-                          className="flex items-center p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-move transition duration-150"
-                        >
-                          <div className="text-gray-400 mr-4 ml-1">
-                            <FiMove size={20} />
-                          </div>
-                          <div className="font-bold text-gray-500 w-6">{index + 1}.</div>
-                          <img src={imageUrl} alt={p.name} className="w-12 h-12 object-cover rounded mr-4 bg-white border" />
-                          <div className="flex-1">
-                            <div className="font-semibold text-gray-900 line-clamp-1">{p.name}</div>
-                            <div className="text-sm text-gray-500">₹{p.price}</div>
-                          </div>
-                          <button 
-                            onClick={() => removeProductFromCarousel(p._id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg ml-4 transition"
-                            title="Remove from carousel"
-                          >
-                            <FiTrash2 />
-                          </button>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
+              ))
             )}
           </div>
         </div>
       </div>
-
-      {/* New Carousel Modal */}
-      {showNewModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-2xl">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Create New Carousel</h3>
-            
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Carousel Title</label>
-              <input 
-                type="text" 
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                placeholder="e.g. Summer Sale"
-                className="w-full bg-white border border-gray-300 rounded-lg p-2 text-gray-900 outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Carousel ID (for code)</label>
-              <input 
-                type="text" 
-                value={newId}
-                onChange={(e) => setNewId(e.target.value)}
-                placeholder="e.g. hero-carousel"
-                className="w-full bg-white border border-gray-300 rounded-lg p-2 text-gray-900 font-mono text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="text-xs text-gray-500 mt-1">Must be unique. Only lowercase letters and hyphens.</p>
-            </div>
-            
-            <div className="flex justify-end space-x-3">
-              <button 
-                onClick={() => setShowNewModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={createCarousel}
-                disabled={!newTitle || !newId}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
-              >
-                Create
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

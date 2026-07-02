@@ -4,6 +4,8 @@ import SiteSettings from '@/app/models/SiteSettings';
 import { verifyAdminToken } from '@/app/lib/auth-utils';
 import Product from '@/app/models/Product'; // Ensure Product is registered
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
     // Verify admin authorization
@@ -22,51 +24,21 @@ export async function GET(request: Request) {
     await connectToDatabase();
     
     // Attempt to find existing settings
-    let settings = await SiteSettings.findOne({ settingId: 'global' });
-    
-    const coreCarousels = [
-      { id: 'hero-carousel', title: 'Main Hero Carousel', products: [] },
-      { id: 'featured-products', title: 'Featured Products Section', products: [] },
-      { id: 'new-arrivals', title: 'New Arrivals Section', products: [] },
-      { id: 'best-sellers', title: 'Best Sellers Section', products: [] }
-    ];
-    
-    if (!settings) {
-      settings = await SiteSettings.create({
-        settingId: 'global',
-        carousels: coreCarousels
-      });
-    } else {
-      let hasChanges = false;
-      for (const core of coreCarousels) {
-        if (!settings.carousels.some((c: any) => c.id === core.id)) {
-          settings.carousels.push(core);
-          hasChanges = true;
-        }
-      }
-      if (hasChanges) {
-        await settings.save();
-      }
-    }
-
-    // Populate the settings after ensuring core carousels are present
-    const populatedSettings = await SiteSettings.findOne({ settingId: 'global' }).populate({
-      path: 'carousels.products.product',
+    let settings = await SiteSettings.findOne({ settingId: 'global' }).populate({
+      path: 'heroProducts.product',
       model: Product,
       select: 'name slug mainImage images price comparePrice discountedPrice isPinnedFirst isPinnedSecond isPinnedThird isPinnedFourth'
-    }).lean() as any;
-
-    // Ensure slots has defaults if missing
-    if (populatedSettings && !populatedSettings.slots) {
-      populatedSettings.slots = {
-        hero: 'hero-carousel',
-        featured: 'featured-products',
-        newArrivals: 'new-arrivals',
-        bestSellers: 'best-sellers'
-      };
+    });
+    
+    if (!settings) {
+      // Create default if it doesn't exist
+      settings = await SiteSettings.create({
+        settingId: 'global',
+        heroProducts: []
+      });
     }
 
-    return NextResponse.json(populatedSettings);
+    return NextResponse.json(settings);
   } catch (error) {
     console.error('Error in GET /api/admin/settings:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
@@ -89,23 +61,18 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { carousels, slots } = body;
+    const { heroProducts } = body;
 
-    if (!carousels || !Array.isArray(carousels)) {
-      return NextResponse.json({ error: 'Invalid payload: carousels must be an array' }, { status: 400 });
+    if (!heroProducts || !Array.isArray(heroProducts)) {
+      return NextResponse.json({ error: 'Invalid payload: heroProducts must be an array' }, { status: 400 });
     }
 
     await connectToDatabase();
     
-    const updateData: any = { carousels };
-    if (slots) {
-      updateData.slots = slots;
-    }
-    
     // Update or create the global settings
     const updatedSettings = await SiteSettings.findOneAndUpdate(
       { settingId: 'global' },
-      updateData,
+      { heroProducts },
       { new: true, upsert: true }
     );
 
