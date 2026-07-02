@@ -34,34 +34,7 @@ const optimizeImageUrl = (url: string, width = 800) => {
   return url;
 };
 
-const processCarouselProducts = (sourceProducts: any[], exactMode?: boolean) => {
-  if (exactMode) {
-    return sourceProducts.map((product: any) => {
-      const price = convertToRupees(product.price || 0);
-      const discountedPrice = convertToRupees(product.comparePrice || product.discountedPrice || price);
-      const discountPercentage = price && discountedPrice && price > discountedPrice ? ((price - discountedPrice) / price * 100) : 0;
-      
-      let images = [];
-      if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-        images = product.images.map((img: any) => {
-          if (typeof img === 'string') return { url: img };
-          else if (img && img.url) return img;
-          return null;
-        }).filter(Boolean);
-      }
-      if (images.length === 0 && product.mainImage) images = [{ url: product.mainImage }];
-      if (images.length === 0) images = [{ url: '/perfume-placeholder.jpg' }];
-      
-      return {
-        ...product,
-        price,
-        discountedPrice,
-        discountPercentage,
-        images
-      };
-    });
-  }
-
+const processCarouselProducts = (sourceProducts: any[]) => {
   // Filter for products with discount and calculate discount percentage
   const discountedProducts = sourceProducts
     .filter((product: any) => {
@@ -144,10 +117,10 @@ const processCarouselProducts = (sourceProducts: any[], exactMode?: boolean) => 
   return sortedProducts.slice(0, 6);
 };
 
-export default function SaleCarousel({ initialProducts, exactMode = false }: { initialProducts?: any[], exactMode?: boolean } = {}) {
+export default function SaleCarousel({ initialProducts }: { initialProducts?: any[] } = {}) {
   const [products, setProducts] = useState<Product[]>(() => {
     if (initialProducts && initialProducts.length > 0) {
-      return processCarouselProducts(initialProducts, exactMode);
+      return processCarouselProducts(initialProducts);
     }
     return [];
   });
@@ -170,7 +143,7 @@ export default function SaleCarousel({ initialProducts, exactMode = false }: { i
         if (!response.ok) throw new Error('Failed to fetch products');
         const data = await response.json();
         
-        const processed = processCarouselProducts(data.products, exactMode);
+        const processed = processCarouselProducts(data.products);
         setProducts(processed);
       } catch (err: any) {
         setError('Failed to load products');
