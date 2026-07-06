@@ -6,12 +6,12 @@ async function connectToDatabase() {
   try {
     // Use the MongoDB URI directly since .env file might not be available
     const MONGODB_URI = 'mongodb+srv://avitoluxury:l2AuSv97J5FW4ZvU@freetester.667mr8b.mongodb.net/ecommerce';
-    
+
     await mongoose.connect(MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    
+
     console.log('Connected to MongoDB successfully');
   } catch (error) {
     console.error('MongoDB connection error:', error);
@@ -41,7 +41,7 @@ const leadershipData = [
     title: 'Founder & Visionary',
     position: 'founder',
     image: '/ARVIND SONI.jpeg.jpg',
-    bio: "Founder's Vision: Mr. Arvind Soni\nAVITO Perfume is the brainchild of Mr. Arvind Soni, a trailblazer in the fragrance industry with over 18 years of expertise and a legacy of perfume craftsmanship dating back to 1983. His passion for creating world-class fragrances has established AVITO as a beacon of elegance and innovation in the world of perfumery.\n\nExcellence in Fragrance Craftsmanship\nMr. Soni's mastery lies in crafting unique, long-lasting perfumes inspired by the sophistication of French scent artistry. Specializing in high-concentration perfume oils, he creates international-standard fragrances that blend elegant freshness with enduring essence, ensuring every scent leaves a lasting impression.\n\nComprehensive Business Expertise\nWith deep knowledge in retail, finance, and supply chain management, Mr. Soni ensures AVITO Perfume delivers exceptional quality at every stage. His holistic approach guarantees a seamless journey from sourcing premium ingredients to delivering luxurious fragrances to customers across India.\n\nCrafted for India, Inspired Globally\nAVITO Perfume is proud to serve India-wide, with scents thoughtfully designed to suit the country's diverse weather conditions and evolving trends. Our collections cater to all—men, women, and unisex preferences—offering affordable luxury without compromising on quality. Each fragrance is crafted to resonate with Indian sensibilities while maintaining a global standard of elegance.\n\nOur Commitment\nUnder Mr. Soni's visionary leadership, AVITO Perfume is dedicated to creating timeless, inclusive fragrances that celebrate individuality. Whether it's a bold masculine note, a delicate feminine essence, or a versatile unisex scent, our perfumes are designed to be accessible, enduring, and trendsetting for every Indian on affordable price with high quality ingredients.\n\nOur Legacy\nSince 1983, AVITO Perfume has carried forward a legacy of craftsmanship and innovation. With a commitment to affordability, diversity, and quality, we invite you to experience AVITO Perfume—where global artistry meets the heart of India in every bottle."
+    bio: "Founder's Vision: Mr. Arvind Soni\nAVITO Perfume is the brainchild of Mr. Arvind Soni, a trailblazer in the fragrance industry with over 19 years of expertise and a legacy of perfume craftsmanship dating back to 1983. His passion for creating world-class fragrances has established AVITO as a beacon of elegance and innovation in the world of perfumery.\n\nExcellence in Fragrance Craftsmanship\nMr. Soni's mastery lies in crafting unique, long-lasting perfumes inspired by the sophistication of French scent artistry. Specializing in high-concentration perfume oils, he creates international-standard fragrances that blend elegant freshness with enduring essence, ensuring every scent leaves a lasting impression.\n\nComprehensive Business Expertise\nWith deep knowledge in retail, finance, and supply chain management, Mr. Soni ensures AVITO Perfume delivers exceptional quality at every stage. His holistic approach guarantees a seamless journey from sourcing premium ingredients to delivering luxurious fragrances to customers across India.\n\nCrafted for India, Inspired Globally\nAVITO Perfume is proud to serve India-wide, with scents thoughtfully designed to suit the country's diverse weather conditions and evolving trends. Our collections cater to all—men, women, and unisex preferences—offering affordable luxury without compromising on quality. Each fragrance is crafted to resonate with Indian sensibilities while maintaining a global standard of elegance.\n\nOur Commitment\nUnder Mr. Soni's visionary leadership, AVITO Perfume is dedicated to creating timeless, inclusive fragrances that celebrate individuality. Whether it's a bold masculine note, a delicate feminine essence, or a versatile unisex scent, our perfumes are designed to be accessible, enduring, and trendsetting for every Indian on affordable price with high quality ingredients.\n\nOur Legacy\nSince 1983, AVITO Perfume has carried forward a legacy of craftsmanship and innovation. With a commitment to affordability, diversity, and quality, we invite you to experience AVITO Perfume—where global artistry meets the heart of India in every bottle."
   },
   {
     name: 'Mr. Naresh Dadhich',
@@ -52,17 +52,17 @@ const leadershipData = [
   },
   {
     name: 'Ms. Gayatri Soni',
-    title: 'Marketing Head',
-    position: 'marketing',
+    title: 'Chief Human Resources Officer (CHRO)',
+    position: 'chro',
     image: '/GAYATRI SONI.jpeg.jpg',
-    bio: "Marketing Leadership: Ms. Gayatri Soni, Marketing Head\n\nLeading the marketing endeavors of AVITO Perfume is Ms. Gayatri Soni, a seasoned professional with over 10 years of rich experience in marketing, product strategy, and policy formulation. As Marketing Head, she is instrumental in shaping AVITO's brand identity and delivering exceptional customer experiences.\n\nExpertise in Marketing and Digital Innovation\nMs. Gayatri brings a wealth of knowledge in marketing, digital tools, and brand management, backed by an impressive academic record. Her expertise in leveraging digital marketing platforms and analyzing market trends ensures AVITO Perfume remains at the forefront of customer engagement and innovation.\n\nDiverse Professional Background\nWith a proven track record of serving educational institutions and online marketing platforms for various corporate houses, Ms. Gayatri has honed her skills in creating impactful marketing strategies. Her versatile experience enables her to craft customer-centric campaigns that resonate with diverse audiences.\n\nCommitment to Brand Excellence\nAs Marketing Head, Ms. Gayatri is dedicated to establishing AVITO Perfume as a trusted and aspirational brand in the Indian market. She oversees market trend analysis, brand image development, customer support, and grievance redressal, ensuring every customer enjoys a seamless and delightful fragrance experience.\n\nCustomer-Centric Vision\nMs. Gayatri's focus is on delivering the best product experience to AVITO's customers. By blending creativity with data-driven strategies, she ensures that AVITO Perfume's offerings align with evolving customer preferences, making luxury fragrances accessible and memorable for all.\n\nOur Promise\nUnder Ms. Gayatri Soni's leadership, AVITO Perfume is committed to building a brand that stands for quality, trust, and innovation. We strive to create meaningful connections with our customers, offering world-class fragrances backed by exceptional service and a customer-first approach."
+    bio: "Ms. Gayatri Soni serves as the Chief Human Resources Officer (CHRO) at AVITO. She brings over 11 years of experience in institute administration and people management, along with a Postgraduate degree in Business Administration. Throughout her career, she has worked closely with teams, managed administrative operations, and contributed to building structured and efficient work environments. At AVITO, she oversees human resource policies, recruitment, employee development, and organizational processes, ensuring that the company's people practices support its long-term vision. She believes that every successful organization is built on capable and motivated individuals and is committed to creating a workplace where employees can learn, contribute, and grow. Her practical approach to leadership, combined with her administrative expertise, continues to strengthen AVITO's organizational culture and support the company's commitment to excellence."
   },
   {
     name: 'Mr. Chinesh Soni',
-    title: 'Operation & IT Management',
-    position: 'operations',
+    title: 'Chief Operating Officer (COO)',
+    position: 'coo',
     image: '/CHINESH.jpeg.jpg',
-    bio: "Operations & IT Leadership: Mr. Chinesh Soni\n\nMr. Chinesh Soni serves as the backbone of AVITO Perfume's operational and technological infrastructure. With his extensive expertise in IT systems and operations management, he ensures that all aspects of the business run smoothly and efficiently.\n\nTechnological Innovation\nMr. Chinesh brings a forward-thinking approach to AVITO Perfume, implementing cutting-edge technologies that enhance customer experience and streamline internal processes. His knowledge of e-commerce platforms and digital infrastructure has been instrumental in establishing the company's strong online presence.\n\nOperational Excellence\nWith meticulous attention to detail and a commitment to operational efficiency, Mr. Chinesh oversees the day-to-day functioning of AVITO Perfume. From inventory management to logistics coordination, he ensures that customers receive their premium fragrances promptly and in perfect condition.\n\nSupply Chain Optimization\nMr. Chinesh has developed robust supply chain solutions that maintain the highest quality standards while optimizing costs. His strategic approach to procurement and distribution has enabled AVITO Perfume to offer luxury fragrances at competitive prices.\n\nCustomer-Focused Systems\nUnderstanding that exceptional customer service is crucial in the luxury market, Mr. Chinesh has implemented systems that prioritize customer satisfaction at every touchpoint. His IT solutions enable personalized shopping experiences and efficient customer support.\n\nVision for Growth\nAs AVITO Perfume continues to expand, Mr. Chinesh's expertise in scalable operations and IT infrastructure provides a solid foundation for sustainable growth. His innovative strategies ensure that the company can meet increasing demand while maintaining its commitment to quality and excellence."
+    bio: "Chief Operating Officer (COO): Mr. Chinesh Soni\n\nBCA Graduate | COO @ AVITO Luxury | Content Creator & Strategist | Full-Stack Web Developer\n\nMr. Chinesh Soni is the Chief Operating Officer of AVITO Luxury, where he leads the company's digital operations and business execution. He oversees the website, e-commerce platforms, marketplace operations, product listings, catalog optimization, and online logistics, ensuring seamless operations across AVITO's digital ecosystem while supporting the brand's continued growth.\n\nA Bachelor of Computer Applications (BCA) graduate, Mr. Chinesh combines technology with business to build efficient systems and scalable workflows. Alongside his role at AVITO, he is a content creator and strategist behind Mr.SaFFronYT, with a combined audience of over 50,000 subscribers across YouTube. He also works with fellow creators, helping them improve their content strategy and grow their channels through data-driven insights and practical experience.\n\nPassionate about technology, Mr. Chinesh is building AI-powered solutions as a full-stack web developer, with a focus on automation, modern web applications, and creating tools that improve business operations and user experiences."
   }
 ];
 
@@ -70,15 +70,15 @@ const leadershipData = [
 async function populateDatabase() {
   try {
     await connectToDatabase();
-    
+
     // Clear existing data
     await Leadership.deleteMany({});
     console.log('Cleared existing leadership data');
-    
+
     // Insert new data
     const result = await Leadership.insertMany(leadershipData);
     console.log(`Successfully inserted ${result.length} leadership records`);
-    
+
     console.log('Database population completed successfully');
   } catch (error) {
     console.error('Error populating database:', error);
