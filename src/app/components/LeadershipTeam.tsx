@@ -82,19 +82,23 @@ export default function LeadershipTeam() {
     );
   }
 
+  // Filter out founder from display as requested, leaving exactly 3 leaders
+  const visibleLeaders = leaders.filter(leader => leader.position !== 'founder');
+
   return (
     <div className="mt-20 mb-16">
       <h2 className="text-2xl font-bold mb-8 text-center">Our Leadership Team</h2>
 
-      <div className="flex flex-wrap justify-center gap-8 max-w-4xl mx-auto">
-        {leaders.map((leader) => (
-          <LeadershipCard
-            key={leader._id}
-            name={leader.name}
-            title={leader.title}
-            image={leader.image}
-            bio={leader.bio}
-          />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-5xl mx-auto px-4 justify-items-center">
+        {visibleLeaders.map((leader) => (
+          <div key={leader._id} className="w-full max-w-[280px]">
+            <LeadershipCard
+              name={leader.name}
+              title={leader.title}
+              image={leader.image}
+              bio={leader.bio}
+            />
+          </div>
         ))}
       </div>
     </div>
