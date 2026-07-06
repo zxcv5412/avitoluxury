@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
+require('dotenv').config({ path: '.env.local' });
 
 // Connect to MongoDB
 async function connectToDatabase() {
   try {
-    // Use the MongoDB URI directly since .env file might not be available
-    const MONGODB_URI = 'mongodb+srv://avitoluxury:l2AuSv97J5FW4ZvU@freetester.667mr8b.mongodb.net/ecommerce';
+    // Use the environment variable MONGODB_URI if available, otherwise fall back to direct URI
+    const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://avitoluxury:l2AuSv97J5FW4ZvU@freetester.667mr8b.mongodb.net/ecommerce';
 
     await mongoose.connect(MONGODB_URI, {
       useNewUrlParser: true,
