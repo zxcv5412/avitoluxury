@@ -487,7 +487,7 @@ export default function Nav() {
                 >
                   <FiShoppingBag size={20} />
                   {cartItemsCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-black text-white text-[9px] rounded-full h-4.5 w-4.5 flex items-center justify-center font-bold">
+                    <span className="absolute top-0.5 right-0.5 bg-black text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-bold">
                       {cartItemsCount}
                     </span>
                   )}
