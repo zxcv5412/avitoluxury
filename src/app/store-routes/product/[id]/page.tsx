@@ -465,15 +465,19 @@ export default function ProductDetailPage() {
             </div>
             
             {/* Price */}
-            <div className="flex items-center flex-wrap">
+            <div className="flex items-center flex-wrap gap-2">
               {product.discountedPrice > 0 ? (
                 <>
-                  <span className="text-2xl font-medium text-black mr-3">₹{product.discountedPrice.toFixed(2)}</span>
-                  <span className="text-sm text-gray-500 line-through mr-3">MRP ₹{product.price.toFixed(2)}</span>
-                  {discount > 0 && <span className="text-sm text-green-700">({discount}% OFF)</span>}
+                  <span className="text-2xl xs:text-3xl font-bold text-[#0B0B0D]">₹{product.discountedPrice.toFixed(2)}</span>
+                  <span className="text-sm text-[#5A606B] line-through">MRP ₹{product.price.toFixed(2)}</span>
+                  {discount > 0 && (
+                    <span className="bg-[#0B0B0D] text-white px-2.5 py-1 text-[9px] xs:text-[10px] tracking-[0.15em] uppercase font-semibold">
+                      {discount}% OFF
+                    </span>
+                  )}
                 </>
               ) : (
-                <span className="text-2xl font-medium text-black">₹{product.price.toFixed(2)}</span>
+                <span className="text-2xl xs:text-3xl font-bold text-[#0B0B0D]">₹{product.price.toFixed(2)}</span>
               )}
             </div>
             
@@ -675,8 +679,8 @@ export default function ProductDetailPage() {
                       />
                     </Link>
                     {relatedProduct.discountedPrice > 0 && (
-                      <div className="absolute top-2 left-2 bg-black text-white text-xs font-bold px-2 py-1 rounded">
-                        ON SALE
+                      <div className="absolute top-2 left-2 bg-[#0B0B0D] text-white px-2.5 py-1 text-[9px] xs:text-[10px] tracking-[0.15em] uppercase font-semibold z-10">
+                        {Math.round(((relatedProduct.price - relatedProduct.discountedPrice) / relatedProduct.price) * 100)}% OFF
                       </div>
                     )}
                   </div>
@@ -705,13 +709,13 @@ export default function ProductDetailPage() {
                       <div className="flex items-baseline">
                         {relatedProduct.discountedPrice > 0 ? (
                           <>
-                            <span className="text-sm font-bold text-red-600">₹{relatedProduct.discountedPrice.toFixed(2)}</span>
-                            <span className="text-xs text-gray-400 line-through ml-2">
+                            <span className="text-sm font-bold text-[#0B0B0D]">₹{relatedProduct.discountedPrice.toFixed(2)}</span>
+                            <span className="text-xs text-[#5A606B] line-through ml-2">
                               MRP ₹{relatedProduct.price.toFixed(2)}
                             </span>
                           </>
                         ) : (
-                          <span className="text-sm font-bold">₹{relatedProduct.price.toFixed(2)}</span>
+                          <span className="text-sm font-bold text-[#0B0B0D]">₹{relatedProduct.price.toFixed(2)}</span>
                         )}
                       </div>
                       

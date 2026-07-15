@@ -333,16 +333,16 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
                         </button>
                       </div>
                       
-                      <div className="font-medium">
+                      <div className="font-semibold">
                         {item.discountedPrice ? (
-                          <div>
-                            <span className="text-gray-500 line-through mr-2">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[#5A606B] line-through text-xs font-normal">
                               ₹{item.price.toFixed(2)}
                             </span>
-                            <span>₹{item.discountedPrice.toFixed(2)}</span>
+                            <span className="text-[#0B0B0D]">₹{item.discountedPrice.toFixed(2)}</span>
                           </div>
                         ) : (
-                          <span>₹{item.price.toFixed(2)}</span>
+                          <span className="text-[#0B0B0D]">₹{item.price.toFixed(2)}</span>
                         )}
                       </div>
                     </div>

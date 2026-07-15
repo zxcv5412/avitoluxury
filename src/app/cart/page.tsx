@@ -200,13 +200,13 @@ export default function CartPage() {
                         <td className="py-4 text-right">
                           {item.discountedPrice ? (
                             <div>
-                              <span className="text-gray-500 line-through text-sm">
+                              <span className="text-[#5A606B] line-through text-sm mr-2">
                                 ₹{item.price.toFixed(2)}
                               </span>
-                              <div>₹{item.discountedPrice.toFixed(2)}</div>
+                              <div className="font-semibold text-[#0B0B0D]">₹{item.discountedPrice.toFixed(2)}</div>
                             </div>
                           ) : (
-                            <div>₹{item.price.toFixed(2)}</div>
+                            <div className="font-semibold text-[#0B0B0D]">₹{item.price.toFixed(2)}</div>
                           )}
                         </td>
                         <td className="py-4 text-right font-medium">

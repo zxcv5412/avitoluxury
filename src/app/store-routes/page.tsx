@@ -12,8 +12,8 @@ export default function StoreRedirect() {
   }, [router]);
 
   return (
-    <div className="flex items-center justify-center h-screen bg-[#272420]">
-      <p className="text-white text-lg">Redirecting to store...</p>
+    <div className="flex items-center justify-center h-screen bg-[#FAFAFA]">
+      <p className="text-[#0B0B0D] text-lg font-medium">Redirecting to store...</p>
     </div>
   );
 } 

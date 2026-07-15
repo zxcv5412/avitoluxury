@@ -263,7 +263,7 @@ export default function CheckoutSummaryPage() {
                       ₹{((item.discountedPrice || item.price) * item.quantity).toFixed(2)}
                     </p>
                     {item.discountedPrice && (
-                      <p className="text-xs text-gray-500 line-through">
+                      <p className="text-xs text-[#5A606B] line-through">
                         ₹{(item.price * item.quantity).toFixed(2)}
                       </p>
                     )}

@@ -175,8 +175,8 @@ export default function Footer() {
         {/* Copyright at the bottom center */}
         <div className="mt-2 pt-2 border-t border-gray-200">
           <div className="flex flex-col items-center">
-            <p className="text-lg font-bold bg-gradient-to-r from-pink-500 via-yellow-400 to-red-500 bg-clip-text text-transparent drop-shadow-md tracking-wide mb-1 animate-pulse">Crafted in France, Bottled in India</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-xs font-semibold tracking-[0.25em] text-[#5A606B] uppercase mb-1">Crafted in France, Bottled in India</p>
+            <p className="text-xs text-[#5A606B] tracking-wider">
               &copy; {new Date().getFullYear()} AVITO SCENTS. All rights reserved.
             </p>
 

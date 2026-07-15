@@ -174,8 +174,8 @@ export default function CombosPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center mt-4">
                       <div>
                         <div className="flex items-center">
-                          <span className="text-2xl font-bold">₹{combo.comboPrice.toLocaleString()}</span>
-                          <span className="ml-2 text-sm text-gray-500 line-through">₹{combo.originalPrice.toLocaleString()}</span>
+                          <span className="text-2xl font-bold text-[#0B0B0D]">₹{combo.comboPrice.toLocaleString()}</span>
+                          <span className="ml-2 text-sm text-[#5A606B] line-through">₹{combo.originalPrice.toLocaleString()}</span>
                         </div>
                         <p className="text-green-600 font-medium text-sm mt-1">
                           You save: ₹{combo.savings.toLocaleString()}

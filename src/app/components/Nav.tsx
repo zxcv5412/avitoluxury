@@ -331,16 +331,13 @@ export default function Nav() {
     //   name: 'Collection',
     //   path: '/collection',
     //   hasDropdown: false,
-
     // },
     {
       id: 'perfumes',
-      name: 'Perfumes',
+      name: 'PERFUMES',
       path: '/perfumes',
       hasDropdown: true,
       dropdownItems: [
-
- 
         {
           name: 'Luxury Collection',
           path: '/perfumes/luxury'
@@ -361,11 +358,10 @@ export default function Nav() {
     },
     {
       id: 'attars',
-      name: 'Aesthetic Attars',
+      name: 'AESTHETIC ATTARS',
       path: '/aesthetic-attars',
       hasDropdown: true,
       dropdownItems: [
-
         {
           name: 'Premium Attars',
           path: '/aesthetic-attars/premium'
@@ -382,36 +378,35 @@ export default function Nav() {
     },
     {
       id: 'fresheners',
-      name: 'Air Fresheners',
+      name: 'AIR FRESHENERS',
       path: '/air-fresheners',
       hasDropdown: true,
       dropdownItems: [
-
         {
           name: 'Car Fresheners',
           path: '/air-fresheners/car'
         },
-        {
-          name: 'Room Fresheners',
-          path: '/air-fresheners/room'
-        }
+        // {
+        //   name: 'Room Fresheners',
+        //   path: '/air-fresheners/room'
+        // }
       ]
     },
-    {
-      id: 'waxfume',
-      name: 'Waxfume',
-      path: '/waxfume',
-      hasDropdown: false
-    },
+    // {
+    //   id: 'waxfume',
+    //   name: 'Waxfume',
+    //   path: '/waxfume',
+    //   hasDropdown: false
+    // },
     {
       id: 'about',
-      name: 'Our Story',
+      name: 'OUR STORY',
       path: '/about-us',
       hasDropdown: false
     },
     {
       id: 'contact',
-      name: 'Contact Us',
+      name: 'CONTACT US',
       path: '/contact',
       hasDropdown: false
     }
@@ -422,23 +417,23 @@ export default function Nav() {
     { name: 'Perfumes', id: 'perfumes' },
     { name: 'Attars', id: 'attars' },
     { name: 'Air Fresheners', id: 'fresheners' },
-    { name: 'Waxfume', id: 'waxfume' }
+    // { name: 'Waxfume', id: 'waxfume' }
   ];
   
   return (
     <>
       {/* Announcement Bar */}
       {componentSettings.announcement && (
-        <div className="bg-black text-white py-2 text-sm overflow-hidden whitespace-nowrap relative w-full select-none">
+        <div className="bg-[#0B0B0D] text-white py-2.5 text-[10px] xs:text-xs tracking-widest uppercase overflow-hidden whitespace-nowrap relative w-full select-none">
           <div className="flex w-max animate-marquee-loop">
-            <div className="px-4 text-center">
-              Free shipping on orders above ₹500 &nbsp;&nbsp;•&nbsp;&nbsp; Cash on Delivery (COD) Now Available 🚚 &nbsp;&nbsp;•&nbsp;&nbsp;
+            <div className="px-6 text-center">
+              FREE DELIVERY ABOVE ₹500 &nbsp;|&nbsp; ₹50 OFF ALL PREPAID ORDERS &nbsp;|&nbsp; COD AVAILABLE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             </div>
-            <div className="px-4 text-center">
-              Free shipping on orders above ₹500 &nbsp;&nbsp;•&nbsp;&nbsp; Cash on Delivery (COD) Now Available 🚚 &nbsp;&nbsp;•&nbsp;&nbsp;
+            <div className="px-6 text-center">
+              FREE DELIVERY ABOVE ₹500 &nbsp;|&nbsp; ₹50 OFF ALL PREPAID ORDERS &nbsp;|&nbsp; COD AVAILABLE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             </div>
-            <div className="px-4 text-center">
-              Free shipping on orders above ₹500 &nbsp;&nbsp;•&nbsp;&nbsp; Cash on Delivery (COD) Now Available 🚚 &nbsp;&nbsp;•&nbsp;&nbsp;
+            <div className="px-6 text-center">
+              FREE DELIVERY ABOVE ₹500 &nbsp;|&nbsp; ₹50 OFF ALL PREPAID ORDERS &nbsp;|&nbsp; COD AVAILABLE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             </div>
           </div>
           <style dangerouslySetInnerHTML={{ __html: `
@@ -447,7 +442,7 @@ export default function Nav() {
               100% { transform: translateX(-33.333%); }
             }
             .animate-marquee-loop {
-              animation: marqueeLoop 25s linear infinite;
+              animation: marqueeLoop 20s linear infinite;
             }
           `}} />
         </div>
@@ -526,11 +521,11 @@ export default function Nav() {
                   onMouseLeave={handleDropdownLeave}
                 >
                   <div 
-                    className={`flex items-center font-medium cursor-pointer relative 
-                      ${pathname === item.path || pathname?.startsWith(item.path + '/') 
+                    className={`flex items-center font-medium tracking-wider text-[11px] uppercase cursor-pointer relative 
+                      \${pathname === item.path || pathname?.startsWith(item.path + '/') 
                         ? 'text-black' 
                         : 'text-gray-700 hover:text-black'}
-                      ${pathname === item.path || pathname?.startsWith(item.path + '/') 
+                      \${pathname === item.path || pathname?.startsWith(item.path + '/') 
                         ? 'after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-[2px] after:bg-black' 
                         : 'after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-black after:transition-all after:duration-300 hover:after:w-full'
                       }`}
@@ -673,7 +668,7 @@ export default function Nav() {
                         <div className="flex items-center justify-between w-full py-3.5 min-h-[44px] text-gray-800">
                           <button
                             type="button"
-                            className="flex-grow text-left text-base font-medium"
+                            className="flex-grow text-left text-sm font-medium tracking-wider uppercase"
                             onClick={() => toggleDropdown(item.id)}
                             aria-expanded={activeDropdown === item.id}
                             aria-controls={`${item.id}-submenu`}
@@ -715,7 +710,7 @@ export default function Nav() {
                     ) : (
                       <Link
                         href={item.path}
-                        className="block py-3.5 min-h-[44px] text-base font-medium text-gray-800 hover:text-black transition-colors duration-200"
+                        className="block py-3.5 min-h-[44px] text-sm font-medium tracking-wider uppercase text-gray-800 hover:text-black transition-colors duration-200"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {item.name}

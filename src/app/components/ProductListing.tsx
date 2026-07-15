@@ -53,6 +53,10 @@ const ProductCardWrapper = ({ product }: { product: Product }) => {
   const hasDiscount = 
     (formattedProduct.comparePrice && formattedProduct.comparePrice > 0 && formattedProduct.comparePrice < formattedProduct.price);
   
+  const discount = hasDiscount
+    ? Math.round(((formattedProduct.price - (formattedProduct.comparePrice || 0)) / formattedProduct.price) * 100)
+    : 0;
+  
   // Add to cart handler
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -119,9 +123,9 @@ const ProductCardWrapper = ({ product }: { product: Product }) => {
             />
           </div>
         </Link>
-        {hasDiscount && (
-          <div className="absolute top-2 left-2 bg-black text-white text-xs font-bold px-2 py-1 rounded">
-            ON SALE
+        {hasDiscount && discount > 0 && (
+          <div className="absolute top-2 left-2 bg-[#0B0B0D] text-white px-2.5 py-1 text-[9px] xs:text-[10px] tracking-[0.15em] uppercase font-semibold z-10">
+            {discount}% OFF
           </div>
         )}
       </div>
@@ -138,13 +142,13 @@ const ProductCardWrapper = ({ product }: { product: Product }) => {
           <div className="flex items-baseline">
             {hasDiscount ? (
               <>
-                <span className="text-sm xs:text-base font-bold text-red-600">₹{displayPrice}</span>
-                <span className="text-xs text-gray-400 line-through ml-2">
+                <span className="text-sm xs:text-base font-bold text-[#0B0B0D]">₹{displayPrice}</span>
+                <span className="text-xs text-[#5A606B] line-through ml-2">
                   MRP ₹{displayOriginalPrice}
                 </span>
               </>
             ) : (
-              <span className="text-sm xs:text-base font-bold">₹{displayPrice}</span>
+              <span className="text-sm xs:text-base font-bold text-[#0B0B0D]">₹{displayPrice}</span>
             )}
           </div>
           <div className="text-xs text-gray-500">

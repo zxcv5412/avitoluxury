@@ -322,8 +322,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     >
       {/* On Sale Tag */}
       {discount > 0 && (
-        <div className="absolute top-2 left-2 xs:top-3 xs:left-3 sale-tag z-10 text-xs xs:text-sm">
-          On Sale
+        <div className="absolute top-2 left-2 xs:top-3 xs:left-3 bg-[#0B0B0D] text-white px-2.5 py-1 text-[9px] xs:text-[10px] tracking-[0.15em] uppercase font-semibold z-10">
+          {discount}% OFF
         </div>
       )}
       
@@ -361,14 +361,12 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Price */}
         <div className="flex items-center justify-center mt-auto mb-2 xs:mb-3">
           {product.discountedPrice > 0 ? (
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1 xs:gap-2">
-                <span className="text-xs xs:text-sm font-medium text-black">₹{product.discountedPrice.toFixed(2)}</span>
-                <span className="text-xs text-gray-500 line-through">MRP ₹{product.price.toFixed(2)}</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm xs:text-base font-bold text-[#0B0B0D]">₹{product.discountedPrice.toFixed(2)}</span>
+              <span className="text-xs text-[#5A606B] line-through font-normal">MRP ₹{product.price.toFixed(2)}</span>
             </div>
           ) : (
-            <span className="text-xs xs:text-sm font-medium text-black">₹{product.price.toFixed(2)}</span>
+            <span className="text-sm xs:text-base font-bold text-[#0B0B0D]">₹{product.price.toFixed(2)}</span>
           )}
         </div>
         

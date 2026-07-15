@@ -164,10 +164,10 @@ export default function GiftingPage() {
                 </p>
               </div>
               
-              <div className="flex items-center mb-6">
-                <span className="text-2xl font-bold">₹4,999</span>
-                <span className="ml-2 text-sm text-gray-500 line-through">₹5,999</span>
-                <span className="ml-3 bg-black text-white text-xs px-2 py-1">Limited Stock</span>
+              <div className="flex items-center mb-6 gap-2">
+                <span className="text-2xl font-bold text-[#0B0B0D]">₹4,999</span>
+                <span className="text-sm text-[#5A606B] line-through font-normal">₹5,999</span>
+                <span className="ml-2 bg-[#0B0B0D] text-white text-[10px] tracking-[0.15em] uppercase font-semibold px-2 py-0.5 z-10">Limited Stock</span>
               </div>
               
               <ShopNowButton href="/product/luxury-gift-collection" />

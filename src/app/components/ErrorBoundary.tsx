@@ -37,11 +37,11 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     if (this.state.hasError) {
       // Custom fallback UI
       return this.props.fallback || (
-        <div className="bg-[#30231d] rounded-lg p-6 my-4 text-center">
+        <div className="bg-[#FAFAFA] border border-[#E8E8EA] rounded-none p-8 my-4 text-center">
           <div className="flex flex-col items-center">
-            <FiAlertTriangle className="text-[#d4af37] mb-4" size={48} />
-            <h2 className="text-xl font-medium mb-2">Something went wrong</h2>
-            <p className="text-gray-400 mb-4">
+            <FiAlertTriangle className="text-[#0B0B0D] mb-4" size={48} />
+            <h2 className="text-xl font-semibold text-[#0B0B0D] uppercase tracking-wider mb-2">Something went wrong</h2>
+            <p className="text-[#5A606B] text-sm mb-6 max-w-md">
               {this.state.error?.message || "An unknown error occurred"}
             </p>
             <button
@@ -49,7 +49,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                 this.setState({ hasError: false, error: null });
                 window.location.reload();
               }}
-              className="px-4 py-2 bg-[#d4af37] text-[#1a1410] rounded-md hover:bg-[#c4a030] transition"
+              className="px-6 py-2.5 bg-[#0B0B0D] text-white hover:bg-[#1A1C21] rounded-none transition uppercase tracking-widest text-xs font-semibold"
             >
               Try again
             </button>

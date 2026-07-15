@@ -41,26 +41,27 @@ img, video {
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #272420;
-  --primary: #000000; /* Black */
-  --primary-hover: #333333; /* Darker Black */
-  --secondary: #272420; /* Rich Brown */
-  --accent: #272420; /* Dark accent */
-  --text-primary: #272420;
-  --text-secondary: #5c534b;
-  --card-bg: #ffffff;
-  --border-color: #e5e0d5;
+  --background: #FAFAFA;
+  --foreground: #0B0B0D;
+  --primary: #0B0B0D; /* Sleek Dark Black */
+  --primary-hover: #1A1C21; /* Sophisticated Dark Gray */
+  --secondary: #1A1C21; /* Sophisticated Dark Gray */
+  --accent: #5A606B; /* Elegant Slate Gray */
+  --text-primary: #0B0B0D;
+  --text-secondary: #5A606B;
+  --card-bg: #FFFFFF;
+  --border-color: #E8E8EA;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #ffffff;
-    --foreground: #272420;
-    --border-color: #e5e0d5;
-    --card-bg: #ffffff;
+    --background: #FAFAFA;
+    --foreground: #0B0B0D;
+    --border-color: #E8E8EA;
+    --card-bg: #FFFFFF;
   }
 }
+
 
 body {
   background: var(--background);
@@ -266,3 +267,14 @@ button:focus, a:focus, input:focus, select:focus, textarea:focus {
 .font-lastica {
   font-family: 'Lastica', sans-serif !important;
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+

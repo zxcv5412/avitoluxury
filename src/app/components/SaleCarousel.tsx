@@ -251,7 +251,7 @@ export default function SaleCarousel({ initialProducts, exactMode = false }: { i
                         className="w-full h-auto block"
                       />
                       {/* Mobile-only discount badge */}
-                      <div className="absolute top-4 left-4 bg-red-600 text-white inline-block px-1.5 xs:px-2 py-0.5 text-xs uppercase tracking-wider z-10">
+                      <div className="absolute top-4 left-4 bg-[#0B0B0D] text-white px-2.5 py-1 text-[9px] xs:text-[10px] tracking-[0.15em] uppercase font-semibold z-10">
                         {Math.round(product.discountPercentage || 0)}% OFF
                       </div>
                       {/* Mobile-only product name overlay at bottom */}
@@ -279,7 +279,7 @@ export default function SaleCarousel({ initialProducts, exactMode = false }: { i
                 {/* Content - Hidden on mobile, Visible on Desktop: Right side */}
                 <div className="hidden md:flex order-2 md:order-2 flex-col items-center justify-center p-1 xs:p-2 sm:p-4 md:p-6 lg:p-8">
                   <div className="text-center space-y-0.5 xs:space-y-1 sm:space-y-2 md:space-y-4 max-w-sm mx-auto">
-                    <div className="bg-red-600 text-white inline-block px-1.5 xs:px-2 py-0.5 text-xs uppercase tracking-wider mb-0.5 xs:mb-1 md:mb-2">
+                    <div className="bg-[#0B0B0D] text-white px-2.5 py-1 text-[10px] sm:text-xs tracking-[0.15em] uppercase font-semibold mb-0.5 xs:mb-1 md:mb-2">
                       {Math.round(product.discountPercentage || 0)}% OFF
                     </div>
                     
@@ -291,11 +291,11 @@ export default function SaleCarousel({ initialProducts, exactMode = false }: { i
                       {product.description}
                     </p>
                     
-                    <div className="flex flex-row items-center justify-center gap-1 xs:gap-2 md:gap-4 my-0.5 xs:my-1 sm:my-2 md:my-4">
-                      <span className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-bold">
+                    <div className="flex flex-row items-center justify-center gap-2 md:gap-4 my-0.5 xs:my-1 sm:my-2 md:my-4">
+                      <span className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-[#0B0B0D]">
                         ₹{product.discountedPrice}
                       </span>
-                      <span className="text-xs sm:text-sm text-gray-500 line-through">
+                      <span className="text-xs sm:text-sm text-[#5A606B] line-through">
                         ₹{product.price}
                       </span>
                     </div>
