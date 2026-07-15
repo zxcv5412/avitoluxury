@@ -125,26 +125,51 @@ export default async function HomePage() {
         <SaleCarousel initialProducts={JSON.parse(JSON.stringify(finalHeroProducts))} exactMode={isExactHero} />
         
         {/* Trust Badge Ribbon */}
-        <div className="bg-gray-50 py-4 border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 flex justify-around items-center text-center gap-2">
+        <div className="bg-gray-50 py-6 border-y border-gray-100">
+          <div className="max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 items-center text-center">
+            {/* Lowest Price */}
             <div className="flex flex-col items-center">
-              <span className="text-base">🌱</span>
-              <span className="text-[10px] md:text-xs font-medium text-gray-600 uppercase tracking-wider mt-1">100% Organic</span>
+              <svg className="w-8 h-8 text-amber-700 stroke-[1.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7.5 20.5 12 25l11-11V3h-9L3.5 14.5l4 6z" />
+                <path d="M14 7h.01" />
+                <path d="m9.5 15.5 5-5" />
+                <circle cx="10" cy="11" r=".5" fill="currentColor" />
+                <circle cx="14" cy="15" r=".5" fill="currentColor" />
+              </svg>
+              <span className="text-xs md:text-sm font-medium tracking-wider text-gray-700 uppercase mt-2">Lowest Price</span>
             </div>
-            <div className="border-r border-gray-300 h-6"></div>
-            <div className="flex flex-col items-center">
-              <span className="text-base">⏳</span>
-              <span className="text-[10px] md:text-xs font-medium text-gray-600 uppercase tracking-wider mt-1">Long Lasting</span>
+            
+            {/* Cash on Delivery */}
+            <div className="flex flex-col items-center border-l border-gray-200 md:border-l">
+              <svg className="w-8 h-8 text-amber-700 stroke-[1.5] mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="6" width="20" height="12" rx="2" />
+                <circle cx="12" cy="12" r="2.5" />
+                <path d="M6 12h.01M18 12h.01" />
+              </svg>
+              <span className="text-xs md:text-sm font-medium tracking-wider text-gray-700 uppercase mt-2">Cash on Delivery</span>
             </div>
-            <div className="border-r border-gray-300 h-6"></div>
-            <div className="flex flex-col items-center">
-              <span className="text-base">🇮🇳</span>
-              <span className="text-[10px] md:text-xs font-medium text-gray-600 uppercase tracking-wider mt-1">Crafted in India</span>
+            
+            {/* Easy Returns */}
+            <div className="flex flex-col items-center border-l border-gray-200">
+              <svg className="w-8 h-8 text-amber-700 stroke-[1.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                <path d="m3.3 7 8.7 5 8.7-5" />
+                <path d="M12 22V12" />
+                <path d="M8 16a4 4 0 0 1 7-2.8M15 16h-4v-4" />
+              </svg>
+              <span className="text-xs md:text-sm font-medium tracking-wider text-gray-700 uppercase mt-2">Easy Returns</span>
             </div>
-            <div className="border-r border-gray-300 h-6"></div>
-            <div className="flex flex-col items-center">
-              <span className="text-base">🐰</span>
-              <span className="text-[10px] md:text-xs font-medium text-gray-600 uppercase tracking-wider mt-1">Cruelty Free</span>
+            
+            {/* Fast Delivery */}
+            <div className="flex flex-col items-center border-l border-gray-200">
+              <svg className="w-8 h-8 text-amber-700 stroke-[1.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="1" y="3" width="15" height="13" rx="2" />
+                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+                <circle cx="5.5" cy="18.5" r="2.5" />
+                <circle cx="18.5" cy="18.5" r="2.5" />
+                <path d="M3 6h6M3 9h4" />
+              </svg>
+              <span className="text-xs md:text-sm font-medium tracking-wider text-gray-700 uppercase mt-2">Fast Delivery</span>
             </div>
           </div>
         </div>
