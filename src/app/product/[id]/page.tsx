@@ -47,6 +47,22 @@ async function getProductData(id: string) {
       }).lean();
     }
 
+    // Fallback: If not found, check if it matches a trailing random number (slug-XXXXXX)
+    if (!product) {
+      const suffixMatch = decodedId.match(/^(.+)-\d+$/) || id.match(/^(.+)-\d+$/);
+      if (suffixMatch) {
+        const baseSlug = suffixMatch[1];
+        product = await ProductModel.findOne({
+          $or: [
+            { slug: baseSlug },
+            { slug: new RegExp(`^${baseSlug}-\\d+$`, 'i') },
+            { customId: baseSlug },
+            { sku: baseSlug }
+          ]
+        }).lean();
+      }
+    }
+
     return product;
   } catch (error) {
     console.error('Error fetching product in Server Component:', error);

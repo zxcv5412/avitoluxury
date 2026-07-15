@@ -34,6 +34,22 @@ export async function GET(
       });
     }
 
+    // Fallback: If not found, check if it matches a trailing random number (slug-XXXXXX)
+    if (!product) {
+      const suffixMatch = id.match(/^(.+)-\d+$/);
+      if (suffixMatch) {
+        const baseSlug = suffixMatch[1];
+        product = await Product.findOne({
+          $or: [
+            { slug: baseSlug },
+            { slug: new RegExp(`^${baseSlug}-\\d+$`, 'i') },
+            { customId: baseSlug },
+            { sku: baseSlug }
+          ]
+        });
+      }
+    }
+
     if (!product) {
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
     }
@@ -198,36 +214,62 @@ export async function DELETE(
 }
 
 async function generateUniqueSlug(nameOrSlug: string, excludeProductId?: string) {
-  let baseSlug = nameOrSlug
+  let cleaned = nameOrSlug
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)+/g, '');
   
-  if (!baseSlug) {
-    baseSlug = 'product';
+  if (!cleaned) {
+    cleaned = 'product';
   }
 
-  let slug = baseSlug;
-  let counter = 1;
+  // Check if it already has a 6-digit suffix
+  const hasSuffix = /-\d{6}$/.test(cleaned);
+  let baseSlug = cleaned;
   
-  while (true) {
-    const query: any = { slug };
-    if (excludeProductId) {
-      if (mongoose.Types.ObjectId.isValid(excludeProductId)) {
-        query._id = { $ne: new mongoose.Types.ObjectId(excludeProductId) };
-      } else {
-        query._id = { $ne: excludeProductId };
+  if (hasSuffix) {
+    let slug = baseSlug;
+    let counter = 1;
+    while (true) {
+      const query: any = { slug };
+      if (excludeProductId) {
+        if (mongoose.Types.ObjectId.isValid(excludeProductId)) {
+          query._id = { $ne: new mongoose.Types.ObjectId(excludeProductId) };
+        } else {
+          query._id = { $ne: excludeProductId };
+        }
       }
+      
+      const existingProduct = await Product.findOne(query);
+      if (!existingProduct) {
+        break;
+      }
+      
+      slug = `${baseSlug}-${counter}`;
+      counter++;
     }
-    
-    const existingProduct = await Product.findOne(query);
-    if (!existingProduct) {
-      break;
+    return slug;
+  } else {
+    let slug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
+    let counter = 1;
+    while (true) {
+      const query: any = { slug };
+      if (excludeProductId) {
+        if (mongoose.Types.ObjectId.isValid(excludeProductId)) {
+          query._id = { $ne: new mongoose.Types.ObjectId(excludeProductId) };
+        } else {
+          query._id = { $ne: excludeProductId };
+        }
+      }
+      
+      const existingProduct = await Product.findOne(query);
+      if (!existingProduct) {
+        break;
+      }
+      
+      slug = `${baseSlug}-${Date.now().toString().slice(-6)}-${counter}`;
+      counter++;
     }
-    
-    slug = `${baseSlug}-${counter}`;
-    counter++;
+    return slug;
   }
-  
-  return slug;
-} 
+}
