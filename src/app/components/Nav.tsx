@@ -451,9 +451,9 @@ export default function Nav() {
       <header className="bg-white shadow-sm sticky top-0 z-30">
         <div className="container mx-auto px-4 flex flex-col items-center">
           {/* Top Row: Search | Logo | Cart */}
-          <div className="w-full flex items-center justify-between py-2 xs:py-4">
+          <div className="w-full relative flex items-center justify-between py-2 xs:py-4 h-16 xs:h-20 sm:h-24">
             {/* Search Bar (left) */}
-            <div className="flex-1 flex justify-start">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2">
               {componentSettings.search && (
                 <button
                   onClick={toggleSearch}
@@ -465,7 +465,7 @@ export default function Nav() {
               )}
             </div>
             {/* Logo (center) */}
-            <div className="flex-shrink-0 flex flex-col items-center">
+            <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center">
               <Link href="/" className="flex gap-2 items-center">
                 <Image
                   src="/avito3-16.png"
@@ -473,12 +473,12 @@ export default function Nav() {
                   width={200}
                   height={80}
                   priority
-                  className="h-12 xs:h-16 sm:h-20 w-auto"
+                  className="h-10 xs:h-14 sm:h-18 w-auto"
                 />
               </Link>
             </div>
-            {/* Cart (right) */}
-            <div className="flex-1 flex justify-end items-center space-x-4">
+            {/* Cart & Menu (right) */}
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center space-x-1 xs:space-x-2">
               {componentSettings.miniCart && (
                 <button
                   onClick={toggleMiniCart}
@@ -487,21 +487,21 @@ export default function Nav() {
                 >
                   <FiShoppingBag size={20} />
                   {cartItemsCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center transition-transform duration-300 animate-pulse">
+                    <span className="absolute -top-1 -right-1 bg-black text-white text-[9px] rounded-full h-4.5 w-4.5 flex items-center justify-center font-bold">
                       {cartItemsCount}
                     </span>
                   )}
                 </button>
               )}
               {/* Mobile menu toggle */}
-              <div className="md:hidden">
+              <div className="md:hidden flex items-center">
                 <button
                   onClick={toggleMobileMenu}
-                  className="text-gray-700 hover:text-black p-2.5 rounded-full hover:bg-gray-100 transition-all duration-300"
+                  className="text-gray-700 hover:text-black p-2 rounded-full hover:bg-gray-100 transition-all duration-300"
                   aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
                   aria-expanded={mobileMenuOpen}
                 >
-                  {mobileMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
+                  {mobileMenuOpen ? <FiX size={22} /> : <FiMenu size={22} />}
                 </button>
               </div>
             </div>
