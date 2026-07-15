@@ -125,10 +125,10 @@ export default async function HomePage() {
         <SaleCarousel initialProducts={JSON.parse(JSON.stringify(finalHeroProducts))} exactMode={isExactHero} />
         
         {/* Trust Badge Ribbon */}
-        <div className="bg-[#E8E8EA]/30 py-6 border-y border-[#E8E8EA]">
-          <div className="max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 items-center text-center">
+        <div className="bg-[#E8E8EA]/30 py-6 border-y border-[#E8E8EA] overflow-hidden">
+          <div className="max-w-6xl mx-auto px-4 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-4 gap-6 md:gap-8 items-center text-center">
             {/* Lowest Price */}
-            <div className="flex flex-col items-center">
+            <div className="flex-shrink-0 w-[50vw] md:w-auto snap-center flex flex-col items-center">
               <svg className="w-8 h-8 text-[#5A606B] stroke-[1.2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M7.5 20.5 12 25l11-11V3h-9L3.5 14.5l4 6z" />
                 <path d="M14 7h.01" />
@@ -140,7 +140,7 @@ export default async function HomePage() {
             </div>
             
             {/* Cash on Delivery */}
-            <div className="flex flex-col items-center border-l border-gray-200">
+            <div className="flex-shrink-0 w-[50vw] md:w-auto snap-center flex flex-col items-center border-l border-gray-200">
               <svg className="w-8 h-8 text-[#5A606B] stroke-[1.2] mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="6" width="20" height="12" rx="2" />
                 <circle cx="12" cy="12" r="2.5" />
@@ -150,7 +150,7 @@ export default async function HomePage() {
             </div>
             
             {/* Easy Returns */}
-            <div className="flex flex-col items-center border-l border-gray-200">
+            <div className="flex-shrink-0 w-[50vw] md:w-auto snap-center flex flex-col items-center border-l border-gray-200">
               <svg className="w-8 h-8 text-[#5A606B] stroke-[1.2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
                 <path d="m3.3 7 8.7 5 8.7-5" />
@@ -161,7 +161,7 @@ export default async function HomePage() {
             </div>
             
             {/* Fast Delivery */}
-            <div className="flex flex-col items-center border-l border-gray-200">
+            <div className="flex-shrink-0 w-[50vw] md:w-auto snap-center flex flex-col items-center border-l border-gray-200">
               <svg className="w-8 h-8 text-[#5A606B] stroke-[1.2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="1" y="3" width="15" height="13" rx="2" />
                 <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />

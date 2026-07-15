@@ -358,7 +358,7 @@ export default function Nav() {
     },
     {
       id: 'attars',
-      name: 'AESTHETIC ATTARS',
+      name: 'ATTARS',
       path: '/aesthetic-attars',
       hasDropdown: true,
       dropdownItems: [
@@ -378,7 +378,7 @@ export default function Nav() {
     },
     {
       id: 'fresheners',
-      name: 'AIR FRESHENERS',
+      name: 'FRESHENERS',
       path: '/air-fresheners',
       hasDropdown: true,
       dropdownItems: [
@@ -400,13 +400,13 @@ export default function Nav() {
     // },
     {
       id: 'about',
-      name: 'OUR STORY',
+      name: 'STORY',
       path: '/about-us',
       hasDropdown: false
     },
     {
       id: 'contact',
-      name: 'CONTACT US',
+      name: 'CONTACT',
       path: '/contact',
       hasDropdown: false
     }
@@ -521,14 +521,11 @@ export default function Nav() {
                   onMouseLeave={handleDropdownLeave}
                 >
                   <div 
-                    className={`flex items-center font-medium tracking-wider text-[11px] uppercase cursor-pointer relative 
+                    className={`flex items-center font-medium tracking-[0.2em] text-[10px] uppercase cursor-pointer relative whitespace-nowrap py-1.5
                       \${pathname === item.path || pathname?.startsWith(item.path + '/') 
-                        ? 'text-black' 
-                        : 'text-gray-700 hover:text-black'}
-                      \${pathname === item.path || pathname?.startsWith(item.path + '/') 
-                        ? 'after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-[2px] after:bg-black' 
-                        : 'after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-black after:transition-all after:duration-300 hover:after:w-full'
-                      }`}
+                        ? 'text-black font-semibold' 
+                        : 'text-[#5A606B] hover:text-black'}
+                      transition-colors duration-300`}
                     onClick={() => {
                       if (item.hasDropdown) {
                         // Only use hover/inline click for desktop; on mobile, chevron controls dropdown
@@ -544,7 +541,11 @@ export default function Nav() {
                     }}
                   >
                     {item.name}
-                    {item.hasDropdown && <FiChevronDown className="ml-1 transition-transform duration-300 group-hover:rotate-180" size={16} />}
+                    {item.hasDropdown && <FiChevronDown className="ml-1 transition-transform duration-300 group-hover:rotate-180" size={12} />}
+                    {/* Active page indicator dot */}
+                    {(pathname === item.path || pathname?.startsWith(item.path + '/')) && (
+                      <span className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-black rounded-full transition-all duration-300"></span>
+                    )}
                   </div>
                   {item.hasDropdown && activeDropdown === item.id && (
                     <div className="absolute top-full left-0 mt-1 w-56 bg-white shadow-lg rounded-md overflow-hidden z-20 transition-all duration-300 ease-in-out transform origin-top-left opacity-100 animate-[fadeIn_0.2s_ease-in-out]">
