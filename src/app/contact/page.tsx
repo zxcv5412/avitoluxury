@@ -5,6 +5,7 @@ import { FiSend, FiPhone, FiMail, FiMapPin } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import Footer from '../components/Footer';
 import Nav from '../components/Nav';
+import { MAP_EMBED_URL } from '../lib/constants';
 
 export default function ContactPage() {
   // Form state
@@ -285,7 +286,7 @@ export default function ContactPage() {
               <h3 className="text-lg font-medium mb-4">Find Us on Map</h3>
               <div className="h-[300px] bg-gray-200 rounded-lg overflow-hidden">
                 <iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3577.8968991961706!2d73.0290483!3d26.2741628!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39418cf0c2addccd%3A0x992c6825a927a2bd!2sMandore%20Rd%2C%20Jodhpur%2C%20Rajasthan%20342007!5e0!3m2!1sen!2sin!4v1685063289161!5m2!1sen!2sin" 
+                  src={MAP_EMBED_URL} 
                   width="100%" 
                   height="100%" 
                   style={{ border: 0 }} 
