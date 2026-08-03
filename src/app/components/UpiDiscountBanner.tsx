@@ -5,58 +5,55 @@ import React from 'react';
 export default function UpiDiscountBanner() {
   return (
     <div className="w-full my-4">
-      <div className="bg-gradient-to-r from-[#111215] via-[#1C1E26] to-[#111215] text-white border border-amber-500/30 rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg relative overflow-hidden">
-        {/* Subtle Luxury Gold Shimmer Line */}
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
-
+      <div className="bg-[#1A1A1A] text-white border border-[#C9A24B]/30 rounded-xl p-3 sm:p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
         {/* Left: Offer Text & Icon */}
-        <div className="flex items-center space-x-2.5 text-center sm:text-left z-10">
-          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-[11px] font-bold tracking-wider uppercase shadow-sm">
-            ✨ OFFER
+        <div className="flex items-center space-x-2 text-center sm:text-left">
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#C9A24B]/20 text-[#C9A24B] text-xs font-bold">
+            ⚡
           </span>
           <span className="text-xs sm:text-sm font-semibold tracking-wide text-white">
-            <span className="text-amber-300 font-bold">₹50 Extra Discount</span> On UPI / Prepaid Orders
+            <span className="text-[#C9A24B] font-bold">₹50 Extra Discount</span> On UPI / Prepaid Orders
           </span>
         </div>
 
-        {/* Right: Payment Brand Badges */}
-        <div className="flex items-center space-x-2 flex-shrink-0 z-10">
+        {/* Right: Authentic Payment Brand Badges */}
+        <div className="flex items-center space-x-2 flex-wrap justify-center sm:justify-end gap-y-1.5 flex-shrink-0">
           {/* Google Pay (GPay) */}
-          <div className="h-7 px-2.5 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-200 hover:scale-105 transition-transform" title="Google Pay">
-            <svg className="h-3.5 w-auto" viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path fill="#4285F4" d="M72.2 92.5v30.4H57.5V47h39.1c7.3 0 13.5 2.5 18.5 7.4 5.1 4.9 7.7 11.1 7.7 18.5s-2.6 13.6-7.7 18.5c-5 4.9-11.2 7.4-18.5 7.4H72.2zm0-31.5v17.4h24.7c3.1 0 5.7-1 7.8-3.1 2.1-2.1 3.2-4.7 3.2-7.8 0-3-1.1-5.6-3.2-7.7-2.1-2.1-4.7-3.1-7.8-3.1H72.2z"/>
-              <path fill="#34A853" d="M152 75.3c0 7.8-2.6 14.4-7.8 19.8-5.2 5.4-11.8 8.1-19.8 8.1-7.8 0-14.3-2.6-19.6-7.8-5.2-5.3-7.8-11.8-7.8-19.6 0-8.1 2.6-14.7 7.9-20 5.3-5.3 11.9-7.9 19.9-7.9 7.7 0 14.1 2.6 19.4 7.7l-7.3 7.3c-3.4-3.4-7.4-5.1-12.1-5.1-4.4 0-8.2 1.5-11.3 4.6-3.1 3.1-4.7 6.8-4.7 11.2s1.6 8.1 4.7 11.2c3.1 3.1 6.9 4.6 11.3 4.6 4.7 0 8.7-1.7 12.1-5.2 2.3-2.3 3.6-5.1 4.1-8.5h-16.2V75.3H152z"/>
-              <path fill="#FBBC04" d="M190.2 60.5l-20.9 49.3h-15.1l7.8-16.9-13.8-32.4h15.9l7-17.5 6.9 17.5h12.2z"/>
-              <path fill="#EA4335" d="M197.8 77.2c0-2.3-.2-4.6-.6-6.7h-31.5v12.7h18c-.8 4.2-3.1 7.8-6.7 10.2v8.5h10.8c6.3-5.8 10-14.4 10-24.7z"/>
-            </svg>
+          <div className="h-7 px-3 bg-white rounded-lg flex items-center justify-center shadow-sm border border-gray-200 hover:scale-105 transition-transform" title="Google Pay">
+            <span className="text-xs font-bold font-sans tracking-tight text-[#5F6368] flex items-center">
+              <span className="text-[#4285F4] text-sm font-black mr-0.5">G</span>Pay
+            </span>
           </div>
 
           {/* PhonePe */}
-          <div className="h-7 px-2.5 bg-[#5f259f] rounded-full flex items-center justify-center shadow-sm text-white text-xs font-bold hover:scale-105 transition-transform" title="PhonePe">
-            पे PhonePe
+          <div className="h-7 px-3 bg-[#5F259F] rounded-lg flex items-center justify-center space-x-1 shadow-sm text-white text-xs font-bold hover:scale-105 transition-transform" title="PhonePe">
+            <span className="bg-white text-[#5F259F] rounded-full w-4 h-4 inline-flex items-center justify-center text-[10px] font-black">पे</span>
+            <span>PhonePe</span>
           </div>
 
           {/* Paytm */}
-          <div className="h-7 px-2.5 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-200 hover:scale-105 transition-transform" title="Paytm">
-            <span className="text-[#002e6e] font-extrabold text-xs tracking-tight">Pay<span className="text-[#00baf2]">tm</span></span>
+          <div className="h-7 px-3 bg-white rounded-lg flex items-center justify-center shadow-sm border border-gray-200 hover:scale-105 transition-transform" title="Paytm">
+            <span className="text-[#002E6E] font-black text-xs tracking-tight">
+              Pay<span className="text-[#00BAF2]">tm</span>
+            </span>
           </div>
 
           {/* BHIM UPI */}
-          <div className="h-7 px-2 bg-white rounded-full flex items-center justify-center space-x-1 shadow-sm border border-gray-200 hover:scale-105 transition-transform" title="BHIM UPI">
-            <span className="text-[#FF6600] font-black text-xs italic">UPI</span>
-            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <div className="h-7 px-3 bg-white rounded-lg flex items-center justify-center space-x-1 shadow-sm border border-gray-200 hover:scale-105 transition-transform" title="BHIM UPI">
+            <span className="text-[#FF6600] font-black text-xs italic tracking-tighter">UPI</span>
+            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M4 18L12 4L20 18H4Z" fill="#008450" />
               <path d="M12 4L20 18H14L8 8L12 4Z" fill="#F15A24" />
             </svg>
           </div>
 
           {/* Razorpay */}
-          <div className="h-7 px-2.5 bg-[#0c2340] rounded-full flex items-center justify-center space-x-1 shadow-sm border border-blue-900 hover:scale-105 transition-transform" title="Razorpay Secure">
-            <svg className="h-3.5 w-auto" viewBox="0 0 100 100" fill="none">
-              <path d="M15 85L45 15H85L55 85H15Z" fill="#072654" />
-              <path d="M35 85L75 15H85L45 85H35Z" fill="#3395FF" />
+          <div className="h-7 px-3 bg-[#0C2340] rounded-lg flex items-center justify-center space-x-1 shadow-sm border border-[#173860] hover:scale-105 transition-transform" title="Razorpay Secure">
+            <svg className="h-3.5 w-auto" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 80L50 20H80L50 80H20Z" fill="#0284C7" />
+              <path d="M40 80L75 20H85L50 80H40Z" fill="#38BDF8" />
             </svg>
-            <span className="text-white font-bold text-[10px] tracking-tighter">Razorpay</span>
+            <span className="text-white font-bold text-xs tracking-tight">Razorpay</span>
           </div>
         </div>
       </div>
