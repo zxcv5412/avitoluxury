@@ -385,8 +385,8 @@ export default function CheckoutPage() {
                 name="city"
                 value={formData.city}
                 onChange={handleChange}
-                readOnly={formData.city !== ''}
-                className={`w-full p-2 border rounded-md ${errors.city ? 'border-red-500' : formData.city ? 'border-gray-300 bg-gray-50' : 'border-gray-300'}`}
+                placeholder="Enter city"
+                className={`w-full p-2 border rounded-md ${errors.city ? 'border-red-500' : 'border-gray-300'}`}
               />
               {errors.city && (
                 <p className="mt-1 text-sm text-red-500 flex items-center">
@@ -405,8 +405,7 @@ export default function CheckoutPage() {
                 name="state"
                 value={formData.state}
                 onChange={handleChange}
-                disabled={formData.state !== ''}
-                className={`w-full p-2 border rounded-md ${errors.state ? 'border-red-500' : formData.state ? 'border-gray-300 bg-gray-50' : 'border-gray-300'}`}
+                className={`w-full p-2 border rounded-md ${errors.state ? 'border-red-500' : 'border-gray-300'}`}
               >
                 <option value="">Select State</option>
                 <option value="Andhra Pradesh">Andhra Pradesh</option>

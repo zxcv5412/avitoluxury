@@ -253,9 +253,8 @@ export default function GuestCheckoutModal({
                   name="city"
                   value={formData.city}
                   onChange={handleChange}
-                  readOnly={formData.city !== ''}
                   className={`w-full p-3 border rounded-md ${
-                    errors.city ? 'border-red-500' : formData.city ? 'border-gray-300 bg-gray-50' : 'border-gray-300'
+                    errors.city ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="City"
                 />
@@ -272,9 +271,8 @@ export default function GuestCheckoutModal({
                   name="state"
                   value={formData.state}
                   onChange={handleChange}
-                  readOnly={formData.state !== ''}
                   className={`w-full p-3 border rounded-md ${
-                    errors.state ? 'border-red-500' : formData.state ? 'border-gray-300 bg-gray-50' : 'border-gray-300'
+                    errors.state ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="State"
                 />
