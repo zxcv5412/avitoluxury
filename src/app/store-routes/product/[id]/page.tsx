@@ -536,15 +536,15 @@ export default function ProductDetailPage() {
                   productName={product.name}
                   productPrice={product.discountedPrice > 0 ? product.discountedPrice : product.price}
                   productImage={product.images[0]?.url || ''}
-                  className="bg-black text-white py-3 px-6 hover:bg-gray-800 flex-1 text-center"
+                  className="bg-[#121318] text-white py-3.5 px-6 rounded-xl border border-gray-800 hover:bg-[#1C1E26] flex-1 text-center font-semibold tracking-wider text-xs sm:text-sm uppercase transition-all shadow-sm"
                 />
                 
                 {/* Buy Now button */}
                 <button 
                   onClick={handleBuyNow}
-                  className="border border-black py-3 px-6 hover:bg-gray-100 flex-1"
+                  className="bg-gradient-to-r from-[#C5A059] via-[#D4AF37] to-[#B89047] hover:from-[#B89047] hover:to-[#C5A059] text-black font-bold py-3.5 px-6 rounded-xl shadow-lg border border-[#E5C158]/50 uppercase tracking-[0.15em] text-xs sm:text-sm flex-1 flex items-center justify-center space-x-2 transition-all duration-300 transform hover:scale-[1.02] cursor-pointer"
                 >
-                  Buy Now
+                  <span>⚡ Buy Now</span>
                 </button>
               </div>
               

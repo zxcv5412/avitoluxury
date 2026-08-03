@@ -322,7 +322,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     >
       {/* On Sale Tag */}
       {discount > 0 && (
-        <div className="absolute top-2 left-2 xs:top-3 xs:left-3 bg-[#0B0B0D] text-white px-2.5 py-1 text-[9px] xs:text-[10px] tracking-[0.15em] uppercase font-semibold z-10">
+        <div className="absolute top-2 left-2 xs:top-3 xs:left-3 bg-[#0B0B0D]/90 backdrop-blur-sm border border-amber-400/40 text-amber-300 px-2.5 py-0.5 text-[9px] xs:text-[10px] tracking-[0.15em] uppercase font-bold rounded-full shadow-md z-10">
           {discount}% OFF
         </div>
       )}

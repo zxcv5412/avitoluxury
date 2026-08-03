@@ -238,71 +238,56 @@ export default function SaleCarousel({ initialProducts, exactMode = false }: { i
                 pointerEvents: isActive ? 'auto' : 'none',
               }}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 h-auto md:h-full">
-                {/* Image - Mobile: Full screen with link, Desktop: Left side */}
-                <div className="order-1 md:order-1 flex items-center justify-center h-auto md:h-full bg-white relative w-full">
-                  
-                  {/* Mobile fluid display: stretch to full width, adapt container height dynamically */}
-                  <div className="block md:hidden w-full relative">
-                    <Link href={`/product/${product.slug || product._id}`} className="block w-full">
-                      <img
-                        src={optimizeImageUrl(product.images && product.images[0]?.url || '/perfume-placeholder.jpg', 800)}
-                        alt={product.name || "Perfume product"}
-                        className="w-full h-auto block"
-                      />
-                      {/* Mobile-only discount badge */}
-                      <div className="absolute top-4 left-4 bg-[#0B0B0D] text-white px-2.5 py-1 text-[9px] xs:text-[10px] tracking-[0.15em] uppercase font-semibold z-10">
-                        {Math.round(product.discountPercentage || 0)}% OFF
-                      </div>
-                      {/* Mobile-only product name overlay at bottom */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-center z-10">
-                        <h3 className="text-sm xs:text-base font-medium truncate">{product.name}</h3>
-                      </div>
-                    </Link>
-                  </div>
+              <div className="max-w-5xl mx-auto h-full flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 px-4 md:px-8 py-6 md:py-10">
+                {/* Product Image */}
+                <div className="w-full md:w-1/2 max-w-sm aspect-square relative rounded-2xl overflow-hidden bg-gradient-to-b from-gray-50/80 to-white shadow-xl border border-gray-100 flex items-center justify-center p-4">
+                  <Link href={`/product/${product.slug || product._id}`} className="block relative w-full h-full">
+                    <img
+                      src={optimizeImageUrl(product.images && product.images[0]?.url || '/perfume-placeholder.jpg', 800)}
+                      alt={product.name || "Perfume product"}
+                      className="w-full h-full object-contain transition-transform duration-700 hover:scale-105"
+                    />
+                  </Link>
 
-                  {/* Desktop layout: keep original fixed-height container and Next.js Image cover details */}
-                  <div className="hidden md:block relative w-full h-full">
-                    <Link href={`/product/${product.slug || product._id}`} className="block relative w-full h-full">
-                      <Image
-                        src={optimizeImageUrl(product.images && product.images[0]?.url || '/perfume-placeholder.jpg', 800)}
-                        alt={product.name || "Perfume product"}
-                        fill
-                        sizes="50vw"
-                        priority={index === 0}
-                        className="object-contain p-4 md:p-6 lg:p-8"
-                      />
-                    </Link>
-                  </div>
-                </div>
-                
-                {/* Content - Hidden on mobile, Visible on Desktop: Right side */}
-                <div className="hidden md:flex order-2 md:order-2 flex-col items-center justify-center p-1 xs:p-2 sm:p-4 md:p-6 lg:p-8">
-                  <div className="text-center space-y-0.5 xs:space-y-1 sm:space-y-2 md:space-y-4 max-w-sm mx-auto">
-                    <div className="bg-[#0B0B0D] text-white px-2.5 py-1 text-[10px] sm:text-xs tracking-[0.15em] uppercase font-semibold mb-0.5 xs:mb-1 md:mb-2">
+                  {/* Luxury Discount Pill Badge */}
+                  {Math.round(product.discountPercentage || 0) > 0 && (
+                    <div className="absolute top-4 left-4 bg-[#0B0B0D]/90 backdrop-blur-sm border border-amber-400/40 text-amber-300 px-3 py-1 text-[10px] sm:text-xs tracking-[0.15em] uppercase font-bold rounded-full shadow-md z-10">
                       {Math.round(product.discountPercentage || 0)}% OFF
                     </div>
-                    
-                    <h2 className="text-sm xs:text-base sm:text-xl md:text-2xl lg:text-3xl font-bold font-serif">
+                  )}
+                </div>
+                
+                {/* Content Details */}
+                <div className="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left space-y-3 md:space-y-4">
+                  {Math.round(product.discountPercentage || 0) > 0 && (
+                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-[#0B0B0D] text-amber-300 text-xs font-semibold tracking-[0.15em] border border-amber-400/30 uppercase shadow-sm">
+                      ✨ SPECIAL OFFER — SAVE {Math.round(product.discountPercentage || 0)}%
+                    </div>
+                  )}
+                  
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#0B0B0D] font-normal leading-tight">
+                    <Link href={`/product/${product.slug || product._id}`} className="hover:text-amber-700 transition-colors">
                       {product.name}
-                    </h2>
-                    
-                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-1 sm:line-clamp-2">
-                      {product.description}
-                    </p>
-                    
-                    <div className="flex flex-row items-center justify-center gap-2 md:gap-4 my-0.5 xs:my-1 sm:my-2 md:my-4">
-                      <span className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-[#0B0B0D]">
-                        ₹{product.discountedPrice}
-                      </span>
-                      <span className="text-xs sm:text-sm text-[#5A606B] line-through">
+                    </Link>
+                  </h2>
+                  
+                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 max-w-md">
+                    {product.description}
+                  </p>
+                  
+                  <div className="flex items-baseline space-x-3 my-2">
+                    <span className="text-xl sm:text-2xl md:text-3xl font-bold text-[#0B0B0D]">
+                      ₹{product.discountedPrice}
+                    </span>
+                    {product.price > product.discountedPrice && (
+                      <span className="text-sm sm:text-base text-[#5A606B] line-through">
                         ₹{product.price}
                       </span>
-                    </div>
-                    
-                    <div className="mt-0.5 xs:mt-1 sm:mt-2 md:mt-4">
-                      <ShopNowButton href={`/product/${product.slug || product._id}`} />
-                    </div>
+                    )}
+                  </div>
+                  
+                  <div className="pt-2">
+                    <ShopNowButton href={`/product/${product.slug || product._id}`} />
                   </div>
                 </div>
               </div>
