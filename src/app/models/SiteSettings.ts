@@ -21,6 +21,15 @@ const CarouselConfigSchema = new mongoose.Schema({
   products: [CarouselProductSchema]
 }, { _id: false });
 
+const StorySwatchSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  title: { type: String, required: true },
+  imageUrl: { type: String, required: true },
+  linkUrl: { type: String, required: true },
+  isActive: { type: Boolean, default: true },
+  order: { type: Number, default: 0 }
+}, { _id: false });
+
 const SiteSettingsSchema = new mongoose.Schema({
   settingId: {
     type: String,
@@ -31,7 +40,8 @@ const SiteSettingsSchema = new mongoose.Schema({
   activePresetId: {
     type: String,
     default: 'default'
-  }
+  },
+  storySwatches: [StorySwatchSchema]
 }, {
   timestamps: true
 });

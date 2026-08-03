@@ -68,18 +68,18 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { presets, activePresetId } = body;
+    const { presets, activePresetId, storySwatches } = body;
 
-    if (!presets || !Array.isArray(presets)) {
+    if (presets && !Array.isArray(presets)) {
       return NextResponse.json({ error: 'Invalid payload: presets must be an array' }, { status: 400 });
     }
 
     await connectToDatabase();
     
-    const updateData: any = { presets };
-    if (activePresetId) {
-      updateData.activePresetId = activePresetId;
-    }
+    const updateData: any = {};
+    if (presets) updateData.presets = presets;
+    if (activePresetId) updateData.activePresetId = activePresetId;
+    if (storySwatches && Array.isArray(storySwatches)) updateData.storySwatches = storySwatches;
 
     // Update or create the global settings
     const updatedSettings = await SiteSettings.findOneAndUpdate(

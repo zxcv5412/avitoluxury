@@ -24,6 +24,15 @@ interface PresetConfig {
   products: CarouselProduct[];
 }
 
+interface StorySwatch {
+  id: string;
+  title: string;
+  imageUrl: string;
+  linkUrl: string;
+  isActive?: boolean;
+  order?: number;
+}
+
 export default function StorefrontSettings() {
   const router = useRouter();
   const { isAuthenticated, loading: authLoading } = useAdminAuth();
@@ -32,6 +41,9 @@ export default function StorefrontSettings() {
   const [presets, setPresets] = useState<PresetConfig[]>([]);
   const [selectedPresetId, setSelectedPresetId] = useState<string>('');
   const [activePresetId, setActivePresetId] = useState<string>('default');
+
+  // Story Swatches State
+  const [storySwatches, setStorySwatches] = useState<StorySwatch[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,6 +78,7 @@ export default function StorefrontSettings() {
         const loadedPresets = data.presets || [];
         setPresets(loadedPresets);
         setActivePresetId(data.activePresetId || 'default');
+        setStorySwatches(data.storySwatches || []);
         
         if (loadedPresets.length > 0) {
           // If previous selection is invalid or empty, set to first preset
@@ -209,7 +222,7 @@ export default function StorefrontSettings() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}` 
         },
-        body: JSON.stringify({ presets: payloadPresets, activePresetId })
+        body: JSON.stringify({ presets: payloadPresets, activePresetId, storySwatches })
       });
       
       if (res.ok) {
@@ -223,6 +236,43 @@ export default function StorefrontSettings() {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Swatches Management Handlers
+  const addSwatch = (title = 'NEW SIZE', linkUrl = '/collection?volume=50ml', imageUrl = '') => {
+    const newSwatch: StorySwatch = {
+      id: `swatch-${Date.now()}`,
+      title,
+      imageUrl,
+      linkUrl,
+      isActive: true,
+      order: storySwatches.length + 1
+    };
+    setStorySwatches(prev => [...prev, newSwatch]);
+  };
+
+  const updateSwatch = (index: number, key: keyof StorySwatch, val: any) => {
+    setStorySwatches(prev => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], [key]: val };
+      return copy;
+    });
+  };
+
+  const removeSwatch = (index: number) => {
+    setStorySwatches(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const moveSwatch = (index: number, direction: 'left' | 'right') => {
+    if ((direction === 'left' && index === 0) || (direction === 'right' && index === storySwatches.length - 1)) return;
+    const targetIndex = direction === 'left' ? index - 1 : index + 1;
+    setStorySwatches(prev => {
+      const copy = [...prev];
+      const temp = copy[index];
+      copy[index] = copy[targetIndex];
+      copy[targetIndex] = temp;
+      return copy;
+    });
   };
 
   // Drag and Drop Logic
@@ -500,6 +550,119 @@ export default function StorefrontSettings() {
                     ))
                   )}
                 </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Homepage Story Circle Swatches Manager */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8 mt-8">
+          <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Homepage Circle Swatches ("Shop By Size & Category")</h2>
+              <p className="text-xs text-gray-500 mt-1">Manage the story-style circles displayed on your homepage under the Trust Ribbon.</p>
+            </div>
+            <button
+              onClick={() => addSwatch()}
+              className="px-3 py-1.5 bg-black text-white text-xs font-semibold rounded-lg hover:bg-gray-800 flex items-center gap-1 transition"
+            >
+              <FiPlus /> Add Swatch
+            </button>
+          </div>
+
+          <div className="p-6 space-y-4">
+            {/* Quick Add Presets Bar */}
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 flex flex-wrap items-center gap-2 text-xs">
+              <span className="font-semibold text-blue-900">Quick Add Suggestions:</span>
+              <button onClick={() => addSwatch('2 ML ROLL-ONS', '/collection?volume=2ml')} className="px-2 py-1 bg-white border border-blue-200 rounded text-blue-800 hover:bg-blue-100">+ 2ml Roll-ons</button>
+              <button onClick={() => addSwatch('3 ML ATTARS', '/collection?volume=3ml')} className="px-2 py-1 bg-white border border-blue-200 rounded text-blue-800 hover:bg-blue-100">+ 3ml Attars</button>
+              <button onClick={() => addSwatch('6 ML ATTARS', '/collection?volume=6ml')} className="px-2 py-1 bg-white border border-blue-200 rounded text-blue-800 hover:bg-blue-100">+ 6ml Attars</button>
+              <button onClick={() => addSwatch('12 ML ATTARS', '/collection?volume=12ml')} className="px-2 py-1 bg-white border border-blue-200 rounded text-blue-800 hover:bg-blue-100">+ 12ml Attars</button>
+              <button onClick={() => addSwatch('30 ML PERFUMES', '/collection?volume=30ml')} className="px-2 py-1 bg-white border border-blue-200 rounded text-blue-800 hover:bg-blue-100">+ 30ml Perfumes</button>
+              <button onClick={() => addSwatch('50 ML PERFUMES', '/collection?volume=50ml')} className="px-2 py-1 bg-white border border-blue-200 rounded text-blue-800 hover:bg-blue-100">+ 50ml Perfumes</button>
+              <button onClick={() => addSwatch('100 ML SPRAYS', '/collection?volume=100ml')} className="px-2 py-1 bg-white border border-blue-200 rounded text-blue-800 hover:bg-blue-100">+ 100ml Sprays</button>
+              <button onClick={() => addSwatch('CAR FRESHENERS', '/air-fresheners/car')} className="px-2 py-1 bg-white border border-blue-200 rounded text-blue-800 hover:bg-blue-100">+ Car Diffusers</button>
+            </div>
+
+            {storySwatches.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 text-sm">
+                No custom swatches configured yet. Default volume circles (2ml, 6ml, 12ml, 50ml, etc.) will be shown on the homepage until custom ones are created.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {storySwatches.map((swatch, idx) => (
+                  <div key={swatch.id || idx} className="flex flex-col md:flex-row items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 border border-gray-300 relative">
+                      {swatch.imageUrl ? (
+                        <img src={swatch.imageUrl} alt={swatch.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-500">#{idx + 1}</span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 flex-1 w-full text-xs">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-gray-500 uppercase">Label Title</label>
+                        <input
+                          type="text"
+                          value={swatch.title}
+                          onChange={(e) => updateSwatch(idx, 'title', e.target.value)}
+                          placeholder="e.g. 50 ML PERFUMES"
+                          className="w-full px-2 py-1 bg-white border border-gray-300 rounded font-medium"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-gray-500 uppercase">Image URL (Optional)</label>
+                        <input
+                          type="text"
+                          value={swatch.imageUrl}
+                          onChange={(e) => updateSwatch(idx, 'imageUrl', e.target.value)}
+                          placeholder="https://..."
+                          className="w-full px-2 py-1 bg-white border border-gray-300 rounded font-mono text-[10px]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-gray-500 uppercase">Target Link URL</label>
+                        <input
+                          type="text"
+                          value={swatch.linkUrl}
+                          onChange={(e) => updateSwatch(idx, 'linkUrl', e.target.value)}
+                          placeholder="/collection?volume=50ml"
+                          className="w-full px-2 py-1 bg-white border border-gray-300 rounded font-mono text-[10px]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => updateSwatch(idx, 'isActive', !swatch.isActive)}
+                        className={`px-2.5 py-1 text-xs font-semibold rounded ${swatch.isActive !== false ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'}`}
+                      >
+                        {swatch.isActive !== false ? 'Active' : 'Hidden'}
+                      </button>
+                      <button
+                        onClick={() => moveSwatch(idx, 'left')}
+                        disabled={idx === 0}
+                        className="px-2 py-1 border border-gray-300 rounded bg-white hover:bg-gray-100 text-xs disabled:opacity-30"
+                      >
+                        &uarr;
+                      </button>
+                      <button
+                        onClick={() => moveSwatch(idx, 'right')}
+                        disabled={idx === storySwatches.length - 1}
+                        className="px-2 py-1 border border-gray-300 rounded bg-white hover:bg-gray-100 text-xs disabled:opacity-30"
+                      >
+                        &darr;
+                      </button>
+                      <button
+                        onClick={() => removeSwatch(idx)}
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                      >
+                        <FiTrash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

@@ -7,6 +7,7 @@ import { FiShoppingBag, FiArrowLeft, FiVideo, FiChevronLeft, FiChevronRight } fr
 import Image from 'next/image';
 import { useAuth } from '@/app/components/AuthProvider';
 import AddToCartButton from '@/app/components/AddToCartButton';
+import UpiDiscountBanner from '@/app/components/UpiDiscountBanner';
 // Removed AddToWishlistButton import
 import { UserActivityTracker } from '@/app/services/UserActivityTracker';
 
@@ -547,7 +548,8 @@ export default function ProductDetailPage() {
                 </button>
               </div>
               
-              {/* Removed AddToWishlistButton */}
+              {/* Brand-Matched UPI Payment Discount Banner */}
+              <UpiDiscountBanner />
             </div>
             
             {/* Description */}

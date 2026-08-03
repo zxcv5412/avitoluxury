@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import ProductCard from './components/store/ProductCard';
 import SaleCarousel from '@/app/components/SaleCarousel';
+import ShopByCircleSwatches from '@/app/components/ShopByCircleSwatches';
 import Nav from '@/app/components/Nav';
 import Footer from '@/app/components/Footer';
 import connectMongoDB from '@/app/lib/mongodb';
@@ -101,6 +102,7 @@ export default async function HomePage() {
     const fetchedHero = activePreset?.products || [];
     heroProducts = fetchedHero.map((item: any) => item.product).filter(Boolean);
     isExactHero = heroProducts.length > 0;
+    var storySwatches = settings?.storySwatches || [];
     
   } catch (error) {
     console.error('Error fetching products during SSR:', error);
@@ -173,6 +175,9 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
+
+        {/* Circular Story Swatches Section */}
+        <ShopByCircleSwatches swatches={storySwatches} />
         
         {/* Featured Products */}
         <section className="py-10 px-4 max-w-7xl mx-auto">

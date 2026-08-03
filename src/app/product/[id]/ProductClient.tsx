@@ -7,6 +7,7 @@ import { FiShoppingBag, FiArrowLeft, FiVideo, FiChevronLeft, FiChevronRight } fr
 import Image from 'next/image';
 import { useAuth } from '@/app/components/AuthProvider';
 import AddToCartButton from '@/app/components/AddToCartButton';
+import UpiDiscountBanner from '@/app/components/UpiDiscountBanner';
 import { UserActivityTracker } from '@/app/services/UserActivityTracker';
 
 interface Product {
@@ -531,6 +532,9 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
                   Buy Now
                 </button>
               </div>
+
+              {/* Brand-Matched UPI Payment Discount Banner */}
+              <UpiDiscountBanner />
             </div>
             
             {/* Description */}

@@ -217,7 +217,13 @@ export default function ProductListing({
   const [availableVolumes, setAvailableVolumes] = useState<string[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   
-  // Fetch products based on category, productType, subCategory, or tag
+  // Read URL searchParams on mount (e.g. ?volume=2ml)
+  useEffect(() => {
+    const urlVolume = searchParams.get('volume');
+    if (urlVolume) {
+      setSelectedVolume([urlVolume]);
+    }
+  }, [searchParams]);
   useEffect(() => {
     const fetchProducts = async () => {
       // If SSR provided products, skip fetching on initial load
