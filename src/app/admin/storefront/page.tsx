@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FiBox, FiShoppingBag, FiUsers, FiLogOut, FiSettings, FiPlus, FiTrash2, FiMove, FiSearch, FiSave, FiMail } from 'react-icons/fi';
+import { FiBox, FiShoppingBag, FiUsers, FiLogOut, FiSettings, FiPlus, FiTrash2, FiMove, FiSearch, FiSave, FiMail, FiUpload } from 'react-icons/fi';
 import { useAdminAuth, getAdminToken, adminLogout } from '@/app/lib/admin-auth';
 
 interface CarouselProduct {
@@ -273,6 +273,34 @@ export default function StorefrontSettings() {
       copy[targetIndex] = temp;
       return copy;
     });
+  };
+
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+
+  const handleSwatchFileUpload = async (index: number, file: File) => {
+    try {
+      setUploadingIndex(index);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'swatches');
+      
+      const res = await fetch('/api/upload/cloudinary', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!res.ok) throw new Error('Upload failed');
+      const data = await res.json();
+      if (data.success && data.url) {
+        updateSwatch(index, 'imageUrl', data.url);
+      } else {
+        throw new Error(data.error || 'Failed to upload image');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Error uploading image');
+    } finally {
+      setUploadingIndex(null);
+    }
   };
 
   // Drag and Drop Logic
@@ -612,14 +640,31 @@ export default function StorefrontSettings() {
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-semibold text-gray-500 uppercase">Image URL (Optional)</label>
-                        <input
-                          type="text"
-                          value={swatch.imageUrl}
-                          onChange={(e) => updateSwatch(idx, 'imageUrl', e.target.value)}
-                          placeholder="https://..."
-                          className="w-full px-2 py-1 bg-white border border-gray-300 rounded font-mono text-[10px]"
-                        />
+                        <label className="block text-[10px] font-semibold text-gray-500 uppercase">Circle Image</label>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="text"
+                            value={swatch.imageUrl}
+                            onChange={(e) => updateSwatch(idx, 'imageUrl', e.target.value)}
+                            placeholder="Image URL or upload..."
+                            className="flex-1 px-2 py-1 bg-white border border-gray-300 rounded font-mono text-[10px]"
+                          />
+                          <label className="cursor-pointer px-2 py-1 bg-black text-white text-[10px] font-semibold rounded hover:bg-gray-800 flex items-center gap-1 flex-shrink-0">
+                            <FiUpload className="w-3 h-3" />
+                            {uploadingIndex === idx ? '...' : 'Upload'}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={uploadingIndex === idx}
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  handleSwatchFileUpload(idx, e.target.files[0]);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
                       </div>
                       <div>
                         <label className="block text-[10px] font-semibold text-gray-500 uppercase">Target Link URL</label>
