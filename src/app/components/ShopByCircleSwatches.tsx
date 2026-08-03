@@ -94,48 +94,49 @@ export default function ShopByCircleSwatches({ swatches }: ShopByCircleSwatchesP
   if (!activeSwatches || activeSwatches.length === 0) return null;
 
   return (
-    <section className="w-full bg-white border-b border-gray-100 py-5 sm:py-6">
+    <section className="w-full bg-white border-b border-gray-100 py-6 sm:py-8">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Section Heading */}
-        <div className="text-center mb-3 sm:mb-4">
-          <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#0B0B0D]">
+        {/* Section Heading matching website's brand serif font */}
+        <div className="text-center mb-4 sm:mb-6">
+          <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-normal uppercase tracking-[0.15em] text-[#0B0B0D]">
             Shop By Category & Size
           </h3>
         </div>
 
         {/* Scrollable Story Swatches Bar */}
-        <div className="flex items-center justify-start md:justify-center gap-4 sm:gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide py-2 px-1">
+        <div className="flex items-center justify-start md:justify-center gap-5 sm:gap-7 overflow-x-auto snap-x snap-mandatory scrollbar-hide py-3 px-2">
           {activeSwatches.map((item) => (
             <Link
               key={item.id}
               href={item.linkUrl}
               className="flex-shrink-0 flex flex-col items-center group snap-center cursor-pointer transition-transform duration-300 hover:scale-105"
             >
-              {/* Outer Ring Circle Container */}
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-[2px] bg-gradient-to-tr from-gray-900 via-gray-700 to-gray-400 group-hover:from-black group-hover:to-black transition-all shadow-sm">
+              {/* Outer Ring Circle Container - Enlarged for pleasant aesthetic */}
+              <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full p-[2px] bg-gradient-to-tr from-gray-900 via-gray-700 to-gray-400 group-hover:from-black group-hover:to-black transition-all shadow-md">
                 <div className="w-full h-full rounded-full p-[2px] bg-white">
-                  <div className="w-full h-full rounded-full overflow-hidden relative bg-gray-100 flex items-center justify-center">
+                  <div className="w-full h-full rounded-full overflow-hidden relative bg-white flex items-center justify-center">
                     {item.imageUrl ? (
                       <img
                         src={item.imageUrl}
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         onError={(e) => {
-                          // Fallback placeholder icon on image error
+                          // Hide broken image
                           (e.target as HTMLElement).style.display = 'none';
                         }}
                       />
-                    ) : null}
-                    {/* Default letter icon if no image */}
-                    <span className="text-[11px] sm:text-xs font-bold text-gray-800 tracking-tighter uppercase px-1 text-center">
-                      {item.title.split(' ')[0]}
-                    </span>
+                    ) : (
+                      /* Only show letter icon if NO image URL exists */
+                      <span className="text-xs sm:text-sm font-bold text-gray-800 tracking-tighter uppercase px-1 text-center">
+                        {item.title.split(' ')[0]}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Title Text Under Circle */}
-              <span className="text-[9px] sm:text-[11px] font-semibold tracking-wider text-center uppercase text-[#0B0B0D] mt-2 max-w-[70px] sm:max-w-[90px] leading-tight truncate group-hover:text-black">
+              {/* Title Text Under Circle - Styled matching website fonts with 2-line wrap */}
+              <span className="text-[10px] sm:text-xs font-semibold tracking-wider text-center uppercase text-[#0B0B0D] mt-2.5 max-w-[85px] sm:max-w-[105px] md:max-w-[125px] leading-tight group-hover:text-black">
                 {item.title}
               </span>
             </Link>
