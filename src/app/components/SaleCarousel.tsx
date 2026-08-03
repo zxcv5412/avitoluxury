@@ -214,7 +214,7 @@ export default function SaleCarousel({ initialProducts, exactMode = false }: { i
   }
   
   return (
-    <div className="relative w-full overflow-hidden bg-white my-1 sm:my-3">
+    <div className="relative w-full overflow-hidden bg-transparent my-1 sm:my-3">
       <div className="relative w-full">
         {displayProducts.map((product, index) => {
           const isActive = index === currentIndex;
@@ -235,8 +235,8 @@ export default function SaleCarousel({ initialProducts, exactMode = false }: { i
               }}
             >
               <div className="max-w-5xl mx-auto px-2 sm:px-4 py-1 sm:py-2">
-                {/* Ultra-Minimalistic Banner Image Wrapper */}
-                <div className="w-full relative rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gradient-to-b from-gray-50/50 to-white flex items-center justify-center h-auto md:h-[440px] lg:h-[480px]">
+                {/* Minimalistic Banner Image Wrapper matching Dark/Light mode seamlessly */}
+                <div className="w-full relative rounded-2xl overflow-hidden shadow-lg border border-[#C9A24B]/30 bg-[#181920] flex items-center justify-center h-auto md:h-[440px] lg:h-[480px]">
                   <Link href={`/product/${product.slug || product._id}`} className="block relative w-full h-full flex items-center justify-center">
                     <img
                       src={optimizeImageUrl(product.images && product.images[0]?.url || '/perfume-placeholder.jpg', 1200)}
