@@ -104,15 +104,15 @@ export default function ShopByCircleSwatches({ swatches }: ShopByCircleSwatchesP
         </div>
 
         {/* Scrollable Story Swatches Bar */}
-        <div className="flex items-center justify-start md:justify-center gap-5 sm:gap-7 overflow-x-auto snap-x snap-mandatory scrollbar-hide py-3 px-2">
+        <div className="flex items-center justify-start md:justify-center gap-5 sm:gap-8 overflow-x-auto snap-x snap-mandatory scrollbar-hide py-3.5 px-2">
           {activeSwatches.map((item) => (
             <Link
               key={item.id}
               href={item.linkUrl}
               className="flex-shrink-0 flex flex-col items-center group snap-center cursor-pointer transition-transform duration-300 hover:scale-105"
             >
-              {/* Outer Ring Circle Container - Enlarged for pleasant aesthetic */}
-              <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full p-[2px] bg-gradient-to-tr from-gray-900 via-gray-700 to-gray-400 group-hover:from-black group-hover:to-black transition-all shadow-md">
+              {/* Outer Ring Circle Container - Extra enlarged for high-impact mobile luxury visual */}
+              <div className="w-[92px] h-[92px] xs:w-26 xs:h-26 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full p-[2.5px] bg-gradient-to-tr from-gray-900 via-gray-700 to-gray-400 group-hover:from-black group-hover:to-black transition-all shadow-md">
                 <div className="w-full h-full rounded-full p-[2px] bg-white">
                   <div className="w-full h-full rounded-full overflow-hidden relative bg-white flex items-center justify-center">
                     {item.imageUrl ? (
@@ -136,7 +136,7 @@ export default function ShopByCircleSwatches({ swatches }: ShopByCircleSwatchesP
               </div>
 
               {/* Title Text Under Circle - Styled matching website fonts with 2-line wrap */}
-              <span className="text-[10px] sm:text-xs font-semibold tracking-wider text-center uppercase text-[#0B0B0D] mt-2.5 max-w-[85px] sm:max-w-[105px] md:max-w-[125px] leading-tight group-hover:text-black">
+              <span className="text-[11px] sm:text-xs md:text-sm font-semibold tracking-wider text-center uppercase text-[#0B0B0D] mt-3 max-w-[98px] sm:max-w-[125px] md:max-w-[145px] leading-snug group-hover:text-black">
                 {item.title}
               </span>
             </Link>

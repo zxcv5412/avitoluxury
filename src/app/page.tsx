@@ -186,7 +186,7 @@ export default async function HomePage() {
           <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-4 gap-4 md:gap-6 pb-4 md:pb-0">
             {featuredProducts.length > 0 ? (
               featuredProducts.map((product) => (
-                <div key={product._id} className="flex-shrink-0 w-[72vw] xs:w-[62vw] sm:w-[45vw] md:w-auto snap-start">
+                <div key={product._id} className="flex-shrink-0 w-[48vw] xs:w-[44vw] sm:w-[35vw] md:w-auto snap-start">
                   <ProductCard product={product} />
                 </div>
               ))
@@ -209,7 +209,7 @@ export default async function HomePage() {
           <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-4 gap-4 md:gap-6 pb-4 md:pb-0">
             {newArrivals.length > 0 ? (
               newArrivals.map((product) => (
-                <div key={product._id} className="flex-shrink-0 w-[72vw] xs:w-[62vw] sm:w-[45vw] md:w-auto snap-start">
+                <div key={product._id} className="flex-shrink-0 w-[48vw] xs:w-[44vw] sm:w-[35vw] md:w-auto snap-start">
                   <ProductCard product={product} />
                 </div>
               ))
@@ -232,7 +232,7 @@ export default async function HomePage() {
           <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-4 gap-4 md:gap-6 pb-4 md:pb-0">
             {topSelling.length > 0 ? (
               topSelling.map((product) => (
-                <div key={product._id} className="flex-shrink-0 w-[72vw] xs:w-[62vw] sm:w-[45vw] md:w-auto snap-start">
+                <div key={product._id} className="flex-shrink-0 w-[48vw] xs:w-[44vw] sm:w-[35vw] md:w-auto snap-start">
                   <ProductCard product={product} />
                 </div>
               ))

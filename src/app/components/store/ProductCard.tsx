@@ -327,14 +327,14 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       )}
       
-      {/* Product Image - Link wrapper */}
-      <Link href={`/product/${product.slug || product._id}`} className="block relative h-48 xs:h-56 sm:h-60 md:h-64 overflow-hidden">
+      {/* Product Image - Link wrapper with square aspect ratio to eliminate wide side spaces */}
+      <Link href={`/product/${product.slug || product._id}`} className="block relative aspect-square w-full overflow-hidden bg-[#FAFAFA] flex items-center justify-center p-2 border-b border-gray-100">
         <Image
           src={optimizeImageUrl(imageUrl, 600)}
           alt={product.name}
-          width={400}
+          width={500}
           height={500}
-          className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
+          className="w-full h-full object-contain p-1 transition-transform duration-700 group-hover:scale-105"
           onError={() => setImageError(true)}
         />
       </Link>
