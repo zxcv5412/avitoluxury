@@ -214,12 +214,8 @@ export default function SaleCarousel({ initialProducts, exactMode = false }: { i
   }
   
   return (
-    <motion.div
-      layout="size"
-      transition={{ duration: 0.4, ease: "easeInOut" }}
-      className="relative w-full overflow-hidden bg-white h-auto md:h-[500px] lg:h-[600px]"
-    >
-      <div className="relative w-full h-auto md:h-full">
+    <div className="relative w-full overflow-hidden bg-white my-1 sm:my-3">
+      <div className="relative w-full">
         {displayProducts.map((product, index) => {
           const isActive = index === currentIndex;
           return (
@@ -233,62 +229,28 @@ export default function SaleCarousel({ initialProducts, exactMode = false }: { i
               transition={{ duration: 0.4 }}
               className={`${
                 isActive ? 'relative' : 'absolute inset-0'
-              } w-full h-auto md:h-full`}
+              } w-full`}
               style={{
                 pointerEvents: isActive ? 'auto' : 'none',
               }}
             >
-              <div className="max-w-5xl mx-auto h-full flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 px-4 md:px-8 py-6 md:py-10">
-                {/* Product Image */}
-                <div className="w-full md:w-1/2 max-w-sm aspect-square relative rounded-2xl overflow-hidden bg-gradient-to-b from-gray-50/80 to-white shadow-xl border border-gray-100 flex items-center justify-center p-4">
-                  <Link href={`/product/${product.slug || product._id}`} className="block relative w-full h-full">
+              <div className="max-w-5xl mx-auto px-2 sm:px-4 py-1 sm:py-2">
+                {/* Ultra-Minimalistic Banner Image Wrapper */}
+                <div className="w-full relative rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-white">
+                  <Link href={`/product/${product.slug || product._id}`} className="block relative w-full">
                     <img
-                      src={optimizeImageUrl(product.images && product.images[0]?.url || '/perfume-placeholder.jpg', 800)}
-                      alt={product.name || "Perfume product"}
-                      className="w-full h-full object-contain transition-transform duration-700 hover:scale-105"
+                      src={optimizeImageUrl(product.images && product.images[0]?.url || '/perfume-placeholder.jpg', 1200)}
+                      alt={product.name || "Banner"}
+                      className="w-full h-auto object-cover block cursor-pointer"
                     />
                   </Link>
 
-                  {/* Luxury Discount Pill Badge */}
+                  {/* Minimalistic Discount Pill Badge */}
                   {Math.round(product.discountPercentage || 0) > 0 && (
-                    <div className="absolute top-4 left-4 bg-[#0B0B0D]/90 backdrop-blur-sm border border-amber-400/40 text-amber-300 px-3 py-1 text-[10px] sm:text-xs tracking-[0.15em] uppercase font-bold rounded-full shadow-md z-10">
+                    <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#1A1A1A]/90 backdrop-blur-sm border border-[#C9A24B]/40 text-[#C9A24B] px-2.5 py-0.5 text-[9px] sm:text-xs tracking-[0.15em] uppercase font-bold rounded-full shadow-md z-10 pointer-events-none">
                       {Math.round(product.discountPercentage || 0)}% OFF
                     </div>
                   )}
-                </div>
-                
-                {/* Content Details */}
-                <div className="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left space-y-3 md:space-y-4">
-                  {Math.round(product.discountPercentage || 0) > 0 && (
-                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-[#0B0B0D] text-amber-300 text-xs font-semibold tracking-[0.15em] border border-amber-400/30 uppercase shadow-sm">
-                      ✨ SPECIAL OFFER — SAVE {Math.round(product.discountPercentage || 0)}%
-                    </div>
-                  )}
-                  
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#0B0B0D] font-normal leading-tight">
-                    <Link href={`/product/${product.slug || product._id}`} className="hover:text-amber-700 transition-colors">
-                      {product.name}
-                    </Link>
-                  </h2>
-                  
-                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 max-w-md">
-                    {product.description}
-                  </p>
-                  
-                  <div className="flex items-baseline space-x-3 my-2">
-                    <span className="text-xl sm:text-2xl md:text-3xl font-bold text-[#0B0B0D]">
-                      ₹{product.discountedPrice}
-                    </span>
-                    {product.price > product.discountedPrice && (
-                      <span className="text-sm sm:text-base text-[#5A606B] line-through">
-                        ₹{product.price}
-                      </span>
-                    )}
-                  </div>
-                  
-                  <div className="pt-2">
-                    <ShopNowButton href={`/product/${product.slug || product._id}`} />
-                  </div>
                 </div>
               </div>
             </motion.div>
@@ -326,6 +288,6 @@ export default function SaleCarousel({ initialProducts, exactMode = false }: { i
           />
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 }
