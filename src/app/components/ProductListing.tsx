@@ -49,13 +49,38 @@ const ProductCardWrapper = ({ product }: { product: Product }) => {
     inStock: product.inStock !== undefined ? product.inStock : true
   };
   
-  // Check if product has a valid discount - comparePrice is the discounted price (lower than original price)
-  const hasDiscount = 
-    (formattedProduct.comparePrice && formattedProduct.comparePrice > 0 && formattedProduct.comparePrice < formattedProduct.price);
-  
-  const discount = hasDiscount
-    ? Math.round(((formattedProduct.price - (formattedProduct.comparePrice || 0)) / formattedProduct.price) * 100)
-    : 0;
+  // Comprehensive discount calculation handling all price/comparePrice schema variations
+  const computeDiscountInfo = () => {
+    const p = Number(formattedProduct.price) || 0;
+    const dp = Number(formattedProduct.discountedPrice) || 0;
+    const cp = Number(formattedProduct.comparePrice) || 0;
+    const pct = Number((formattedProduct as any).discountPercentage) || 0;
+
+    if (pct > 0) {
+      const saleP = dp > 0 && dp < p ? dp : (cp > 0 && cp < p ? cp : p);
+      const origP = cp > p ? cp : (p > saleP ? p : Math.round(saleP / (1 - pct / 100)));
+      return { hasDiscount: true, discount: Math.round(pct), displayPrice: saleP, displayOriginalPrice: origP };
+    }
+
+    if (cp > 0 && p > 0 && cp > p) {
+      const d = Math.round(((cp - p) / cp) * 100);
+      return { hasDiscount: d > 0, discount: d, displayPrice: p, displayOriginalPrice: cp };
+    }
+
+    if (p > 0 && dp > 0 && p > dp) {
+      const d = Math.round(((p - dp) / p) * 100);
+      return { hasDiscount: d > 0, discount: d, displayPrice: dp, displayOriginalPrice: p };
+    }
+
+    if (p > 0 && cp > 0 && p > cp) {
+      const d = Math.round(((p - cp) / p) * 100);
+      return { hasDiscount: d > 0, discount: d, displayPrice: cp, displayOriginalPrice: p };
+    }
+
+    return { hasDiscount: false, discount: 0, displayPrice: p, displayOriginalPrice: p };
+  };
+
+  const { hasDiscount, discount, displayPrice, displayOriginalPrice } = computeDiscountInfo();
   
   // Add to cart handler
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -104,12 +129,7 @@ const ProductCardWrapper = ({ product }: { product: Product }) => {
       console.error('Error adding to cart:', error);
     }
   };
-  
-  // displayPrice should be the price to show (discounted if available, otherwise original)
-  const displayPrice = formattedProduct.comparePrice && formattedProduct.comparePrice > 0 && formattedProduct.comparePrice < formattedProduct.price ? formattedProduct.comparePrice : formattedProduct.price;
-  // displayOriginalPrice should be the original higher price (for strikethrough)
-  const displayOriginalPrice = formattedProduct.price;
-  
+
   return (
     <div className="h-full flex flex-col bg-white border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-gray-300">
       <div className="relative overflow-hidden group">
@@ -124,7 +144,7 @@ const ProductCardWrapper = ({ product }: { product: Product }) => {
           </div>
         </Link>
         {hasDiscount && discount > 0 && (
-          <div className="absolute top-2 left-2 bg-[#0B0B0D] text-white px-2.5 py-1 text-[9px] xs:text-[10px] tracking-[0.15em] uppercase font-semibold z-10">
+          <div className="absolute top-2 left-2 bg-[#0B0B0D]/90 backdrop-blur-sm border border-amber-400/40 text-amber-300 px-2.5 py-0.5 text-[9px] xs:text-[10px] tracking-[0.15em] uppercase font-bold rounded-full shadow-md z-10">
             {discount}% OFF
           </div>
         )}

@@ -235,13 +235,13 @@ export default function SaleCarousel({ initialProducts, exactMode = false }: { i
               }}
             >
               <div className="max-w-5xl mx-auto px-2 sm:px-4 py-1 sm:py-2">
-                {/* Minimalistic Banner Image Wrapper matching Dark/Light mode seamlessly */}
-                <div className="w-full relative rounded-2xl overflow-hidden shadow-lg border border-[#C9A24B]/30 bg-[#181920] flex items-center justify-center h-auto md:h-[440px] lg:h-[480px]">
+                {/* Ultra-Minimalistic Seamless Banner Image Wrapper */}
+                <div className="w-full relative flex items-center justify-center h-auto md:h-[440px] lg:h-[480px]">
                   <Link href={`/product/${product.slug || product._id}`} className="block relative w-full h-full flex items-center justify-center">
                     <img
                       src={optimizeImageUrl(product.images && product.images[0]?.url || '/perfume-placeholder.jpg', 1200)}
                       alt={product.name || "Banner"}
-                      className="w-full h-auto md:h-full md:w-auto object-contain block cursor-pointer"
+                      className="w-full h-auto md:h-full md:w-auto object-contain block cursor-pointer rounded-2xl shadow-sm"
                     />
                   </Link>
 

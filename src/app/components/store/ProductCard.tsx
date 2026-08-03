@@ -235,9 +235,21 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
   };
   
-  const discount = (product.discountedPrice > 0 && product.price > 0)
-    ? Math.round(((product.price - product.discountedPrice) / product.price) * 100) 
-    : 0;
+  // Comprehensive discount calculation handling all price/comparePrice/discountPercentage variations
+  const computeDiscount = () => {
+    const p = Number(product.price) || 0;
+    const dp = Number(product.discountedPrice) || 0;
+    const cp = Number((product as any).comparePrice) || 0;
+    const pct = Number((product as any).discountPercentage) || 0;
+
+    if (pct > 0) return Math.round(pct);
+    if (cp > 0 && p > 0 && cp > p) return Math.round(((cp - p) / cp) * 100);
+    if (p > 0 && dp > 0 && p > dp) return Math.round(((p - dp) / p) * 100);
+    if (p > 0 && cp > 0 && p > cp) return Math.round(((p - cp) / p) * 100);
+    return 0;
+  };
+
+  const discount = computeDiscount();
   
   // Generate stars for rating
   const renderRatingStars = () => {
