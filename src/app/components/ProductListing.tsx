@@ -8,6 +8,7 @@ import Nav from './Nav';
 import Footer from './Footer';
 import Link from 'next/link';
 import Image from 'next/image';
+import CustomComboFloatingBar from './CustomComboFloatingBar';
 
 interface Product {
   _id: string;
@@ -37,8 +38,20 @@ interface Product {
   description?: string;
 }
 
+interface ProductCardWrapperProps {
+  product: Product;
+  isInCombo?: boolean;
+  onToggleCombo?: (product: Product) => void;
+  showComboAction?: boolean;
+}
+
 // ProductCardWrapper to handle different Product interfaces
-const ProductCardWrapper = ({ product }: { product: Product }) => {
+const ProductCardWrapper = ({
+  product,
+  isInCombo = false,
+  onToggleCombo,
+  showComboAction = false,
+}: ProductCardWrapperProps) => {
   // Format product to match ProductCard expectations
   const formattedProduct = {
     ...product,
@@ -175,12 +188,39 @@ const ProductCardWrapper = ({ product }: { product: Product }) => {
             {formattedProduct.volume && `${formattedProduct.volume} `}
           </div>
         </div>
-        <button 
-          onClick={handleAddToCart}
-          className="mt-3 w-full bg-black text-white py-2 xs:py-2.5 sm:py-3 rounded-none hover:bg-gray-800 transition-colors text-xs xs:text-sm"
-        >
-          Add to Cart
-        </button>
+        {showComboAction ? (
+          <div className="mt-3 flex flex-col gap-1.5">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onToggleCombo?.(formattedProduct);
+              }}
+              className={`w-full py-2 px-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider rounded transition-all duration-200 flex items-center justify-center space-x-1 ${
+                isInCombo
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm border border-emerald-500'
+                  : 'bg-gradient-to-r from-[#C5A059] via-[#D4AF37] to-[#B89047] hover:from-[#B89047] hover:to-[#C5A059] text-black shadow-md border border-[#E5C158]/50 cursor-pointer'
+              }`}
+            >
+              <span>{isInCombo ? '✓ In 3-Pack Combo' : '+ Add to 3-Pack Combo'}</span>
+            </button>
+
+            <button 
+              onClick={handleAddToCart}
+              className="w-full bg-[#121318] text-gray-300 hover:text-white py-1.5 px-2 rounded hover:bg-gray-800 transition-colors text-[10px] sm:text-[11px] font-medium"
+            >
+              Add Single Unit
+            </button>
+          </div>
+        ) : (
+          <button 
+            onClick={handleAddToCart}
+            className="mt-3 w-full bg-black text-white py-2 xs:py-2.5 sm:py-3 rounded-none hover:bg-gray-800 transition-colors text-xs xs:text-sm"
+          >
+            Add to Cart
+          </button>
+        )}
       </div>
     </div>
   );
@@ -236,6 +276,34 @@ export default function ProductListing({
   const [availableGenders, setAvailableGenders] = useState<string[]>([]);
   const [availableVolumes, setAvailableVolumes] = useState<string[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
+
+  // Custom 3-pack combo builder state
+  const [comboItems, setComboItems] = useState<Product[]>([]);
+
+  // Check if 2ml products are active
+  const is2mlActive = selectedVolume.includes('2ml') || 
+    searchParams.get('volume') === '2ml';
+
+  const handleToggleCombo = (product: Product) => {
+    setComboItems((prev) => {
+      const exists = prev.some((item) => item._id === product._id);
+      if (exists) {
+        return prev.filter((item) => item._id !== product._id);
+      }
+      if (prev.length >= 3) {
+        return [...prev.slice(1), product];
+      }
+      return [...prev, product];
+    });
+  };
+
+  const handleRemoveComboItem = (index: number) => {
+    setComboItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleClearCombo = () => {
+    setComboItems([]);
+  };
   
   // Read URL searchParams on mount (e.g. ?volume=2ml)
   useEffect(() => {
@@ -700,10 +768,15 @@ export default function ProductListing({
                 </div>
                 
                 {filteredProducts.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 md:gap-8">
+                  <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 md:gap-8 ${(is2mlActive || comboItems.length > 0) ? 'pb-28 sm:pb-32' : ''}`}>
                     {filteredProducts.map((product) => (
                       <div key={product._id} className="h-full">
-                        <ProductCardWrapper product={product} />
+                        <ProductCardWrapper 
+                          product={product} 
+                          showComboAction={is2mlActive || product.volume?.toLowerCase() === '2ml'}
+                          isInCombo={comboItems.some((item) => item._id === product._id)}
+                          onToggleCombo={handleToggleCombo}
+                        />
                       </div>
                     ))}
                   </div>
@@ -727,6 +800,16 @@ export default function ProductListing({
           </div>
         </div>
       </div>
+
+      {/* Floating 3-Pack Discovery Combo Builder */}
+      {(is2mlActive || comboItems.length > 0) && (
+        <CustomComboFloatingBar
+          selectedItems={comboItems as any}
+          onRemoveItem={handleRemoveComboItem}
+          onClearAll={handleClearCombo}
+        />
+      )}
+
       <Footer />
     </>
   );
