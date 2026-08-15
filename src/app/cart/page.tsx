@@ -12,8 +12,17 @@ interface CartItem {
   name: string;
   price: number;
   discountedPrice?: number;
+  comparePrice?: number;
   quantity: number;
   image: string;
+  images?: string[];
+  isBundle?: boolean;
+  bundleItems?: Array<{
+    id?: string;
+    name?: string;
+    image?: string;
+    volume?: string;
+  }>;
 }
 
 export default function CartPage() {
@@ -165,17 +174,48 @@ export default function CartPage() {
                       <tr key={item._id || item.id} className="py-4">
                         <td className="py-4">
                           <div className="flex items-center">
-                            <div className="w-16 h-16 relative flex-shrink-0">
-                              <Image
-                                src={item.image || '/perfume-placeholder.jpg'}
-                                alt={item.name}
-                                fill
-                                sizes="64px"
-                                className="object-cover rounded"
-                              />
-                            </div>
+                            {item.bundleItems && item.bundleItems.length > 0 ? (
+                              <div className="w-16 h-16 relative flex-shrink-0 bg-amber-50/50 rounded p-1 border border-amber-300/60 flex items-center justify-center">
+                                <div className="flex items-center -space-x-2">
+                                  {item.bundleItems.slice(0, 3).map((bItem: any, idx: number) => (
+                                    <div 
+                                      key={idx} 
+                                      className="w-7 h-7 rounded-full border border-[#C9A24B] bg-white shadow-xs p-0.5 overflow-hidden flex-shrink-0 relative"
+                                      title={bItem.name}
+                                    >
+                                      <Image
+                                        src={bItem.image || '/perfume-placeholder.jpg'}
+                                        alt={bItem.name || 'Perfume'}
+                                        fill
+                                        sizes="28px"
+                                        className="object-contain"
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="w-16 h-16 relative flex-shrink-0">
+                                <Image
+                                  src={item.image || '/perfume-placeholder.jpg'}
+                                  alt={item.name}
+                                  fill
+                                  sizes="64px"
+                                  className="object-cover rounded"
+                                />
+                              </div>
+                            )}
                             <div className="ml-4">
                               <h3 className="font-medium">{item.name}</h3>
+                              {item.bundleItems && item.bundleItems.length > 0 && (
+                                <div className="flex flex-wrap items-center gap-1 mt-1">
+                                  {item.bundleItems.map((bItem: any, idx: number) => (
+                                    <span key={idx} className="text-[10px] bg-amber-100/70 text-gray-800 px-1.5 py-0.5 rounded">
+                                      {bItem.name}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </td>
@@ -198,15 +238,22 @@ export default function CartPage() {
                           </div>
                         </td>
                         <td className="py-4 text-right">
-                          {item.discountedPrice ? (
+                          {item.discountedPrice && item.price && item.discountedPrice < item.price ? (
                             <div>
                               <span className="text-[#5A606B] line-through text-sm mr-2">
                                 ₹{item.price.toFixed(2)}
                               </span>
                               <div className="font-semibold text-[#0B0B0D]">₹{item.discountedPrice.toFixed(2)}</div>
                             </div>
+                          ) : item.comparePrice && item.price && item.comparePrice > item.price ? (
+                            <div>
+                              <span className="text-[#5A606B] line-through text-sm mr-2">
+                                ₹{item.comparePrice.toFixed(2)}
+                              </span>
+                              <div className="font-semibold text-[#0B0B0D]">₹{item.price.toFixed(2)}</div>
+                            </div>
                           ) : (
-                            <div className="font-semibold text-[#0B0B0D]">₹{item.price.toFixed(2)}</div>
+                            <div className="font-semibold text-[#0B0B0D]">₹{(item.discountedPrice || item.price).toFixed(2)}</div>
                           )}
                         </td>
                         <td className="py-4 text-right font-medium">

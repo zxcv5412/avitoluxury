@@ -11,8 +11,18 @@ interface CartItem {
   _id?: string;
   name: string;
   price: number;
+  discountedPrice?: number;
+  comparePrice?: number;
   image: string;
+  images?: string[];
+  isBundle?: boolean;
   quantity: number;
+  bundleItems?: Array<{
+    id?: string;
+    name?: string;
+    image?: string;
+    volume?: string;
+  }>;
 }
 
 interface MiniCartProps {
@@ -338,21 +348,52 @@ export default function MiniCart({ isOpen, onClose }: MiniCartProps) {
             <div className="space-y-4">
               {cartItems.map((item) => (
                 <div key={item.id || item._id} className="flex items-center border-b pb-4">
-                  <div className="w-20 h-20 relative mr-4 border">
-                    <Image 
-                      src={item.image || "/images/placeholder-product.jpg"} 
-                      alt={item.name}
-                      fill
-                      sizes="80px"
-                      style={{ objectFit: 'cover' }}
-                      onError={(e) => {
-                        // @ts-ignore
-                        e.target.src = "/images/placeholder-product.jpg";
-                      }}
-                    />
-                  </div>
+                  {item.bundleItems && item.bundleItems.length > 0 ? (
+                    <div className="w-20 h-20 relative mr-4 bg-amber-50/50 rounded-lg p-1 border border-amber-300/60 flex items-center justify-center flex-shrink-0">
+                      <div className="flex items-center -space-x-2">
+                        {item.bundleItems.slice(0, 3).map((bItem: any, idx: number) => (
+                          <div 
+                            key={idx} 
+                            className="w-7 h-7 rounded-full border border-[#C9A24B] bg-white shadow-xs p-0.5 overflow-hidden flex-shrink-0 relative"
+                            title={bItem.name}
+                          >
+                            <Image
+                              src={bItem.image || "/images/placeholder-product.jpg"} 
+                              alt={bItem.name || 'Perfume'}
+                              fill
+                              sizes="28px"
+                              style={{ objectFit: 'contain' }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 relative mr-4 border flex-shrink-0">
+                      <Image 
+                        src={item.image || "/images/placeholder-product.jpg"} 
+                        alt={item.name}
+                        fill
+                        sizes="80px"
+                        style={{ objectFit: 'cover' }}
+                        onError={(e) => {
+                          // @ts-ignore
+                          e.target.src = "/images/placeholder-product.jpg";
+                        }}
+                      />
+                    </div>
+                  )}
                   <div className="flex-grow">
                     <h3 className="font-medium">{item.name}</h3>
+                    {item.bundleItems && item.bundleItems.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1 mt-1">
+                        {item.bundleItems.map((bItem: any, idx: number) => (
+                          <span key={idx} className="text-[10px] bg-amber-100/70 text-gray-800 px-1.5 py-0.5 rounded">
+                            {bItem.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex items-center mt-2">
                       <button 
                         onClick={() => updateQuantity(item.id || item._id || '', item.quantity - 1)}
@@ -382,7 +423,23 @@ export default function MiniCart({ isOpen, onClose }: MiniCartProps) {
                     >
                       Remove
                     </button>
-                    <span className="font-medium">₹{item.price.toFixed(2)}</span>
+                    {item.discountedPrice && item.price && item.discountedPrice < item.price ? (
+                      <div className="text-right">
+                        <span className="text-[#5A606B] line-through text-xs font-normal mr-1">
+                          ₹{item.price.toFixed(2)}
+                        </span>
+                        <span className="font-medium text-[#0B0B0D]">₹{item.discountedPrice.toFixed(2)}</span>
+                      </div>
+                    ) : item.comparePrice && item.price && item.comparePrice > item.price ? (
+                      <div className="text-right">
+                        <span className="text-[#5A606B] line-through text-xs font-normal mr-1">
+                          ₹{item.comparePrice.toFixed(2)}
+                        </span>
+                        <span className="font-medium text-[#0B0B0D]">₹{item.price.toFixed(2)}</span>
+                      </div>
+                    ) : (
+                      <span className="font-medium">₹{(item.discountedPrice || item.price).toFixed(2)}</span>
+                    )}
                   </div>
                 </div>
               ))}

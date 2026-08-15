@@ -15,8 +15,17 @@ interface CartItem {
   name: string;
   price: number;
   discountedPrice?: number;
+  comparePrice?: number;
   quantity: number;
   image: string;
+  images?: string[];
+  isBundle?: boolean;
+  bundleItems?: Array<{
+    id?: string;
+    name?: string;
+    image?: string;
+    volume?: string;
+  }>;
 }
 
 interface MiniCartWithModalProps {
@@ -279,16 +288,41 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
             <div className="space-y-4">
               {cartItems.map((item) => (
                 <div key={item._id || item.id || ''} className="flex border-b pb-4">
-                  <div className="w-20 h-20 relative flex-shrink-0">
-                    <Image
-                      src={item.image || '/placeholder-image.jpg'}
-                      alt={item.name}
-                      fill
-                      sizes="80px"
-                      style={{ objectFit: 'cover' }}
-                      className="rounded"
-                    />
-                  </div>
+                  {item.bundleItems && item.bundleItems.length > 0 ? (
+                    <div className="w-20 h-20 flex-shrink-0 bg-amber-50/50 rounded-lg p-1 border border-amber-300/60 flex flex-col items-center justify-center">
+                      <div className="flex items-center -space-x-2">
+                        {item.bundleItems.slice(0, 3).map((bItem: any, idx: number) => (
+                          <div 
+                            key={idx} 
+                            className="w-7 h-7 rounded-full border border-[#C9A24B] bg-white shadow-xs p-0.5 overflow-hidden flex-shrink-0 relative"
+                            title={bItem.name}
+                          >
+                            <Image
+                              src={bItem.image || '/placeholder-image.jpg'}
+                              alt={bItem.name || 'Perfume'}
+                              fill
+                              sizes="28px"
+                              style={{ objectFit: 'contain' }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <span className="text-[8px] bg-[#C9A24B] text-black font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full mt-1.5">
+                        3-Pack
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 relative flex-shrink-0">
+                      <Image
+                        src={item.image || '/placeholder-image.jpg'}
+                        alt={item.name}
+                        fill
+                        sizes="80px"
+                        style={{ objectFit: 'cover' }}
+                        className="rounded"
+                      />
+                    </div>
+                  )}
                   
                   <div className="ml-4 flex-grow">
                     <div className="flex justify-between">
@@ -298,12 +332,35 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
                           e.stopPropagation();
                           removeItem(item._id || item.id || '');
                         }}
-                        className="text-gray-400 hover:text-red-500"
+                        className="text-gray-400 hover:text-red-500 cursor-pointer"
                         aria-label="Remove item"
                       >
                         <FiTrash2 size={18} />
                       </button>
                     </div>
+
+                    {/* If bundle, show clean horizontal list of chosen scents with thumbnails */}
+                    {item.bundleItems && item.bundleItems.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5 my-1.5">
+                        {item.bundleItems.map((bItem: any, idx: number) => (
+                          <div 
+                            key={idx} 
+                            className="inline-flex items-center space-x-1 bg-amber-50/80 border border-amber-300/60 rounded-full px-1.5 py-0.5 text-[9px] text-gray-800 font-medium"
+                          >
+                            <div className="w-3.5 h-3.5 rounded-full overflow-hidden relative flex-shrink-0 bg-white">
+                              <Image
+                                src={bItem.image || '/placeholder-image.jpg'}
+                                alt={bItem.name}
+                                fill
+                                sizes="14px"
+                                style={{ objectFit: 'contain' }}
+                              />
+                            </div>
+                            <span className="truncate max-w-[80px]">{bItem.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     
                     <div className="flex justify-between items-center mt-2">
                       <div className="flex items-center border rounded-md">
@@ -313,7 +370,7 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
                             const itemId = item._id || item.id || '';
                             updateQuantity(itemId, item.quantity - 1);
                           }}
-                          className="px-2 py-1 text-gray-600 hover:text-black"
+                          className="px-2 py-1 text-gray-600 hover:text-black cursor-pointer"
                           aria-label="Decrease quantity"
                           disabled={item.quantity <= 1}
                         >
@@ -326,7 +383,7 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
                             const itemId = item._id || item.id || '';
                             updateQuantity(itemId, item.quantity + 1);
                           }}
-                          className="px-2 py-1 text-gray-600 hover:text-black"
+                          className="px-2 py-1 text-gray-600 hover:text-black cursor-pointer"
                           aria-label="Increase quantity"
                         >
                           <FiPlus size={16} />
@@ -334,15 +391,22 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
                       </div>
                       
                       <div className="font-semibold">
-                        {item.discountedPrice ? (
+                        {item.discountedPrice && item.price && item.discountedPrice < item.price ? (
                           <div className="flex items-center gap-1.5">
                             <span className="text-[#5A606B] line-through text-xs font-normal">
                               ₹{item.price.toFixed(2)}
                             </span>
                             <span className="text-[#0B0B0D]">₹{item.discountedPrice.toFixed(2)}</span>
                           </div>
+                        ) : item.comparePrice && item.price && item.comparePrice > item.price ? (
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[#5A606B] line-through text-xs font-normal">
+                              ₹{item.comparePrice.toFixed(2)}
+                            </span>
+                            <span className="text-[#0B0B0D]">₹{item.price.toFixed(2)}</span>
+                          </div>
                         ) : (
-                          <span className="text-[#0B0B0D]">₹{item.price.toFixed(2)}</span>
+                          <span className="text-[#0B0B0D]">₹{(item.discountedPrice || item.price).toFixed(2)}</span>
                         )}
                       </div>
                     </div>

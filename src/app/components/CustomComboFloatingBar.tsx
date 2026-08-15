@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { FiX, FiCheck, FiShoppingBag } from 'react-icons/fi';
+import { FiCheck, FiShoppingBag } from 'react-icons/fi';
 
 export interface ComboProduct {
   _id: string;
@@ -58,15 +58,17 @@ export default function CustomComboFloatingBar({
         _id: bundleId,
         id: bundleId,
         name: `Custom 2ml 3-Pack Discovery Combo (${fragranceNames})`,
-        price: finalPrice,
+        price: totalBasePrice,
         comparePrice: totalBasePrice,
         discountedPrice: finalPrice,
         image: selectedItems[0]?.mainImage || (typeof selectedItems[0]?.images?.[0] === 'string' ? selectedItems[0]?.images?.[0] : selectedItems[0]?.images?.[0]?.url) || '/placeholder-image.jpg',
+        images: selectedItems.map(i => i.mainImage || (typeof i.images?.[0] === 'string' ? i.images?.[0] : i.images?.[0]?.url) || '/placeholder-image.jpg'),
         quantity: 1,
         isBundle: true,
         bundleItems: selectedItems.map(i => ({
           id: i._id,
           name: i.name,
+          image: i.mainImage || (typeof i.images?.[0] === 'string' ? i.images?.[0] : i.images?.[0]?.url) || '/placeholder-image.jpg',
           volume: i.volume || '2ml'
         }))
       };
@@ -91,17 +93,17 @@ export default function CustomComboFloatingBar({
   };
 
   return (
-    <div className="fixed bottom-2.5 sm:bottom-5 inset-x-2 sm:inset-x-auto sm:w-[92%] sm:max-w-4xl sm:left-1/2 sm:-translate-x-1/2 z-50 pointer-events-auto">
+    <div className="fixed bottom-2 sm:bottom-5 inset-x-2 sm:inset-x-auto sm:w-[92%] sm:max-w-4xl sm:left-1/2 sm:-translate-x-1/2 z-50 pointer-events-auto">
       <motion.div
         initial={{ y: 60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 60, opacity: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="w-full bg-[#121318] border-2 border-[#C9A24B] rounded-2xl sm:rounded-3xl shadow-[0_15px_50px_rgba(0,0,0,0.9)] p-2.5 sm:p-3.5 px-3 sm:px-5 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4"
+        className="w-full bg-[#121318] border-2 border-[#C9A24B] rounded-2xl sm:rounded-3xl shadow-[0_15px_50px_rgba(0,0,0,0.95)] p-2.5 sm:p-3.5 px-3 sm:px-5 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4"
       >
         {/* Left: 3 Fragrance Slots & Status */}
-        <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-3 sm:gap-4">
-          <div className="flex items-center space-x-2.5 sm:space-x-3.5">
+        <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-2.5 sm:gap-4">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {[0, 1, 2].map((index) => {
               const item = selectedItems[index];
               const imageUrl = item ? (item.mainImage || (typeof item.images?.[0] === 'string' ? item.images?.[0] : item.images?.[0]?.url) || '/placeholder-image.jpg') : null;
@@ -112,18 +114,24 @@ export default function CustomComboFloatingBar({
                     <motion.div 
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white border-2 border-[#C9A24B] shadow-md p-1 flex items-center justify-center"
-                      title={item.name}
+                      className="relative flex items-center justify-center"
                     >
-                      <Image
-                        src={imageUrl!}
-                        alt={item.name}
-                        width={60}
-                        height={60}
-                        className="w-full h-full object-contain rounded-full"
-                      />
+                      {/* Fragrance Circular Disc */}
+                      <div 
+                        onClick={() => onRemoveItem(index)}
+                        className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 rounded-full bg-white border-2 border-[#C9A24B] shadow-md p-1 flex items-center justify-center overflow-hidden cursor-pointer"
+                        title={`${item.name} (Click to remove)`}
+                      >
+                        <Image
+                          src={imageUrl!}
+                          alt={item.name}
+                          width={56}
+                          height={56}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
                       
-                      {/* Elegant Gold/Dark Cancel Badge at corner */}
+                      {/* Micro Cancel '✕' Badge */}
                       <button
                         type="button"
                         onClick={(e) => {
@@ -131,14 +139,15 @@ export default function CustomComboFloatingBar({
                           e.stopPropagation();
                           onRemoveItem(index);
                         }}
-                        className="absolute -top-1 -right-1 w-5 h-5 bg-[#121318] hover:bg-black text-[#C9A24B] hover:text-white border border-[#C9A24B] rounded-full flex items-center justify-center text-[10px] shadow-md cursor-pointer z-30 transition-transform hover:scale-110 active:scale-95"
+                        style={{ width: '18px', height: '18px', minWidth: '18px', minHeight: '18px' }}
+                        className="absolute -top-1 -right-1 bg-black hover:bg-zinc-800 text-[#C9A24B] border border-[#C9A24B] rounded-full flex items-center justify-center text-[10px] font-bold shadow-md cursor-pointer z-30 transition-transform active:scale-90"
                         title="Remove scent"
                       >
-                        <FiX className="w-3 h-3" />
+                        ✕
                       </button>
                     </motion.div>
                   ) : (
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-dashed border-[#C9A24B]/50 bg-[#1A1A1A] flex flex-col items-center justify-center text-gray-300 shadow-inner">
+                    <div className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 rounded-full border-2 border-dashed border-[#C9A24B]/50 bg-[#1A1A1A] flex flex-col items-center justify-center text-gray-300 shadow-inner">
                       <span className="text-[#C9A24B] text-xs sm:text-sm font-black">#{index + 1}</span>
                       <span className="text-[8px] sm:text-[9px] text-gray-400 font-medium">Empty</span>
                     </div>
