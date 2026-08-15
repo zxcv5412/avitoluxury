@@ -26,40 +26,28 @@ export async function POST(request: NextRequest) {
     let user = await User.findOne({ email: userData.email });
     
     if (!user) {
-      // For security, require users to register with a proper password
-      // Don't create users with default passwords during checkout
-      if (!userData.password) {
-        return NextResponse.json(
-          { success: false, error: 'User registration required. Please create an account first.' },
-          { status: 400 }
-        );
-      }
-      
-      // Validate password strength
-      if (userData.password.length < 8) {
-        return NextResponse.json(
-          { success: false, error: 'Password must be at least 8 characters long' },
-          { status: 400 }
-        );
-      }
-      
-      // Create new user with provided password
+      // Create new user (using provided password or generating secure random guest account)
+      const userPassword = userData.password && userData.password.length >= 6 
+        ? userData.password 
+        : `guest_${uuidv4()}_${Date.now()}`;
+
       user = new User({
-        name: userData.fullName,
+        name: userData.fullName || 'Customer',
         email: userData.email,
-        password: userData.password, // Use provided password only
+        password: userPassword,
         phone: userData.phone,
+        role: 'user',
         addresses: [{
           addressId: uuidv4(),
           fullName: userData.fullName,
           addressLine1: userData.houseNo,
           addressLine2: userData.address,
-          landmark: userData.landmark,
+          landmark: userData.landmark || '',
           city: userData.city,
           state: userData.state,
           pincode: userData.pincode,
           phone: userData.phone,
-          country: 'India', // Add required country field
+          country: 'India',
           isDefault: true
         }]
       });

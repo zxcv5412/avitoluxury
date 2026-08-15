@@ -32,6 +32,16 @@ export default function PaymentPage() {
         setPaymentStatus('success');
         setTrackingId(codTrackingId);
         setIsLoading(false);
+        try {
+          localStorage.setItem('cart', '[]');
+          sessionStorage.removeItem('checkout_form_data');
+          sessionStorage.removeItem('checkoutFormData');
+          sessionStorage.removeItem('checkout_order_id');
+          window.dispatchEvent(new Event('storage'));
+          window.dispatchEvent(new Event('cart-updated'));
+        } catch (e) {
+          // ignore
+        }
         return;
       }
 

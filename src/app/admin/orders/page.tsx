@@ -41,6 +41,7 @@ interface Customer {
 interface Order {
   id?: string;
   _id?: string;  // MongoDB ID
+  trackingId?: string;
   orderNumber?: string;
   orderId?: string;  // Alternative order ID field
   customer?: Customer;
@@ -383,7 +384,7 @@ export default function AdminOrdersPage() {
                     <div className="flex items-center">
                       <FiPackage className="mr-2 text-gray-400" />
                       <span className="font-medium text-gray-900">
-                        {order.orderNumber || (order.id ? order.id.slice(0, 8).toUpperCase() : order._id ? order._id.toString().slice(0, 8).toUpperCase() : 'N/A')}
+                        {order.trackingId || order.orderNumber || order.orderId || (order.id ? order.id.slice(0, 8).toUpperCase() : order._id ? order._id.toString().slice(0, 8).toUpperCase() : 'N/A')}
                       </span>
                     </div>
                   </td>

@@ -70,7 +70,8 @@ export default function OrderTrackingPage() {
     setError(null);
     
     try {
-      const response = await fetch(`/api/checkout/track-order?tracking_id=${id}`);
+      const trimmedId = id.trim();
+      const response = await fetch(`/api/checkout/track-order?tracking_id=${encodeURIComponent(trimmedId)}`);
       const data = await response.json();
       
       if (!data.success) {

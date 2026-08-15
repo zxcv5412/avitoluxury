@@ -64,9 +64,11 @@ export default function TrackOrderPage() {
       setError('');
       
       // Build the query string
+      const trimmedOrderId = orderId.trim();
+      const trimmedPhone = phone.trim();
       const queryParams = new URLSearchParams();
-      if (orderId) queryParams.append('id', orderId);
-      if (phone) queryParams.append('phone', phone);
+      if (trimmedOrderId) queryParams.append('id', trimmedOrderId);
+      if (trimmedPhone) queryParams.append('phone', trimmedPhone);
       
       // Fetch order details
       const response = await fetch(`/api/guest-orders?${queryParams.toString()}`, {
