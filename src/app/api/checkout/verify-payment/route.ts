@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectToDatabase } from '@/app/lib/db-connect';
 import Order from '@/app/models/Order';
 import Product from '@/app/models/Product';
@@ -27,8 +28,15 @@ export async function POST(request: NextRequest) {
     // Connect to database
     await connectToDatabase();
     
-    // Find order and populate user information
-    const order = await Order.findById(orderId).populate('user').populate({
+    // Find order safely by _id, trackingId, or orderId
+    const isObjectId = mongoose.Types.ObjectId.isValid(orderId);
+    const order = await Order.findOne({
+      $or: [
+        ...(isObjectId ? [{ _id: new mongoose.Types.ObjectId(orderId) }] : []),
+        { trackingId: orderId },
+        { orderId }
+      ]
+    }).populate('user').populate({
       path: 'items.product',
       model: Product
     });

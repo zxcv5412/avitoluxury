@@ -32,20 +32,26 @@ export async function GET(
     
     // Create the query - for admin show any order, for regular users show only their orders
     let query = {};
+    const isObjectId = mongoose.Types.ObjectId.isValid(id);
     if (userId === 'admin-bypass-user-id' || isPublic) {
       // Admin or public access can view any order
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        query = { _id: new mongoose.Types.ObjectId(id) };
-      } else {
-        query = { trackingId: id };
-      }
+      query = {
+        $or: [
+          { trackingId: id },
+          { orderId: id },
+          ...(isObjectId ? [{ _id: new mongoose.Types.ObjectId(id) }] : [])
+        ]
+      };
     } else if (userId) {
       // Regular users can only view their own orders
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        query = { _id: new mongoose.Types.ObjectId(id), user: userId };
-      } else {
-        query = { trackingId: id, user: userId };
-      }
+      query = {
+        user: userId,
+        $or: [
+          { trackingId: id },
+          { orderId: id },
+          ...(isObjectId ? [{ _id: new mongoose.Types.ObjectId(id) }] : [])
+        ]
+      };
     } else {
       // No user ID and not public - should not reach here due to earlier check
       return NextResponse.json({ 
