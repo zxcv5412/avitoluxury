@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiCheck, FiShoppingBag, FiPlus } from 'react-icons/fi';
+import { motion } from 'framer-motion';
+import { FiX, FiCheck, FiShoppingBag } from 'react-icons/fi';
 
 export interface ComboProduct {
   _id: string;
@@ -91,54 +91,56 @@ export default function CustomComboFloatingBar({
   };
 
   return (
-    <div className="fixed bottom-2.5 sm:bottom-5 left-2 right-2 sm:left-auto sm:right-auto sm:w-[92%] sm:max-w-4xl sm:left-1/2 sm:-translate-x-1/2 z-50">
+    <div className="fixed bottom-2.5 sm:bottom-5 inset-x-2 sm:inset-x-auto sm:w-[92%] sm:max-w-4xl sm:left-1/2 sm:-translate-x-1/2 z-50 pointer-events-auto">
       <motion.div
         initial={{ y: 60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 60, opacity: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="w-full bg-[#121318]/98 backdrop-blur-xl border-2 border-[#C9A24B]/70 rounded-2xl sm:rounded-3xl shadow-[0_12px_45px_rgba(0,0,0,0.85)] p-2.5 sm:p-3 px-3 sm:px-5 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4"
+        className="w-full bg-[#121318] border-2 border-[#C9A24B] rounded-2xl sm:rounded-3xl shadow-[0_15px_50px_rgba(0,0,0,0.9)] p-2.5 sm:p-3.5 px-3 sm:px-5 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4"
       >
-        {/* Left: 3 Large Prominent Fragrance Slots */}
-        <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-2.5 sm:gap-4">
-          <div className="flex items-center space-x-2 sm:space-x-3">
+        {/* Left: 3 Fragrance Slots & Status */}
+        <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-3 sm:gap-4">
+          <div className="flex items-center space-x-2.5 sm:space-x-3.5">
             {[0, 1, 2].map((index) => {
               const item = selectedItems[index];
               const imageUrl = item ? (item.mainImage || (typeof item.images?.[0] === 'string' ? item.images?.[0] : item.images?.[0]?.url) || '/placeholder-image.jpg') : null;
 
               return (
-                <div key={index} className="relative">
+                <div key={index} className="relative flex-shrink-0">
                   {item ? (
                     <motion.div 
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-2xl bg-white border-2 border-[#C9A24B] shadow-lg p-1 flex items-center justify-center group overflow-hidden"
+                      className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white border-2 border-[#C9A24B] shadow-md p-1 flex items-center justify-center"
                       title={item.name}
                     >
                       <Image
                         src={imageUrl!}
                         alt={item.name}
-                        width={64}
-                        height={64}
-                        className="w-full h-full object-contain"
+                        width={60}
+                        height={60}
+                        className="w-full h-full object-contain rounded-full"
                       />
-                      {/* Name pill on hover */}
-                      <span className="absolute bottom-0 inset-x-0 bg-black/80 text-[8px] sm:text-[9px] text-[#C9A24B] font-bold text-center truncate px-0.5 pointer-events-none">
-                        {item.name}
-                      </span>
-                      {/* Remove Button */}
+                      
+                      {/* Elegant Gold/Dark Cancel Badge at corner */}
                       <button
-                        onClick={() => onRemoveItem(index)}
-                        className="absolute top-0.5 right-0.5 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 shadow-md opacity-90 hover:opacity-100 transition-all cursor-pointer z-10"
-                        title="Remove fragrance"
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onRemoveItem(index);
+                        }}
+                        className="absolute -top-1 -right-1 w-5 h-5 bg-[#121318] hover:bg-black text-[#C9A24B] hover:text-white border border-[#C9A24B] rounded-full flex items-center justify-center text-[10px] shadow-md cursor-pointer z-30 transition-transform hover:scale-110 active:scale-95"
+                        title="Remove scent"
                       >
                         <FiX className="w-3 h-3" />
                       </button>
                     </motion.div>
                   ) : (
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-2xl border-2 border-dashed border-[#C9A24B]/50 bg-white/5 flex flex-col items-center justify-center text-gray-300 text-[10px] sm:text-xs font-bold shadow-inner">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-dashed border-[#C9A24B]/50 bg-[#1A1A1A] flex flex-col items-center justify-center text-gray-300 shadow-inner">
                       <span className="text-[#C9A24B] text-xs sm:text-sm font-black">#{index + 1}</span>
-                      <span className="text-[9px] text-gray-400 font-medium">Empty</span>
+                      <span className="text-[8px] sm:text-[9px] text-gray-400 font-medium">Empty</span>
                     </div>
                   )}
                 </div>

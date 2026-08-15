@@ -283,6 +283,8 @@ export default function ProductListing({
   const [isTagsOpen, setIsTagsOpen] = useState(true);
   
   // Filter states
+  const [minPossiblePrice, setMinPossiblePrice] = useState(0);
+  const [maxPossiblePrice, setMaxPossiblePrice] = useState(10000);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [sortBy, setSortBy] = useState('price-low-high');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -418,6 +420,8 @@ export default function ProductListing({
       const prices = products.map(product => (product.discountedPrice && product.discountedPrice > 0) ? product.discountedPrice : product.price);
       const minPrice = Math.floor(Math.min(...prices)) || 0;
       const maxPrice = Math.ceil(Math.max(...prices)) || 10000;
+      setMinPossiblePrice(minPrice);
+      setMaxPossiblePrice(maxPrice);
       setPriceRange([minPrice, maxPrice]);
     }
   };
@@ -522,12 +526,7 @@ export default function ProductListing({
     setSelectedGender([]);
     setSelectedVolume([]);
     setSelectedTags([]);
-    if (products.length > 0) {
-      const prices = products.map(p => (p.discountedPrice && p.discountedPrice > 0) ? p.discountedPrice : p.price);
-      const minPrice = Math.floor(Math.min(...prices)) || 0;
-      const maxPrice = Math.ceil(Math.max(...prices)) || 10000;
-      setPriceRange([minPrice, maxPrice]);
-    }
+    setPriceRange([minPossiblePrice, maxPossiblePrice]);
     setSortBy('price-low-high');
   };
   
@@ -549,15 +548,16 @@ export default function ProductListing({
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name, category, or description..."
+              placeholder="Search by name..."
               className="w-full px-4 py-3 pl-10 rounded-md bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black focus:outline-none text-black"
             />
             <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
           
           <button 
+            type="button"
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="flex items-center gap-2 px-6 py-3 bg-black text-white hover:bg-gray-800 rounded-md transition duration-300 shadow-md"
+            className="flex items-center gap-2 px-6 py-3 bg-black text-white hover:bg-gray-800 rounded-md transition duration-300 shadow-md cursor-pointer flex-shrink-0"
           >
             <FiFilter />
             <span>{isFilterOpen ? 'Hide Filters' : 'Show Filters'}</span>
@@ -566,61 +566,63 @@ export default function ProductListing({
         
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* Filters Panel */}
-          <div className={`${isFilterOpen ? 'block' : 'hidden lg:block'} w-full lg:w-1/4 transition-all duration-300`}>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 xs:p-4 mb-6 shadow-sm lg:sticky lg:top-24">
-              <div className="flex justify-between items-center mb-3 xs:mb-5 pb-2 border-b border-gray-200">
-                <h3 className="font-semibold text-base xs:text-lg">Filters</h3>
-                <button 
-                  onClick={resetFilters}
-                  className="text-xs xs:text-sm text-black hover:text-gray-600 transition-colors"
-                >
-                  Reset All
-                </button>
-              </div>
-              
-              {/* Sort By */}
-              <div className="border-t border-gray-200 py-3 xs:py-4">
-                <h4 className="font-medium mb-2 text-sm xs:text-base">Sort By</h4>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md bg-white text-sm"
-                >
-                  <option value="newest">Newest</option>
-                  <option value="price-low-high">Price: Low to High</option>
-                  <option value="price-high-low">Price: High to Low</option>
-                  <option value="name-a-z">Name: A to Z</option>
-                  <option value="name-z-a">Name: Z to A</option>
-                </select>
-              </div>
-              
-              {/* Price Range */}
-              <div className="border-t border-gray-200 py-4">
-                <div 
-                  className="flex justify-between items-center cursor-pointer"
-                  onClick={() => setIsPriceOpen(!isPriceOpen)}
-                >
-                  <h4 className="font-medium">Price Range</h4>
-                  {isPriceOpen ? <FiChevronUp /> : <FiChevronDown />}
+          {isFilterOpen && (
+            <div className="w-full lg:w-1/4 transition-all duration-300">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 xs:p-4 mb-6 shadow-sm lg:sticky lg:top-24">
+                <div className="flex justify-between items-center mb-3 xs:mb-5 pb-2 border-b border-gray-200">
+                  <h3 className="font-semibold text-base xs:text-lg">Filters</h3>
+                  <button 
+                    onClick={resetFilters}
+                    className="text-xs xs:text-sm text-black hover:text-gray-600 transition-colors cursor-pointer"
+                  >
+                    Reset All
+                  </button>
                 </div>
                 
-                {isPriceOpen && (
-                  <div className="mt-4">
-                    <div className="flex justify-between mb-2 text-sm">
-                      <span>₹{priceRange[0]}</span>
-                      <span>₹{priceRange[1]}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={0}
-                      max={priceRange[1] || 10000}
-                      value={priceRange[1]}
-                      onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                      className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-black"
-                    />
+                {/* Sort By */}
+                <div className="border-t border-gray-200 py-3 xs:py-4">
+                  <h4 className="font-medium mb-2 text-sm xs:text-base">Sort By</h4>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-md bg-white text-sm"
+                  >
+                    <option value="newest">Newest</option>
+                    <option value="price-low-high">Price: Low to High</option>
+                    <option value="price-high-low">Price: High to Low</option>
+                    <option value="name-a-z">Name: A to Z</option>
+                    <option value="name-z-a">Name: Z to A</option>
+                  </select>
+                </div>
+                
+                {/* Price Range */}
+                <div className="border-t border-gray-200 py-4">
+                  <div 
+                    className="flex justify-between items-center cursor-pointer"
+                    onClick={() => setIsPriceOpen(!isPriceOpen)}
+                  >
+                    <h4 className="font-medium">Price Range</h4>
+                    {isPriceOpen ? <FiChevronUp /> : <FiChevronDown />}
                   </div>
-                )}
-              </div>
+                  
+                  {isPriceOpen && (
+                    <div className="mt-4">
+                      <div className="flex justify-between mb-2 text-sm font-semibold text-gray-700">
+                        <span>₹{minPossiblePrice}</span>
+                        <span className="text-black font-bold">Max: ₹{priceRange[1]}</span>
+                        <span>₹{maxPossiblePrice}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={minPossiblePrice}
+                        max={maxPossiblePrice}
+                        value={priceRange[1]}
+                        onChange={(e) => setPriceRange([minPossiblePrice, Number(e.target.value)])}
+                        className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-black"
+                      />
+                    </div>
+                  )}
+                </div>
               
               {/* Categories */}
               {availableCategories.length > 0 && (
@@ -753,9 +755,10 @@ export default function ProductListing({
               )}
             </div>
           </div>
-          
-          {/* Products Grid */}
-          <div className="w-full lg:w-3/4">
+        )}
+        
+        {/* Products Grid */}
+          <div className={`transition-all duration-300 ${isFilterOpen ? "w-full lg:w-3/4" : "w-full"}`}>
             {loading ? (
               <div className="flex justify-center items-center h-64 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="text-center">
@@ -787,7 +790,7 @@ export default function ProductListing({
                 </div>
                 
                 {filteredProducts.length > 0 ? (
-                  <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 md:gap-8 ${(is2mlActive || comboItems.length > 0) ? 'pb-28 sm:pb-32' : ''}`}>
+                  <div className={`grid grid-cols-2 sm:grid-cols-2 ${isFilterOpen ? 'md:grid-cols-3 lg:grid-cols-3' : 'md:grid-cols-3 lg:grid-cols-4'} gap-3 sm:gap-6 md:gap-8 ${(is2mlActive || comboItems.length > 0) ? 'pb-28 sm:pb-32' : ''}`}>
                     {filteredProducts.map((product) => (
                       <div key={product._id} className="h-full">
                         <ProductCardWrapper 
