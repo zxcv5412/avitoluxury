@@ -77,22 +77,29 @@ export async function GET(
     await connectMongoDB();
     
     // Create the query - for admin show any order, for regular users show only their orders
+    // Create the query - for admin show any order, for regular users show only their orders
     let query = {};
+    const isObjectId = mongoose.Types.ObjectId.isValid(id);
     if (userId === 'admin-bypass-user-id') {
       // Admin can view any order
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        query = { _id: new mongoose.Types.ObjectId(id) };
-      } else {
-        query = { orderId: id };
-      }
+      query = {
+        $or: [
+          { trackingId: id },
+          { orderId: id },
+          ...(isObjectId ? [{ _id: new mongoose.Types.ObjectId(id) }] : [])
+        ]
+      };
       console.log('Admin is viewing order:', query);
     } else {
       // Regular users can only view their own orders
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        query = { _id: new mongoose.Types.ObjectId(id), user: userId };
-      } else {
-        query = { orderId: id, user: userId };
-      }
+      query = {
+        user: userId,
+        $or: [
+          { trackingId: id },
+          { orderId: id },
+          ...(isObjectId ? [{ _id: new mongoose.Types.ObjectId(id) }] : [])
+        ]
+      };
       console.log('User is viewing their order:', query);
     }
     
@@ -121,12 +128,15 @@ export async function GET(
       volume: item.volume || 'NA'
     }));
     
+    const orderNumber = order.trackingId || order.orderId || `ORD-${order._id.toString().slice(-8)}`;
+
     // Prepare the response in the expected format
     const orderResponse = {
       _id: order._id.toString(),
       id: order._id.toString(),
-      orderId: order.orderId,
-      orderNumber: order.orderId || `ORD-${order._id.toString().slice(-8)}`,
+      orderId: orderNumber,
+      orderNumber,
+      trackingId: orderNumber,
       user: order.user,
       orderItems: formattedItems,
       items: formattedItems,

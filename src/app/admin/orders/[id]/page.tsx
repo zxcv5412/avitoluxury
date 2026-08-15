@@ -185,7 +185,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     return {
       id: orderData._id || orderData.id,
       _id: orderData._id,
-      orderNumber: orderData.orderId || orderData.orderNumber || `ORD-${orderData._id?.toString().slice(-8)}`,
+      orderNumber: orderData.trackingId || orderData.orderId || orderData.orderNumber || `ORD-${orderData._id?.toString().slice(-8)}`,
       customer: {
         id: orderData.user?._id || 'unknown',
         name: customerName,

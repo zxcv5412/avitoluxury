@@ -50,18 +50,22 @@ export async function GET(request: Request) {
     ]);
 
     // Format the recent orders data
-    const formattedRecentOrders = recentOrders.map(order => ({
-      _id: order._id.toString(),
-      orderNumber: `ORD-${order._id.toString().substr(-6)}`,
-      customer: {
-        name: order.user ? (order.user as any).name : 'Guest Customer',
-        email: order.user ? (order.user as any).email : 'N/A'
-      },
-      createdAt: order.createdAt,
-      status: order.status,
-      totalAmount: order.totalPrice,
-      total: order.totalPrice
-    }));
+    const formattedRecentOrders = recentOrders.map(order => {
+      const orderNumber = order.trackingId || order.orderId || `ORD-${order._id.toString().slice(-8)}`;
+      return {
+        _id: order._id.toString(),
+        orderNumber,
+        trackingId: orderNumber,
+        customer: {
+          name: order.user ? (order.user as any).name : (order.shippingAddress?.fullName || 'Customer'),
+          email: order.user ? (order.user as any).email : 'N/A'
+        },
+        createdAt: order.createdAt,
+        status: order.status,
+        totalAmount: order.totalPrice,
+        total: order.totalPrice
+      };
+    });
 
     // Construct dashboard data
     const dashboardData = {

@@ -15,6 +15,8 @@ interface OrderItem {
 
 interface GuestOrder {
   _id: string;
+  orderNumber?: string;
+  trackingId?: string;
   customerInfo: {
     name: string;
     email: string;
@@ -194,7 +196,7 @@ export default function TrackOrderPage() {
           {order && (
             <div className="border-t border-gray-200 pt-8">
               <div className="mb-6">
-                <h2 className="text-lg font-medium mb-2">Order #{order._id.substring(order._id.length - 8)}</h2>
+                <h2 className="text-lg font-medium mb-2">Order #{order.orderNumber || order.trackingId || `ORD-${order._id.slice(-8)}`}</h2>
                 <p className="text-sm text-gray-500">
                   Placed on {new Date(order.createdAt).toLocaleDateString('en-US', {
                     year: 'numeric',

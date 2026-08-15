@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectToDatabase } from '@/app/lib/db-connect';
 import GuestOrder from '@/app/models/GuestOrder';
+import Order from '@/app/models/Order';
+import User from '@/app/models/User';
 import OTP from '@/app/models/OTP';
 import Product from '@/app/models/Product';
 
@@ -170,42 +172,113 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Get phone number from query parameters
     const url = new URL(request.url);
-    const phone = url.searchParams.get('phone');
-    const id = url.searchParams.get('id');
+    const phone = url.searchParams.get('phone')?.trim();
+    const id = url.searchParams.get('id')?.trim();
     
-    // Connect to database
     await connectToDatabase();
     
-    // If ID is provided, get specific order
+    const formatOrder = (raw: any) => {
+      const orderNumber = raw.trackingId || raw.orderId || raw.trackingNumber || `ORD-${raw._id?.toString().slice(-8)}`;
+      return {
+        _id: raw._id?.toString() || '',
+        orderNumber,
+        trackingId: orderNumber,
+        customerInfo: {
+          name: raw.shippingAddress?.fullName || raw.customerInfo?.name || raw.user?.name || 'Customer',
+          email: raw.customerInfo?.email || raw.user?.email || '',
+          phone: raw.shippingAddress?.phone || raw.customerInfo?.phone || raw.alternatePhone || ''
+        },
+        shippingAddress: {
+          addressLine1: raw.shippingAddress?.address || raw.shippingAddress?.addressLine1 || '',
+          addressLine2: raw.shippingAddress?.addressLine2 || raw.shippingAddress?.landmark || '',
+          city: raw.shippingAddress?.city || '',
+          state: raw.shippingAddress?.state || '',
+          pincode: raw.shippingAddress?.postalCode || raw.shippingAddress?.pincode || '',
+          country: raw.shippingAddress?.country || 'India'
+        },
+        items: (raw.items || raw.orderItems || []).map((item: any) => ({
+          name: item.name || 'Product',
+          price: item.price || 0,
+          quantity: item.quantity || 1,
+          image: item.image || '/perfume-placeholder.jpg'
+        })),
+        itemsPrice: raw.itemsPrice || (raw.totalPrice ? Math.max(0, raw.totalPrice - (raw.shippingPrice || 0)) : 0),
+        shippingPrice: raw.shippingPrice || 0,
+        totalPrice: raw.totalPrice || 0,
+        paymentMethod: raw.paymentMethod || 'COD',
+        isPaid: Boolean(raw.isPaid),
+        paidAt: raw.paidAt ? new Date(raw.paidAt).toISOString() : undefined,
+        createdAt: raw.createdAt ? new Date(raw.createdAt).toISOString() : new Date().toISOString(),
+        status: raw.status || 'Pending'
+      };
+    };
+
+    // If ID is provided, search Order first, then GuestOrder
     if (id) {
-      const order = await GuestOrder.findById(id);
-      
+      const isObjectId = mongoose.Types.ObjectId.isValid(id);
+      let order = await Order.findOne({
+        $or: [
+          { trackingId: id },
+          { trackingId: new RegExp(`^${id}$`, 'i') },
+          { orderId: id },
+          ...(isObjectId ? [{ _id: new mongoose.Types.ObjectId(id) }] : [])
+        ]
+      }).populate('user', 'email name').lean();
+
+      if (!order) {
+        order = await GuestOrder.findOne({
+          $or: [
+            { trackingNumber: id },
+            { trackingNumber: new RegExp(`^${id}$`, 'i') },
+            ...(isObjectId ? [{ _id: new mongoose.Types.ObjectId(id) }] : [])
+          ]
+        }).lean();
+      }
+
       if (!order) {
         return NextResponse.json({ 
           success: false, 
           error: 'Order not found' 
         }, { status: 404 });
       }
-      
+
       return NextResponse.json({
         success: true,
-        order
+        order: formatOrder(order)
       });
     }
-    
-    // If phone is provided, get orders for that phone
+
+    // If phone is provided, search Order first, then GuestOrder
     if (phone) {
-      const orders = await GuestOrder.find({ 'customerInfo.phone': phone })
-        .sort({ createdAt: -1 });
-      
+      const sanitizedPhone = phone.replace(/\D/g, '');
+      const last10 = sanitizedPhone.slice(-10);
+
+      const orders = await Order.find({
+        $or: [
+          { 'shippingAddress.phone': phone },
+          ...(last10 ? [{ 'shippingAddress.phone': new RegExp(last10) }] : []),
+          { alternatePhone: phone },
+          ...(last10 ? [{ alternatePhone: new RegExp(last10) }] : [])
+        ]
+      }).sort({ createdAt: -1 }).populate('user', 'email name').lean();
+
+      const guestOrders = await GuestOrder.find({
+        $or: [
+          { 'customerInfo.phone': phone },
+          ...(last10 ? [{ 'customerInfo.phone': new RegExp(last10) }] : [])
+        ]
+      }).sort({ createdAt: -1 }).lean();
+
+      const combined = [...orders, ...guestOrders].map(formatOrder);
+      combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
       return NextResponse.json({
         success: true,
-        orders
+        orders: combined
       });
     }
-    
+
     // If no parameters, return error
     return NextResponse.json({ 
       success: false, 

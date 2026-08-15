@@ -32,11 +32,14 @@ export async function GET(request: Request) {
       
       // Transform orders to match the format expected by the frontend
       orders = orders.map(order => {
+        const orderNumber = order.trackingId || order.orderId || `ORD-${order._id.toString().slice(-8)}`;
         // Create a properly formatted order object
         const formattedOrder = {
           _id: order._id.toString(),
           id: order._id.toString(),
-          orderNumber: order.orderId || `ORD-${order._id.toString().slice(-8)}`,
+          orderNumber,
+          trackingId: orderNumber,
+          orderId: orderNumber,
           status: order.status || 'Pending',
           total: order.totalPrice || 0,
           date: order.createdAt || order.paidAt || new Date(),
@@ -65,6 +68,7 @@ export async function GET(request: Request) {
       orders = orders.map(order => {
         const orderItems = order.items || order.orderItems || [];
         let totalPrice = order.totalPrice || 0;
+        const orderNumber = order.trackingId || order.orderId || `ORD-${order._id.toString().slice(-8)}`;
         
         // Calculate total price if it's missing or zero
         if (totalPrice === 0 && orderItems.length > 0) {
@@ -74,7 +78,9 @@ export async function GET(request: Request) {
         return {
           _id: order._id.toString(),
           id: order._id.toString(),
-          orderId: order.orderId,
+          orderId: orderNumber,
+          orderNumber,
+          trackingId: orderNumber,
           date: order.createdAt,
           status: order.status || 'Pending',
           total: totalPrice,
