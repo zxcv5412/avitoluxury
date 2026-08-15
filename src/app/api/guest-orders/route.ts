@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectToDatabase } from '@/app/lib/db-connect';
 import GuestOrder from '@/app/models/GuestOrder';
 import OTP from '@/app/models/OTP';
@@ -49,12 +50,13 @@ export async function POST(request: NextRequest) {
     
     // Process items with complete product details
     const processedItems = await Promise.all(items.map(async (item: any) => {
-      // Check if product exists and get current price and details
-      const product = await Product.findById(item.product) as any;
+      // Check if product exists and get current price and details safely
+      const isValidId = item.product && mongoose.Types.ObjectId.isValid(item.product);
+      const product = isValidId ? await Product.findById(item.product) as any : null;
       if (!product) {
         console.log('Guest Order API: Product not found by ID:', item.product, 'for item:', item.name);
         // Try to find by name as fallback
-        const productByName = await Product.findOne({ name: item.name }) as any;
+        const productByName = item.name ? await Product.findOne({ name: item.name }) as any : null;
         if (productByName) {
           console.log('Guest Order API: Found product by name:', productByName.name);
           // Use the found product
@@ -64,7 +66,6 @@ export async function POST(request: NextRequest) {
             price: item.price,
             quantity: item.quantity,
             image: item.image,
-            // Add complete product details
             sku: productByName.sku || '',
             productType: productByName.productType || '',
             category: productByName.category || '',
@@ -75,7 +76,23 @@ export async function POST(request: NextRequest) {
             gender: productByName.gender || ''
           };
         }
-        throw new Error(`Product not found: ${item.name}`);
+
+        // Custom Bundle Fallback
+        return {
+          product: null,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image,
+          sku: 'COMBO-2ML',
+          productType: 'Discovery Set',
+          category: 'Combos',
+          subCategory: '2ml Combos',
+          volume: '2ml',
+          gender: 'Unisex',
+          isBundle: item.isBundle,
+          bundleItems: item.bundleItems
+        };
       }
       
       console.log('Guest Order API: Found product details:', {

@@ -29,8 +29,36 @@ export default function CustomComboFloatingBar({
   onClearAll,
 }: CustomComboFloatingBarProps) {
   const [isAdded, setIsAdded] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const maxSlots = 3;
   const isComplete = selectedItems.length === maxSlots;
+
+  // Listen for MiniCart drawer opening / closing
+  React.useEffect(() => {
+    const checkMiniCart = () => {
+      const miniCartElement = document.querySelector('[data-mini-cart="true"]');
+      setIsCartOpen(!!miniCartElement && window.getComputedStyle(miniCartElement).display !== 'none');
+    };
+
+    checkMiniCart();
+
+    const observer = new MutationObserver(checkMiniCart);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+
+    const handleOpen = () => setIsCartOpen(true);
+    const handleClose = () => setIsCartOpen(false);
+
+    window.addEventListener('openMiniCart', handleOpen);
+    window.addEventListener('open-minicart', handleOpen);
+    window.addEventListener('closeMiniCart', handleClose);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('openMiniCart', handleOpen);
+      window.removeEventListener('open-minicart', handleOpen);
+      window.removeEventListener('closeMiniCart', handleClose);
+    };
+  }, []);
 
   // Calculate pricing
   const totalBasePrice = selectedItems.reduce((sum, item) => {
@@ -92,8 +120,11 @@ export default function CustomComboFloatingBar({
     }
   };
 
+  // When mini cart is open, hide the floating bar so it never covers the checkout button
+  if (isCartOpen) return null;
+
   return (
-    <div className="fixed bottom-2 sm:bottom-5 inset-x-2 sm:inset-x-auto sm:w-[92%] sm:max-w-4xl sm:left-1/2 sm:-translate-x-1/2 z-50 pointer-events-auto">
+    <div className="fixed bottom-2 sm:bottom-5 inset-x-2 sm:inset-x-auto sm:w-[92%] sm:max-w-4xl sm:left-1/2 sm:-translate-x-1/2 z-30 pointer-events-auto">
       <motion.div
         initial={{ y: 60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}

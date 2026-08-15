@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectToDatabase } from '@/app/lib/db-connect';
 import { v4 as uuidv4 } from 'uuid';
 import User from '@/app/models/User';
@@ -71,13 +72,14 @@ export async function POST(request: NextRequest) {
     
     // Create order items with product references
     const orderItems = await Promise.all(cartItems.map(async (item: any) => {
-      // Find product in database to get reference
-      const product = await Product.findById(item._id) as any;
+      // Find product in database to get reference safely
+      const isValidId = item._id && mongoose.Types.ObjectId.isValid(item._id);
+      const product = isValidId ? await Product.findById(item._id) as any : null;
       
       if (!product) {
         console.log('Checkout API: Product not found by ID:', item._id, 'for item:', item.name);
         // Try to find by name as fallback
-        const productByName = await Product.findOne({ name: item.name }) as any;
+        const productByName = item.name ? await Product.findOne({ name: item.name }) as any : null;
         if (productByName) {
           console.log('Checkout API: Found product by name:', productByName.name);
           return {
@@ -86,7 +88,6 @@ export async function POST(request: NextRequest) {
             price: item.discountedPrice || item.price,
             quantity: item.quantity,
             image: item.image,
-            // Add complete product details
             sku: productByName.sku || '',
             productType: productByName.productType || '',
             category: productByName.category || '',
@@ -97,6 +98,23 @@ export async function POST(request: NextRequest) {
             gender: productByName.gender || ''
           };
         }
+
+        // Custom Bundle Fallback
+        return {
+          product: null,
+          name: item.name,
+          price: item.discountedPrice || item.price,
+          quantity: item.quantity,
+          image: item.image,
+          sku: 'COMBO-2ML',
+          productType: 'Discovery Set',
+          category: 'Combos',
+          subCategory: '2ml Combos',
+          volume: '2ml',
+          gender: 'Unisex',
+          isBundle: item.isBundle,
+          bundleItems: item.bundleItems
+        };
       } else {
         console.log('Checkout API: Found product details:', {
           id: product._id.toString(),
@@ -115,7 +133,6 @@ export async function POST(request: NextRequest) {
         price: item.discountedPrice || item.price,
         quantity: item.quantity,
         image: item.image,
-        // Add complete product details
         sku: product?.sku || '',
         productType: product?.productType || '',
         category: product?.category || '',
@@ -123,7 +140,9 @@ export async function POST(request: NextRequest) {
           ? product?.subCategories[0] 
           : '',
         volume: product?.volume || '',
-        gender: product?.gender || ''
+        gender: product?.gender || '',
+        isBundle: item.isBundle,
+        bundleItems: item.bundleItems
       };
     }));
     

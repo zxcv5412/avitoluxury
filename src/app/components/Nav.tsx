@@ -211,6 +211,7 @@ export default function Nav() {
     };
     
     window.addEventListener('open-minicart', handleOpenMiniCart);
+    window.addEventListener('openMiniCart', handleOpenMiniCart);
     
     const checkForCheckoutFlag = () => {
       if (typeof window === 'undefined') return;
@@ -237,6 +238,7 @@ export default function Nav() {
     
     return () => {
       window.removeEventListener('open-minicart', handleOpenMiniCart);
+      window.removeEventListener('openMiniCart', handleOpenMiniCart);
       window.removeEventListener('storage', checkForCheckoutFlag);
     };
   }, []);

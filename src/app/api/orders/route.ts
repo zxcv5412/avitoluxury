@@ -222,9 +222,9 @@ export async function POST(request: Request) {
     
     // Create order with complete product details
     const orderItems = await Promise.all(cart.items.map(async (item: any) => {
-      // Find the product to get all details
+      // Find the product to get all details safely
       let productDetails = null;
-      if (item.product) {
+      if (item.product && mongoose.Types.ObjectId.isValid(item.product)) {
         productDetails = await Product.findById(item.product);
         console.log('Order API: Found product details:', {
           id: productDetails?._id?.toString(),
@@ -236,7 +236,7 @@ export async function POST(request: Request) {
           volume: productDetails?.volume
         });
       } else {
-        console.log('Order API: No product ID found for item:', item.name);
+        console.log('Order API: Custom bundle or non-ObjectId item:', item.name);
       }
       
       // If product details are null, try to find by name as fallback
@@ -246,20 +246,19 @@ export async function POST(request: Request) {
       }
       
       return {
-        product: item.product,
+        product: productDetails?._id || (item.product && mongoose.Types.ObjectId.isValid(item.product) ? item.product : null),
         name: item.name,
         quantity: item.quantity,
         price: item.price,
         image: item.image,
-        // Add complete product details with proper fallbacks
-        sku: productDetails?.sku || '',
-        productType: productDetails?.productType || '',
-        category: productDetails?.category || '',
+        sku: productDetails?.sku || 'COMBO-2ML',
+        productType: productDetails?.productType || 'Discovery Set',
+        category: productDetails?.category || 'Combos',
         subCategory: Array.isArray(productDetails?.subCategories) && productDetails?.subCategories.length > 0 
           ? productDetails?.subCategories[0] 
-          : '',
-        volume: productDetails?.volume || '',
-        gender: productDetails?.gender || ''
+          : '2ml Combos',
+        volume: productDetails?.volume || '2ml',
+        gender: productDetails?.gender || 'Unisex'
       };
     }));
 

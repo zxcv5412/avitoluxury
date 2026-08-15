@@ -236,7 +236,7 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
   return (
     <>
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[60]"
         onClick={(e) => {
           e.stopPropagation();
           onClose();
@@ -245,7 +245,8 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
       
       <div
         ref={cartRef}
-        className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-xl flex flex-col"
+        data-mini-cart="true"
+        className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center p-4 border-b">

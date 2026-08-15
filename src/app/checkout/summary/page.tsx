@@ -20,11 +20,21 @@ interface FormData {
 
 interface CartItem {
   _id: string;
+  id?: string;
   name: string;
   price: number;
   discountedPrice?: number;
+  comparePrice?: number;
   quantity: number;
   image: string;
+  images?: string[];
+  isBundle?: boolean;
+  bundleItems?: Array<{
+    id?: string;
+    name?: string;
+    image?: string;
+    volume?: string;
+  }>;
 }
 
 export default function CheckoutSummaryPage() {
@@ -35,21 +45,28 @@ export default function CheckoutSummaryPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [subtotal, setSubtotal] = useState(0);
   const [shippingCost, setShippingCost] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'Razorpay' | 'COD'>('Razorpay');
+  const [selectedOffer, setSelectedOffer] = useState<{ code: string; type: string; value: number } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discountType: 'percentage' | 'fixed';
+    discountValue: number;
+    description: string;
+  } | null>(null);
   
   // Load form data from session storage and cart items from localStorage
   useEffect(() => {
     try {
-      // Get form data from session storage
-      const storedFormData = sessionStorage.getItem('checkout_form_data');
-      if (!storedFormData) {
-        // Redirect to checkout page if form data doesn't exist
+      // Get checkout form data (try both keys for compatibility)
+      const savedFormData = sessionStorage.getItem('checkout_form_data') || sessionStorage.getItem('checkoutFormData');
+      if (savedFormData) {
+        setFormData(JSON.parse(savedFormData));
+      } else {
+        // Redirect to checkout page if form data is not found
         router.push('/checkout');
         return;
       }
-      
-      setFormData(JSON.parse(storedFormData));
       
       // Get cart items from localStorage
       const storedCart = localStorage.getItem('cart');
@@ -65,32 +82,28 @@ export default function CheckoutSummaryPage() {
         
         setSubtotal(total);
         
-        // Calculate shipping cost (free for orders above ₹500)
-        setShippingCost(total >= 500 ? 0 : 75);
+        // Calculate shipping (free over ₹500)
+        setShippingCost(total >= 500 ? 0 : 50);
       } else {
         // Redirect to cart page if cart is empty
         router.push('/cart');
       }
     } catch (error) {
-      console.error('Error loading data:', error);
-      router.push('/checkout');
+      console.error('Error loading checkout summary data:', error);
+      router.push('/cart');
     }
   }, [router]);
-  
+
   // Handle alternate phone number change
   const handleAlternatePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    
-    // Only allow numbers
     if (/^\d*$/.test(value)) {
       setAlternatePhone(value);
       setPhoneError('');
     }
   };
-  
-  // Handle payment
+
   const handlePayment = async () => {
-    // Validate alternate phone if provided
     if (alternatePhone && !/^\d{10}$/.test(alternatePhone)) {
       setPhoneError('Please enter a valid 10-digit phone number');
       return;
@@ -139,10 +152,12 @@ export default function CheckoutSummaryPage() {
         
         // Clear checkout details from session storage
         sessionStorage.removeItem('checkout_form_data');
+        sessionStorage.removeItem('checkoutFormData');
         sessionStorage.removeItem('checkout_order_id');
         
         // Dispatch event to update cart count in header
         window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new Event('cart-updated'));
         
         // Redirect to payment success page for COD directly
         router.push(`/checkout/payment?method=COD&trackingId=${orderData.trackingId}`);
@@ -157,22 +172,25 @@ export default function CheckoutSummaryPage() {
     } catch (error) {
       console.error('Error creating order:', error);
       alert('An error occurred while processing your order. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
-  
-  // If form data is not loaded yet, show loading
-  if (!formData) {
+
+  if (!formData || cartItems.length === 0) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading order details...</p>
+        </div>
       </div>
     );
   }
-  
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-medium mb-8">Order Summary</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-serif font-bold mb-6">Order Summary</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
@@ -242,31 +260,66 @@ export default function CheckoutSummaryPage() {
             
             <div className="divide-y">
               {cartItems.map((item) => (
-                <div key={item._id} className="py-4 flex items-center">
-                  <div className="h-16 w-16 relative flex-shrink-0">
-                    <Image
-                      src={item.image || '/perfume-placeholder.jpg'}
-                      alt={item.name}
-                      fill
-                      sizes="64px"
-                      className="object-cover rounded"
-                    />
-                  </div>
+                <div key={item._id || item.id} className="py-4 flex items-center">
+                  {item.bundleItems && item.bundleItems.length > 0 ? (
+                    <div className="h-16 w-16 relative flex-shrink-0 bg-amber-50/50 rounded p-1 border border-amber-300/60 flex items-center justify-center">
+                      <div className="flex items-center -space-x-2">
+                        {item.bundleItems.slice(0, 3).map((bItem: any, idx: number) => (
+                          <div 
+                            key={idx} 
+                            className="w-6 h-6 rounded-full border border-[#C9A24B] bg-white shadow-xs p-0.5 overflow-hidden flex-shrink-0 relative"
+                            title={bItem.name}
+                          >
+                            <Image
+                              src={bItem.image || '/perfume-placeholder.jpg'}
+                              alt={bItem.name || 'Perfume'}
+                              fill
+                              sizes="24px"
+                              className="object-contain"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-16 w-16 relative flex-shrink-0">
+                      <Image
+                        src={item.image || '/perfume-placeholder.jpg'}
+                        alt={item.name}
+                        fill
+                        sizes="64px"
+                        className="object-cover rounded"
+                      />
+                    </div>
+                  )}
                   
                   <div className="ml-4 flex-grow">
-                    <h3 className="font-lastica">{item.name}</h3>
-                    <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                    <h3 className="font-lastica text-sm">{item.name}</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">Quantity: {item.quantity}</p>
+                    {item.bundleItems && item.bundleItems.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1 mt-1">
+                        {item.bundleItems.map((bItem: any, idx: number) => (
+                          <span key={idx} className="text-[10px] bg-amber-100/70 text-gray-800 px-1.5 py-0.5 rounded">
+                            {bItem.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   
                   <div className="text-right">
-                    <p className="font-medium">
+                    <p className="font-medium text-[#0B0B0D]">
                       ₹{((item.discountedPrice || item.price) * item.quantity).toFixed(2)}
                     </p>
-                    {item.discountedPrice && (
+                    {item.discountedPrice && item.price && item.discountedPrice < item.price ? (
                       <p className="text-xs text-[#5A606B] line-through">
                         ₹{(item.price * item.quantity).toFixed(2)}
                       </p>
-                    )}
+                    ) : item.comparePrice && item.price && item.comparePrice > item.price ? (
+                      <p className="text-xs text-[#5A606B] line-through">
+                        ₹{(item.comparePrice * item.quantity).toFixed(2)}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               ))}
