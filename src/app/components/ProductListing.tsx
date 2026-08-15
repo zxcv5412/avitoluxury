@@ -52,6 +52,8 @@ const ProductCardWrapper = ({
   onToggleCombo,
   showComboAction = false,
 }: ProductCardWrapperProps) => {
+  const [isSingleAdded, setIsSingleAdded] = useState(false);
+
   // Format product to match ProductCard expectations
   const formattedProduct = {
     ...product,
@@ -131,12 +133,13 @@ const ProductCardWrapper = ({
       // Save updated cart to localStorage
       localStorage.setItem('cart', JSON.stringify(cart));
       
-      // Trigger events to notify other components
+      // Trigger events to notify other components and open mini cart
       window.dispatchEvent(new Event('storage'));
       window.dispatchEvent(new Event('cart-updated'));
+      window.dispatchEvent(new CustomEvent('openMiniCart'));
       
-      // Optional: Show a notification or feedback
-      
+      setIsSingleAdded(true);
+      setTimeout(() => setIsSingleAdded(false), 2000);
       
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -208,17 +211,33 @@ const ProductCardWrapper = ({
 
             <button 
               onClick={handleAddToCart}
-              className="w-full bg-[#121318] text-gray-300 hover:text-white py-1.5 px-2 rounded hover:bg-gray-800 transition-colors text-[10px] sm:text-[11px] font-medium"
+              className={`w-full py-2 px-2 rounded transition-all duration-200 text-[11px] sm:text-xs font-semibold flex items-center justify-center space-x-1.5 ${
+                isSingleAdded 
+                  ? 'bg-emerald-700 text-white shadow-sm' 
+                  : 'bg-[#121318] text-gray-200 hover:text-white hover:bg-black'
+              }`}
             >
-              Add Single Unit
+              {isSingleAdded ? (
+                <span>✓ Added to Cart!</span>
+              ) : (
+                <span>Add Single Unit to Cart</span>
+              )}
             </button>
           </div>
         ) : (
           <button 
             onClick={handleAddToCart}
-            className="mt-3 w-full bg-black text-white py-2 xs:py-2.5 sm:py-3 rounded-none hover:bg-gray-800 transition-colors text-xs xs:text-sm"
+            className={`mt-3 w-full py-2 xs:py-2.5 sm:py-3 rounded-none transition-colors text-xs xs:text-sm font-semibold flex items-center justify-center space-x-1.5 ${
+              isSingleAdded 
+                ? 'bg-emerald-700 text-white' 
+                : 'bg-black text-white hover:bg-gray-800'
+            }`}
           >
-            Add to Cart
+            {isSingleAdded ? (
+              <span>✓ Added to Cart!</span>
+            ) : (
+              <span>Add to Cart</span>
+            )}
           </button>
         )}
       </div>

@@ -91,34 +91,16 @@ export default function CustomComboFloatingBar({
   };
 
   return (
-    <motion.div
-      initial={{ y: 100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      exit={{ y: 100, opacity: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="fixed bottom-0 left-0 right-0 z-40 bg-[#121318]/95 backdrop-blur-md border-t border-[#C9A24B]/40 shadow-[0_-10px_35px_rgba(0,0,0,0.6)] py-3 px-3 sm:px-6"
-    >
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
-        {/* Left: Combo Info & Slots */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 w-full md:w-auto">
-          {/* Badge & Title */}
-          <div className="text-center sm:text-left flex-shrink-0">
-            <div className="flex items-center justify-center sm:justify-start space-x-2">
-              <span className="bg-[#C9A24B] text-black text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
-                15% OFF BUNDLE
-              </span>
-              <span className="text-white text-xs sm:text-sm font-semibold tracking-wide">
-                Pick Any 3 (2ml Pocket Perfumes)
-              </span>
-            </div>
-            <p className="text-gray-400 text-[10px] sm:text-xs mt-0.5">
-              {isComplete 
-                ? '🎉 15% discount unlocked!' 
-                : `Select ${maxSlots - selectedItems.length} more fragrance${maxSlots - selectedItems.length > 1 ? 's' : ''} to unlock 15% OFF`}
-            </p>
-          </div>
-
-          {/* 3 Fragrance Slots */}
+    <div className="fixed bottom-2.5 sm:bottom-5 left-2 right-2 sm:left-auto sm:right-auto sm:w-[92%] sm:max-w-4xl sm:left-1/2 sm:-translate-x-1/2 z-50">
+      <motion.div
+        initial={{ y: 60, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 60, opacity: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="w-full bg-[#121318]/98 backdrop-blur-xl border-2 border-[#C9A24B]/70 rounded-2xl sm:rounded-3xl shadow-[0_12px_45px_rgba(0,0,0,0.85)] p-2.5 sm:p-3 px-3 sm:px-5 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4"
+      >
+        {/* Left: 3 Large Prominent Fragrance Slots */}
+        <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-2.5 sm:gap-4">
           <div className="flex items-center space-x-2 sm:space-x-3">
             {[0, 1, 2].map((index) => {
               const item = selectedItems[index];
@@ -130,67 +112,81 @@ export default function CustomComboFloatingBar({
                     <motion.div 
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white border-2 border-[#C9A24B] shadow-md p-1 flex items-center justify-center group overflow-hidden"
+                      className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-2xl bg-white border-2 border-[#C9A24B] shadow-lg p-1 flex items-center justify-center group overflow-hidden"
                       title={item.name}
                     >
                       <Image
                         src={imageUrl!}
                         alt={item.name}
-                        width={48}
-                        height={48}
+                        width={64}
+                        height={64}
                         className="w-full h-full object-contain"
                       />
+                      {/* Name pill on hover */}
+                      <span className="absolute bottom-0 inset-x-0 bg-black/80 text-[8px] sm:text-[9px] text-[#C9A24B] font-bold text-center truncate px-0.5 pointer-events-none">
+                        {item.name}
+                      </span>
                       {/* Remove Button */}
                       <button
                         onClick={() => onRemoveItem(index)}
-                        className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer"
-                        title="Remove Scent"
+                        className="absolute top-0.5 right-0.5 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 shadow-md opacity-90 hover:opacity-100 transition-all cursor-pointer z-10"
+                        title="Remove fragrance"
                       >
-                        <FiX className="w-4 h-4 text-amber-400" />
+                        <FiX className="w-3 h-3" />
                       </button>
                     </motion.div>
                   ) : (
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-dashed border-gray-600 bg-white/5 flex flex-col items-center justify-center text-gray-400 text-[9px] font-semibold">
-                      <FiPlus className="w-4 h-4 text-gray-500 mb-0.5" />
-                      <span>Slot {index + 1}</span>
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-2xl border-2 border-dashed border-[#C9A24B]/50 bg-white/5 flex flex-col items-center justify-center text-gray-300 text-[10px] sm:text-xs font-bold shadow-inner">
+                      <span className="text-[#C9A24B] text-xs sm:text-sm font-black">#{index + 1}</span>
+                      <span className="text-[9px] text-gray-400 font-medium">Empty</span>
                     </div>
                   )}
                 </div>
               );
             })}
           </div>
+
+          {/* Scent Counter / Status Text */}
+          <div className="text-left hidden xs:block">
+            <div className="flex items-center space-x-1.5">
+              <span className="bg-[#C9A24B] text-black text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">
+                15% OFF
+              </span>
+            </div>
+            <p className="text-white text-xs font-bold mt-1 tracking-tight">
+              {isComplete 
+                ? '🎉 3-Pack Ready!' 
+                : `${selectedItems.length}/3 Scents Chosen`}
+            </p>
+          </div>
         </div>
 
         {/* Right: Pricing & CTA Button */}
-        <div className="flex items-center justify-between sm:justify-end gap-4 w-full md:w-auto">
-          {/* Price Summary */}
-          {selectedItems.length > 0 && (
-            <div className="text-right">
-              <div className="flex items-baseline space-x-2 justify-end">
-                <span className="text-[#C9A24B] font-serif font-bold text-lg sm:text-2xl">
-                  ₹{finalPrice}
-                </span>
-                {isComplete && (
-                  <span className="text-gray-400 text-xs line-through">
-                    ₹{totalBasePrice}
-                  </span>
-                )}
-              </div>
+        <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+          {/* Price Tag */}
+          <div className="text-left sm:text-right">
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-[#C9A24B] font-serif font-black text-lg sm:text-2xl">
+                ₹{finalPrice}
+              </span>
               {isComplete && (
-                <span className="text-emerald-400 text-[10px] font-bold block">
-                  You Save ₹{discountAmount} (15% OFF)
+                <span className="text-gray-400 text-xs line-through">
+                  ₹{totalBasePrice}
                 </span>
               )}
             </div>
-          )}
+            <span className="text-emerald-400 text-[10px] sm:text-[11px] font-bold block leading-none">
+              {isComplete ? `Save ₹${discountAmount} (15% OFF)` : `Pick ${maxSlots - selectedItems.length} more`}
+            </span>
+          </div>
 
-          {/* Action Button */}
+          {/* Main Action Button */}
           <button
             onClick={handleAddComboToCart}
             disabled={!isComplete}
-            className={`py-3 px-5 sm:px-7 rounded-xl font-bold uppercase tracking-wider text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all duration-300 shadow-lg ${
+            className={`py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl font-bold uppercase tracking-wider text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all duration-300 shadow-md flex-1 sm:flex-initial ${
               isComplete
-                ? 'bg-gradient-to-r from-[#C5A059] via-[#D4AF37] to-[#B89047] hover:from-[#B89047] hover:to-[#C5A059] text-black cursor-pointer transform hover:scale-[1.02] border border-[#E5C158]/60'
+                ? 'bg-gradient-to-r from-[#C5A059] via-[#D4AF37] to-[#B89047] hover:from-[#B89047] hover:to-[#C5A059] text-black cursor-pointer transform hover:scale-[1.02] border border-[#E5C158]/70 shadow-[0_0_15px_rgba(201,162,75,0.4)]'
                 : 'bg-gray-800 text-gray-400 border border-gray-700 cursor-not-allowed'
             }`}
           >
@@ -204,14 +200,14 @@ export default function CustomComboFloatingBar({
                 <FiShoppingBag className="w-4 h-4" />
                 <span>
                   {isComplete 
-                    ? `Add 3-Pack to Cart • ₹${finalPrice}` 
+                    ? `Add 3-Pack to Cart` 
                     : `Pick ${maxSlots - selectedItems.length} More`}
                 </span>
               </>
             )}
           </button>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
