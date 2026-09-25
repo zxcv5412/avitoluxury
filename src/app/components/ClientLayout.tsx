@@ -89,7 +89,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   }, [showWhatsApp, showTooltip]);
   
   const handleWhatsAppClick = () => {
-    window.open('https://wa.me/919928200900', '_blank');
+    window.open('https://wa.me/918905081411', '_blank');
   };
   
   const closeTooltip = () => {

@@ -88,7 +88,7 @@ export default function AboutUsPage() {
         {
           id: "contact-support",
           question: "How can I contact customer support?",
-          answer: "You can reach us at avitoscents@gmail.com or via WhatsApp at +919928200900. We are available Mon-Sat, 10 AM to 6 PM."
+          answer: "You can reach us at avitoscents@gmail.com or via WhatsApp at +918905081411. We are available Mon-Sat, 10 AM to 6 PM."
         }
       ]
     },
@@ -191,7 +191,7 @@ export default function AboutUsPage() {
                 Explore current opportunities and discover what it's like to be part of the A V I T O   S C E N T S family.
               </p>
               <a 
-                href="https://wa.me/919928200900?text=Hi%2C%20I%27m%20interested%20in%20career%20opportunities%20at%20AVITO%20Perfume"
+                href="https://wa.me/918905081411?text=Hi%2C%20I%27m%20interested%20in%20career%20opportunities%20at%20AVITO%20Perfume"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800"
