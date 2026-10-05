@@ -76,7 +76,7 @@ export default function CheckoutSummaryPage() {
         
         // Calculate subtotal
         const total = parsedCart.reduce((sum: number, item: CartItem) => {
-          const itemPrice = item.discountedPrice || item.price;
+          const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
           return sum + (itemPrice * item.quantity);
         }, 0);
         
@@ -160,10 +160,11 @@ export default function CheckoutSummaryPage() {
         window.dispatchEvent(new Event('cart-updated'));
         
         // Redirect to payment success page for COD directly
-        router.push(`/checkout/payment?method=COD&trackingId=${orderData.trackingId}`);
+        router.push(`/checkout/payment?method=COD&trackingId=${orderData.trackingId}&amount=${totalAmount}`);
       } else {
-        // Store order ID in session storage
+        // Store order ID and amount in session storage
         sessionStorage.setItem('checkout_order_id', orderData.orderId);
+        sessionStorage.setItem('checkout_total_amount', totalAmount.toString());
         
         // Redirect to payment page
         router.push('/checkout/payment');
@@ -309,15 +310,15 @@ export default function CheckoutSummaryPage() {
                   
                   <div className="text-right">
                     <p className="font-medium text-[#0B0B0D]">
-                      ₹{((item.discountedPrice || item.price) * item.quantity).toFixed(2)}
+                      ₹{(((item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price) * item.quantity).toFixed(2)}
                     </p>
-                    {item.discountedPrice && item.price && item.discountedPrice < item.price ? (
+                    {item.comparePrice && item.price && item.comparePrice > item.price ? (
                       <p className="text-xs text-[#5A606B] line-through">
-                        ₹{(item.price * item.quantity).toFixed(2)}
+                        MRP ₹{(item.comparePrice * item.quantity).toFixed(2)}
                       </p>
-                    ) : item.comparePrice && item.price && item.comparePrice > item.price ? (
+                    ) : item.discountedPrice && item.price && item.discountedPrice < item.price ? (
                       <p className="text-xs text-[#5A606B] line-through">
-                        ₹{(item.comparePrice * item.quantity).toFixed(2)}
+                        MRP ₹{(item.price * item.quantity).toFixed(2)}
                       </p>
                     ) : null}
                   </div>

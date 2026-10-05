@@ -48,7 +48,7 @@ export default function CartPage() {
         
         // Calculate subtotal
         const total = normalizedCart.reduce((sum: number, item: CartItem) => {
-          const itemPrice = item.discountedPrice || item.price;
+          const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
           return sum + (itemPrice * item.quantity);
         }, 0);
         
@@ -74,18 +74,22 @@ export default function CartPage() {
     // Update localStorage - ensure we're using the id property for localStorage
     const storageCart = updatedCart.map(item => ({
       id: item.id || item._id,
+      _id: item._id || item.id,
       name: item.name,
       price: item.price,
+      comparePrice: item.comparePrice,
       discountedPrice: item.discountedPrice,
       image: item.image,
-      quantity: item.quantity
+      quantity: item.quantity,
+      isBundle: item.isBundle,
+      bundleItems: item.bundleItems
     }));
     
     localStorage.setItem('cart', JSON.stringify(storageCart));
     
     // Recalculate subtotal
     const newSubtotal = updatedCart.reduce((sum, item) => {
-      const itemPrice = item.discountedPrice || item.price;
+      const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
       return sum + (itemPrice * item.quantity);
     }, 0);
     
@@ -102,18 +106,22 @@ export default function CartPage() {
     // Update localStorage - ensure we're using the id property for localStorage
     const storageCart = updatedCart.map(item => ({
       id: item.id || item._id,
+      _id: item._id || item.id,
       name: item.name,
       price: item.price,
+      comparePrice: item.comparePrice,
       discountedPrice: item.discountedPrice,
       image: item.image,
-      quantity: item.quantity
+      quantity: item.quantity,
+      isBundle: item.isBundle,
+      bundleItems: item.bundleItems
     }));
     
     localStorage.setItem('cart', JSON.stringify(storageCart));
     
     // Recalculate subtotal
     const newSubtotal = updatedCart.reduce((sum, item) => {
-      const itemPrice = item.discountedPrice || item.price;
+      const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
       return sum + (itemPrice * item.quantity);
     }, 0);
     
@@ -238,26 +246,26 @@ export default function CartPage() {
                           </div>
                         </td>
                         <td className="py-4 text-right">
-                          {item.discountedPrice && item.price && item.discountedPrice < item.price ? (
+                          {item.comparePrice && item.price && item.comparePrice > item.price ? (
                             <div>
                               <span className="text-[#5A606B] line-through text-sm mr-2">
-                                ₹{item.price.toFixed(2)}
-                              </span>
-                              <div className="font-semibold text-[#0B0B0D]">₹{item.discountedPrice.toFixed(2)}</div>
-                            </div>
-                          ) : item.comparePrice && item.price && item.comparePrice > item.price ? (
-                            <div>
-                              <span className="text-[#5A606B] line-through text-sm mr-2">
-                                ₹{item.comparePrice.toFixed(2)}
+                                MRP ₹{item.comparePrice.toFixed(2)}
                               </span>
                               <div className="font-semibold text-[#0B0B0D]">₹{item.price.toFixed(2)}</div>
                             </div>
+                          ) : item.discountedPrice && item.price && item.discountedPrice < item.price ? (
+                            <div>
+                              <span className="text-[#5A606B] line-through text-sm mr-2">
+                                MRP ₹{item.price.toFixed(2)}
+                              </span>
+                              <div className="font-semibold text-[#0B0B0D]">₹{item.discountedPrice.toFixed(2)}</div>
+                            </div>
                           ) : (
-                            <div className="font-semibold text-[#0B0B0D]">₹{(item.discountedPrice || item.price).toFixed(2)}</div>
+                            <div className="font-semibold text-[#0B0B0D]">₹{((item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price).toFixed(2)}</div>
                           )}
                         </td>
                         <td className="py-4 text-right font-medium">
-                          ₹{((item.discountedPrice || item.price) * item.quantity).toFixed(2)}
+                          ₹{(((item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price) * item.quantity).toFixed(2)}
                         </td>
                         <td className="py-4 text-right">
                           <button

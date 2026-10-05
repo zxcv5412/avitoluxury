@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 import { FiLoader, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { trackGoogleAdsPurchase } from '@/app/lib/gtag';
 
 declare global {
   interface Window {
@@ -32,11 +33,23 @@ export default function PaymentPage() {
         setPaymentStatus('success');
         setTrackingId(codTrackingId);
         setIsLoading(false);
+
+        const amountStr = params.get('amount');
+        const parsedAmount = amountStr ? parseFloat(amountStr) : undefined;
+
+        // Track Google Ads Purchase Conversion
+        trackGoogleAdsPurchase({
+          transactionId: codTrackingId,
+          value: parsedAmount,
+          currency: 'INR'
+        });
+
         try {
           localStorage.setItem('cart', '[]');
           sessionStorage.removeItem('checkout_form_data');
           sessionStorage.removeItem('checkoutFormData');
           sessionStorage.removeItem('checkout_order_id');
+          sessionStorage.removeItem('checkout_total_amount');
           window.dispatchEvent(new Event('storage'));
           window.dispatchEvent(new Event('cart-updated'));
         } catch (e) {
@@ -207,6 +220,16 @@ export default function PaymentPage() {
       // Payment successful
       setPaymentStatus('success');
       setTrackingId(verifyData.trackingId);
+
+      const storedAmount = sessionStorage.getItem('checkout_total_amount');
+      const orderAmount = verifyData.totalAmount || (storedAmount ? parseFloat(storedAmount) : undefined);
+
+      // Track Google Ads Purchase Conversion
+      trackGoogleAdsPurchase({
+        transactionId: verifyData.trackingId || orderId || response.razorpay_payment_id,
+        value: orderAmount,
+        currency: 'INR'
+      });
       
       // Clear cart
       localStorage.setItem('cart', '[]');
@@ -214,6 +237,7 @@ export default function PaymentPage() {
       // Clear checkout data
       sessionStorage.removeItem('checkout_form_data');
       sessionStorage.removeItem('checkout_order_id');
+      sessionStorage.removeItem('checkout_total_amount');
       
       // Dispatch event to update cart count in header
       window.dispatchEvent(new Event('storage'));

@@ -16,10 +16,12 @@ interface Product {
   slug?: string;
   description: string;
   price: number;
-  discountedPrice: number;
+  comparePrice?: number;
+  discountedPrice?: number;
   category: string;
   brand: string;
   images: { url: string }[];
+  mainImage?: string;
   videos: { url: string }[];
   stock: number;
   fragrance_notes?: {
@@ -114,12 +116,14 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
             slug: data.product.slug,
             description: data.product.description || "No description available",
             price: data.product.price,
-            discountedPrice: data.product.comparePrice || 0,
+            comparePrice: data.product.comparePrice || 0,
+            discountedPrice: data.product.price,
             category: data.product.category || "Perfume",
             brand: data.product.brand || 'A V I T O   S C E N T S',
             images: data.product.images ? 
               data.product.images.map((img: string) => ({ url: img })) : 
               [{ url: data.product.mainImage || 'https://placehold.co/600x800/222/fff?text=Product' }],
+            mainImage: data.product.mainImage || '',
             videos: data.product.videos ? 
               data.product.videos.map((vid: string) => ({ url: vid })) : 
               [],
@@ -162,6 +166,39 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
     }
   }, [id, initialProduct]);
   
+  // Comprehensive discount calculation
+  const computeDiscountInfo = () => {
+    const p = Number(product?.price) || 0;
+    const dp = Number(product?.discountedPrice) || 0;
+    const cp = Number((product as any)?.comparePrice) || 0;
+    const pct = Number((product as any)?.discountPercentage) || 0;
+
+    if (pct > 0) {
+      const saleP = dp > 0 && dp < p ? dp : (cp > 0 && cp < p ? cp : p);
+      const origP = cp > p ? cp : (p > saleP ? p : Math.round(saleP / (1 - pct / 100)));
+      return { hasDiscount: true, discount: Math.round(pct), displayPrice: saleP, displayOriginalPrice: origP };
+    }
+
+    if (cp > 0 && p > 0 && cp > p) {
+      const d = Math.round(((cp - p) / cp) * 100);
+      return { hasDiscount: d > 0, discount: d, displayPrice: p, displayOriginalPrice: cp };
+    }
+
+    if (p > 0 && dp > 0 && p > dp) {
+      const d = Math.round(((p - dp) / p) * 100);
+      return { hasDiscount: d > 0, discount: d, displayPrice: dp, displayOriginalPrice: p };
+    }
+
+    if (p > 0 && cp > 0 && p > cp) {
+      const d = Math.round(((p - cp) / p) * 100);
+      return { hasDiscount: d > 0, discount: d, displayPrice: cp, displayOriginalPrice: p };
+    }
+
+    return { hasDiscount: false, discount: 0, displayPrice: p, displayOriginalPrice: p };
+  };
+
+  const { hasDiscount, discount, displayPrice, displayOriginalPrice } = computeDiscountInfo();
+
   // Handle add to cart
   const handleAddToCart = () => {
     if (!product) return;
@@ -176,22 +213,32 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
       console.error('Error parsing cart:', error);
     }
     
-    const existingItemIndex = cart.findIndex((item: any) => item.id === product._id);
+    const existingItemIndex = cart.findIndex((item: any) => item.id === product._id || item._id === product._id);
     
+    const sellingPrice = displayPrice;
+    const originalPrice = displayOriginalPrice > displayPrice ? displayOriginalPrice : undefined;
+
     if (existingItemIndex >= 0) {
       cart[existingItemIndex].quantity += quantity;
+      cart[existingItemIndex].price = sellingPrice;
+      cart[existingItemIndex].comparePrice = originalPrice;
+      delete cart[existingItemIndex].discountedPrice;
     } else {
       cart.push({
+        _id: product._id,
         id: product._id,
         name: product.name,
-        price: product.discountedPrice > 0 ? product.discountedPrice : product.price,
-        image: product.images[0]?.url || '',
+        price: sellingPrice,
+        comparePrice: originalPrice,
+        image: product.images[0]?.url || product.mainImage || '',
         quantity: quantity
       });
     }
     
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('cart-updated'));
+    window.dispatchEvent(new CustomEvent('openMiniCart'));
   };
 
   // Handle buy now
@@ -208,28 +255,33 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
       console.error('Error parsing cart:', error);
     }
     
-    const existingItemIndex = cart.findIndex((item: any) => item.id === product._id);
+    const existingItemIndex = cart.findIndex((item: any) => item.id === product._id || item._id === product._id);
     
+    const sellingPrice = displayPrice;
+    const originalPrice = displayOriginalPrice > displayPrice ? displayOriginalPrice : undefined;
+
     if (existingItemIndex >= 0) {
       cart[existingItemIndex].quantity += quantity;
+      cart[existingItemIndex].price = sellingPrice;
+      cart[existingItemIndex].comparePrice = originalPrice;
+      delete cart[existingItemIndex].discountedPrice;
     } else {
       cart.push({
+        _id: product._id,
         id: product._id,
         name: product.name,
-        price: product.discountedPrice > 0 ? product.discountedPrice : product.price,
-        image: product.images[0]?.url || '',
+        price: sellingPrice,
+        comparePrice: originalPrice,
+        image: product.images[0]?.url || product.mainImage || '',
         quantity: quantity
       });
     }
     
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('cart-updated'));
     router.push('/checkout');
   };
-  
-  const discount = product && product.discountedPrice > 0 && product.price > 0
-    ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
-    : 0;
   
   const handlePreviousImage = () => {
     if (!product || !product.images.length) return;
@@ -344,7 +396,8 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
             slug: p.slug,
             description: p.description || "No description available",
             price: p.price,
-            discountedPrice: p.comparePrice || 0,
+            comparePrice: p.comparePrice || 0,
+            discountedPrice: p.price,
             category: p.category || "Perfume",
             brand: p.brand || 'A V I T O   S C E N T S',
             images: p.images ? 
@@ -453,10 +506,10 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
             
             {/* Price */}
             <div className="flex items-center flex-wrap gap-2">
-              {product.discountedPrice > 0 ? (
+              {hasDiscount ? (
                 <>
-                  <span className="text-2xl xs:text-3xl font-bold text-[#0B0B0D]">₹{product.discountedPrice.toFixed(2)}</span>
-                  <span className="text-sm text-[#5A606B] line-through">MRP ₹{product.price.toFixed(2)}</span>
+                  <span className="text-2xl xs:text-3xl font-bold text-[#0B0B0D]">₹{displayPrice.toFixed(2)}</span>
+                  <span className="text-sm text-[#5A606B] line-through">MRP ₹{displayOriginalPrice.toFixed(2)}</span>
                   {discount > 0 && (
                     <span className="bg-[#0B0B0D] text-white px-2.5 py-1 text-[9px] xs:text-[10px] tracking-[0.15em] uppercase font-semibold">
                       {discount}% OFF
@@ -464,7 +517,7 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
                   )}
                 </>
               ) : (
-                <span className="text-2xl xs:text-3xl font-bold text-[#0B0B0D]">₹{product.price.toFixed(2)}</span>
+                <span className="text-2xl xs:text-3xl font-bold text-[#0B0B0D]">₹{displayPrice.toFixed(2)}</span>
               )}
             </div>
             
@@ -520,8 +573,8 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
                 <AddToCartButton
                   productId={product._id}
                   productName={product.name}
-                  productPrice={product.discountedPrice > 0 ? product.discountedPrice : product.price}
-                  productImage={product.images[0]?.url || ''}
+                  productPrice={displayPrice}
+                  productImage={product.images[0]?.url || product.mainImage || ''}
                   className="bg-[#121318] text-white py-3.5 px-6 rounded-xl border border-gray-800 hover:bg-[#1C1E26] flex-1 text-center font-semibold tracking-wider text-xs sm:text-sm uppercase transition-all shadow-sm"
                 />
                 

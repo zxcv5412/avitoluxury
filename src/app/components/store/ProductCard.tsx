@@ -19,7 +19,8 @@ interface Product {
   productType: string;
   description: string;
   price: number;
-  discountedPrice: number;
+  comparePrice?: number;
+  discountedPrice?: number;
   category: string;
   subCategory?: string;
   images: { url: string }[];
@@ -141,17 +142,24 @@ export default function ProductCard({ product }: ProductCardProps) {
       // Check if product is already in cart
       const existingItemIndex = cart.findIndex((item: any) => item.id === product._id);
       
+      const sellingPrice = displayPrice;
+      const originalPrice = displayOriginalPrice > displayPrice ? displayOriginalPrice : undefined;
+
       if (existingItemIndex >= 0) {
         // If product exists, increase quantity
         cart[existingItemIndex].quantity += 1;
         // Also update the price in case it changed (ensure we use the correct discounted price)
-        cart[existingItemIndex].price = product.discountedPrice > 0 ? product.discountedPrice : product.price;
+        cart[existingItemIndex].price = sellingPrice;
+        cart[existingItemIndex].comparePrice = originalPrice;
+        delete cart[existingItemIndex].discountedPrice;
       } else {
         // Otherwise add new item
         cart.push({
+          _id: product._id,
           id: product._id,
           name: product.name,
-          price: product.discountedPrice > 0 ? product.discountedPrice : product.price,
+          price: sellingPrice,
+          comparePrice: originalPrice,
           image: getImageUrl(), // Use the same image URL function as in the component
           quantity: 1
         });
@@ -236,20 +244,37 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
   
   // Comprehensive discount calculation handling all price/comparePrice/discountPercentage variations
-  const computeDiscount = () => {
+  const computeDiscountInfo = () => {
     const p = Number(product.price) || 0;
     const dp = Number(product.discountedPrice) || 0;
     const cp = Number((product as any).comparePrice) || 0;
     const pct = Number((product as any).discountPercentage) || 0;
 
-    if (pct > 0) return Math.round(pct);
-    if (cp > 0 && p > 0 && cp > p) return Math.round(((cp - p) / cp) * 100);
-    if (p > 0 && dp > 0 && p > dp) return Math.round(((p - dp) / p) * 100);
-    if (p > 0 && cp > 0 && p > cp) return Math.round(((p - cp) / p) * 100);
-    return 0;
+    if (pct > 0) {
+      const saleP = dp > 0 && dp < p ? dp : (cp > 0 && cp < p ? cp : p);
+      const origP = cp > p ? cp : (p > saleP ? p : Math.round(saleP / (1 - pct / 100)));
+      return { hasDiscount: true, discount: Math.round(pct), displayPrice: saleP, displayOriginalPrice: origP };
+    }
+
+    if (cp > 0 && p > 0 && cp > p) {
+      const d = Math.round(((cp - p) / cp) * 100);
+      return { hasDiscount: d > 0, discount: d, displayPrice: p, displayOriginalPrice: cp };
+    }
+
+    if (p > 0 && dp > 0 && p > dp) {
+      const d = Math.round(((p - dp) / p) * 100);
+      return { hasDiscount: d > 0, discount: d, displayPrice: dp, displayOriginalPrice: p };
+    }
+
+    if (p > 0 && cp > 0 && p > cp) {
+      const d = Math.round(((p - cp) / p) * 100);
+      return { hasDiscount: d > 0, discount: d, displayPrice: cp, displayOriginalPrice: p };
+    }
+
+    return { hasDiscount: false, discount: 0, displayPrice: p, displayOriginalPrice: p };
   };
 
-  const discount = computeDiscount();
+  const { hasDiscount, discount, displayPrice, displayOriginalPrice } = computeDiscountInfo();
   
   // Generate stars for rating
   const renderRatingStars = () => {
@@ -372,13 +397,13 @@ export default function ProductCard({ product }: ProductCardProps) {
         
         {/* Price */}
         <div className="flex items-center justify-center mt-auto mb-2 xs:mb-3">
-          {product.discountedPrice > 0 ? (
+          {hasDiscount ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm xs:text-base font-bold text-[#0B0B0D]">₹{product.discountedPrice.toFixed(2)}</span>
-              <span className="text-xs text-[#5A606B] line-through font-normal">MRP ₹{product.price.toFixed(2)}</span>
+              <span className="text-sm xs:text-base font-bold text-[#0B0B0D]">₹{displayPrice.toFixed(2)}</span>
+              <span className="text-xs text-[#5A606B] line-through font-normal">MRP ₹{displayOriginalPrice.toFixed(2)}</span>
             </div>
           ) : (
-            <span className="text-sm xs:text-base font-bold text-[#0B0B0D]">₹{product.price.toFixed(2)}</span>
+            <span className="text-sm xs:text-base font-bold text-[#0B0B0D]">₹{displayPrice.toFixed(2)}</span>
           )}
         </div>
         

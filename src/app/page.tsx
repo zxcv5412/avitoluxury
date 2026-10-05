@@ -14,7 +14,8 @@ interface Product {
   name: string;
   description: string;
   price: number;
-  discountedPrice: number;
+  comparePrice?: number;
+  discountedPrice?: number;
   category: string;
   images: { url: string }[];
   rating: number;
@@ -71,13 +72,14 @@ export default async function HomePage() {
       name: product.name,
       description: product.description || '',
       price: product.price,
-      discountedPrice: product.comparePrice || product.discountedPrice || product.price,
+      comparePrice: product.comparePrice,
+      discountedPrice: product.price,
       category: product.category || '',
       rating: product.rating || 0,
       featured: product.featured || false,
       new_arrival: product.isNewArrival || false,
       best_seller: product.isBestSelling || false,
-      productType: product.productType || 'perfume',
+      productType: product.productType || 'Perfumes',
       images: [{ url: getProductImage(product) }]
     }));
     

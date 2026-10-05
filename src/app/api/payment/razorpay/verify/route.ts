@@ -167,7 +167,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      trackingId: order.trackingId
+      trackingId: order.trackingId,
+      totalAmount: order.totalPrice
     });
     
   } catch (error) {

@@ -142,7 +142,8 @@ export default async function ProductPage({ params }: Props) {
     slug: rawProduct.slug || "",
     description: rawProduct.description || "No description available",
     price: rawProduct.price || 0,
-    discountedPrice: rawProduct.comparePrice || 0,
+    comparePrice: rawProduct.comparePrice || 0,
+    discountedPrice: rawProduct.price || 0,
     category: rawProduct.category || "Perfume",
     brand: rawProduct.brand || 'A V I T O   S C E N T S',
     images: Array.isArray(rawProduct.images) ? 
@@ -182,7 +183,7 @@ export default async function ProductPage({ params }: Props) {
       '@type': 'Offer',
       url: `https://avitoluxury.in/product/${productData.slug || productData._id}`,
       priceCurrency: 'INR',
-      price: productData.discountedPrice > 0 ? productData.discountedPrice : productData.price,
+      price: productData.price,
       itemCondition: 'https://schema.org/NewCondition',
       availability: productData.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
     },

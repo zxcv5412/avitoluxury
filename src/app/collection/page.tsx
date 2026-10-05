@@ -39,15 +39,21 @@ export default async function CollectionPage() {
     products = dbProducts.map((p: any) => ({
       _id: p._id.toString(),
       name: p.name,
+      slug: p.slug,
       description: p.description || '',
       price: p.price,
-      discountedPrice: p.comparePrice || 0,
+      comparePrice: p.comparePrice,
+      discountedPrice: p.price,
       category: p.category || '',
+      subCategories: p.subCategories || [],
       images: [{ url: getProductImage(p) }],
-      productType: p.productType || 'perfume',
+      mainImage: getProductImage(p),
+      productType: p.productType || 'Perfumes',
       tags: p.tags || [],
       volume: p.volume || '',
       gender: p.gender || '',
+      inStock: p.quantity !== undefined ? p.quantity > 0 : true,
+      quantity: p.quantity || 0,
       createdAt: p.createdAt ? new Date(p.createdAt).toISOString() : new Date().toISOString()
     }));
   } catch (error) {

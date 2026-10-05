@@ -112,19 +112,24 @@ const ProductCardWrapper = ({
         item._id === formattedProduct._id || item.id === formattedProduct._id
       );
       
+      const sellingPrice = displayPrice;
+      const originalPrice = displayOriginalPrice > displayPrice ? displayOriginalPrice : undefined;
+
       if (existingItemIndex >= 0) {
         // Update quantity if product already in cart
         cart[existingItemIndex].quantity += 1;
         // Also update the price in case it changed (ensure we use the correct discounted price)
-        cart[existingItemIndex].price = formattedProduct.comparePrice && formattedProduct.comparePrice > 0 && formattedProduct.comparePrice < formattedProduct.price ? formattedProduct.comparePrice : formattedProduct.price;
+        cart[existingItemIndex].price = sellingPrice;
+        cart[existingItemIndex].comparePrice = originalPrice;
+        delete cart[existingItemIndex].discountedPrice;
       } else {
         // Add new product to cart
         cart.push({
           _id: formattedProduct._id,
           id: formattedProduct._id,
           name: formattedProduct.name,
-          price: formattedProduct.comparePrice && formattedProduct.comparePrice > 0 && formattedProduct.comparePrice < formattedProduct.price ? formattedProduct.comparePrice : formattedProduct.price,
-          comparePrice: formattedProduct.comparePrice,
+          price: sellingPrice,
+          comparePrice: originalPrice,
           image: formattedProduct.mainImage,
           quantity: 1
         });
@@ -415,9 +420,20 @@ export default function ProductListing({
     const uniqueTags = [...new Set(allTags)];
     setAvailableTags(uniqueTags);
     
+    // Helper to get true selling price
+    const getSellingPrice = (p: Product) => {
+      const price = Number(p.price) || 0;
+      const cp = Number(p.comparePrice) || 0;
+      const dp = Number(p.discountedPrice) || 0;
+      if (cp > 0 && price > 0 && cp > price) return price;
+      if (dp > 0 && price > 0 && dp < price) return dp;
+      if (cp > 0 && price > 0 && cp < price) return cp;
+      return price || dp || cp || 0;
+    };
+
     // Find min and max price
     if (products.length > 0) {
-      const prices = products.map(product => (product.discountedPrice && product.discountedPrice > 0) ? product.discountedPrice : product.price);
+      const prices = products.map(product => getSellingPrice(product));
       const minPrice = Math.floor(Math.min(...prices)) || 0;
       const maxPrice = Math.ceil(Math.max(...prices)) || 10000;
       setMinPossiblePrice(minPrice);
@@ -434,8 +450,17 @@ export default function ProductListing({
       return false;
     }
     
+    const price = (() => {
+      const p = Number(product.price) || 0;
+      const cp = Number(product.comparePrice) || 0;
+      const dp = Number(product.discountedPrice) || 0;
+      if (cp > 0 && p > 0 && cp > p) return p;
+      if (dp > 0 && p > 0 && dp < p) return dp;
+      if (cp > 0 && p > 0 && cp < p) return cp;
+      return p || dp || cp || 0;
+    })();
+
     // Filter by price range
-    const price = (product.discountedPrice && product.discountedPrice > 0) ? product.discountedPrice : product.price;
     if (price < priceRange[0] || price > priceRange[1]) {
       return false;
     }
@@ -466,16 +491,22 @@ export default function ProductListing({
     
     return true;
   }).sort((a, b) => {
+    const getPrice = (prod: Product) => {
+      const p = Number(prod.price) || 0;
+      const cp = Number(prod.comparePrice) || 0;
+      const dp = Number(prod.discountedPrice) || 0;
+      if (cp > 0 && p > 0 && cp > p) return p;
+      if (dp > 0 && p > 0 && dp < p) return dp;
+      if (cp > 0 && p > 0 && cp < p) return cp;
+      return p || dp || cp || 0;
+    };
+
     // Sort products
     switch (sortBy) {
       case 'price-low-high':
-        const aPrice = (a.discountedPrice && a.discountedPrice > 0) ? a.discountedPrice : a.price;
-        const bPrice = (b.discountedPrice && b.discountedPrice > 0) ? b.discountedPrice : b.price;
-        return aPrice - bPrice;
+        return getPrice(a) - getPrice(b);
       case 'price-high-low':
-        const aPrice2 = (a.discountedPrice && a.discountedPrice > 0) ? a.discountedPrice : a.price;
-        const bPrice2 = (b.discountedPrice && b.discountedPrice > 0) ? b.discountedPrice : b.price;
-        return bPrice2 - aPrice2;
+        return getPrice(b) - getPrice(a);
       case 'newest':
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       case 'name-a-z':

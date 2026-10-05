@@ -57,8 +57,8 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
             
             // Calculate subtotal
             const total = parsedCart.reduce((sum: number, item: CartItem) => {
-              const itemPrice = item.discountedPrice || item.price;
-              return sum + (itemPrice * item.quantity);
+              const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
+              return sum + (itemPrice * (item.quantity || 1));
             }, 0);
             
             setSubtotal(total);
@@ -119,8 +119,8 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
     
     // Recalculate subtotal
     const newSubtotal = updatedCart.reduce((sum, item) => {
-      const itemPrice = item.discountedPrice || item.price;
-      return sum + (itemPrice * item.quantity);
+      const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
+      return sum + (itemPrice * (item.quantity || 1));
     }, 0);
     
     setSubtotal(newSubtotal);
@@ -164,8 +164,8 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
     
     // Recalculate subtotal
     const newSubtotal = updatedCart.reduce((sum: number, item: CartItem) => {
-      const itemPrice = item.discountedPrice || item.price;
-      return sum + (itemPrice * item.quantity);
+      const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
+      return sum + (itemPrice * (item.quantity || 1));
     }, 0);
     
     setSubtotal(newSubtotal);
@@ -392,22 +392,22 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
                       </div>
                       
                       <div className="font-semibold">
-                        {item.discountedPrice && item.price && item.discountedPrice < item.price ? (
+                        {item.comparePrice && item.price && item.comparePrice > item.price ? (
                           <div className="flex items-center gap-1.5">
                             <span className="text-[#5A606B] line-through text-xs font-normal">
-                              ₹{item.price.toFixed(2)}
-                            </span>
-                            <span className="text-[#0B0B0D]">₹{item.discountedPrice.toFixed(2)}</span>
-                          </div>
-                        ) : item.comparePrice && item.price && item.comparePrice > item.price ? (
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[#5A606B] line-through text-xs font-normal">
-                              ₹{item.comparePrice.toFixed(2)}
+                              MRP ₹{item.comparePrice.toFixed(2)}
                             </span>
                             <span className="text-[#0B0B0D]">₹{item.price.toFixed(2)}</span>
                           </div>
+                        ) : item.discountedPrice && item.price && item.discountedPrice < item.price ? (
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[#5A606B] line-through text-xs font-normal">
+                              MRP ₹{item.price.toFixed(2)}
+                            </span>
+                            <span className="text-[#0B0B0D]">₹{item.discountedPrice.toFixed(2)}</span>
+                          </div>
                         ) : (
-                          <span className="text-[#0B0B0D]">₹{(item.discountedPrice || item.price).toFixed(2)}</span>
+                          <span className="text-[#0B0B0D]">₹{((item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price).toFixed(2)}</span>
                         )}
                       </div>
                     </div>
