@@ -710,11 +710,16 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
                         className="w-full h-64 object-contain object-center transition-transform duration-500 group-hover:scale-105"
                       />
                     </Link>
-                    {relatedProduct.discountedPrice > 0 && (
-                      <div className="absolute top-2 left-2 bg-[#0B0B0D] text-white px-2.5 py-1 text-[9px] xs:text-[10px] tracking-[0.15em] uppercase font-semibold z-10">
-                        {Math.round(((relatedProduct.price - relatedProduct.discountedPrice) / relatedProduct.price) * 100)}% OFF
-                      </div>
-                    )}
+                    {(() => {
+                      const rpSelling = relatedProduct.price || 0;
+                      const rpOriginal = (relatedProduct.comparePrice && relatedProduct.comparePrice > rpSelling) ? relatedProduct.comparePrice : 0;
+                      const rpDiscount = rpOriginal > 0 ? Math.round(((rpOriginal - rpSelling) / rpOriginal) * 100) : 0;
+                      return rpDiscount > 0 ? (
+                        <div className="absolute top-2 left-2 bg-[#0B0B0D] text-white px-2.5 py-1 text-[9px] xs:text-[10px] tracking-[0.15em] uppercase font-semibold z-10">
+                          {rpDiscount}% OFF
+                        </div>
+                      ) : null;
+                    })()}
                   </div>
                   <div className="p-4 flex-grow flex flex-col">
                     <div className="relative mb-1">
@@ -734,11 +739,11 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
                     
                     <div className="mt-auto flex justify-between pb-2 items-center">
                       <div className="flex items-baseline">
-                        {relatedProduct.discountedPrice > 0 ? (
+                        {relatedProduct.comparePrice && relatedProduct.comparePrice > relatedProduct.price ? (
                           <>
-                            <span className="text-sm font-bold text-[#0B0B0D]">₹{relatedProduct.discountedPrice.toFixed(2)}</span>
+                            <span className="text-sm font-bold text-[#0B0B0D]">₹{relatedProduct.price.toFixed(2)}</span>
                             <span className="text-xs text-[#5A606B] line-through ml-2">
-                              MRP ₹{relatedProduct.price.toFixed(2)}
+                              MRP ₹{relatedProduct.comparePrice.toFixed(2)}
                             </span>
                           </>
                         ) : (
@@ -750,7 +755,7 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
                     <AddToCartButton
                       productId={relatedProduct._id}
                       productName={relatedProduct.name}
-                      productPrice={relatedProduct.discountedPrice > 0 ? relatedProduct.discountedPrice : relatedProduct.price}
+                      productPrice={relatedProduct.price}
                       productImage={relatedProduct.images[0]?.url || ''}
                       className="w-full bg-black text-white py-2 px-4 rounded mb-2 hover:bg-gray-800 text-xs"
                       showIcon={true}
@@ -782,7 +787,12 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
             <div>
               <h4 className="text-sm font-medium font-lastica line-clamp-1 max-w-[150px] sm:max-w-xs">{product.name}</h4>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-red-600">₹{product.discountedPrice > 0 ? product.discountedPrice : product.price}</span>
+                <span className="text-sm font-bold text-[#0B0B0D]">₹{displayPrice.toFixed(2)}</span>
+                {displayOriginalPrice > displayPrice && (
+                  <span className="text-xs text-[#5A606B] line-through">
+                    MRP ₹{displayOriginalPrice.toFixed(2)}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -790,8 +800,8 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
             <AddToCartButton
               productId={product._id}
               productName={product.name}
-              productPrice={product.discountedPrice > 0 ? product.discountedPrice : product.price}
-              productImage={product.images[0]?.url || ''}
+              productPrice={displayPrice}
+              productImage={product.images[0]?.url || product.mainImage || ''}
               className="w-full bg-black text-white py-2 px-4 hover:bg-gray-800 text-sm font-medium rounded-none"
               showIcon={true}
             />
