@@ -182,51 +182,110 @@ const ProductForm: React.FC<ProductFormProps> = ({
     }
   }, [selectedCategory, setValue, isInitialized, isEditing]);
 
+  // Upload helper: uploads directly to Cloudinary using signed upload to bypass Vercel's 4.5MB payload limits
+  const uploadMediaFile = async (
+    file: File,
+    resourceType: 'image' | 'video',
+    folder: string
+  ): Promise<{ public_id: string; url: string }> => {
+    // 1. Try direct signed Cloudinary upload first (bypasses Vercel 4.5MB body limit)
+    try {
+      const sigResponse = await fetch(`/api/upload/signature?folder=${encodeURIComponent(folder)}`);
+      if (sigResponse.ok) {
+        const sigData = await sigResponse.json();
+        if (sigData.success && sigData.signature && sigData.apiKey && sigData.cloudName) {
+          const directFormData = new FormData();
+          directFormData.append('file', file);
+          directFormData.append('api_key', sigData.apiKey);
+          directFormData.append('timestamp', sigData.timestamp.toString());
+          directFormData.append('signature', sigData.signature);
+          directFormData.append('folder', sigData.folder);
+
+          const uploadUrl = `https://api.cloudinary.com/v1_1/${sigData.cloudName}/${resourceType}/upload`;
+          const cloudinaryRes = await fetch(uploadUrl, {
+            method: 'POST',
+            body: directFormData,
+          });
+
+          if (cloudinaryRes.ok) {
+            const data = await cloudinaryRes.json();
+            return {
+              public_id: data.public_id,
+              url: data.secure_url || data.url,
+            };
+          } else {
+            const errJson = await cloudinaryRes.json().catch(() => null);
+            throw new Error(errJson?.error?.message || `Cloudinary upload failed with status ${cloudinaryRes.status}`);
+          }
+        }
+      }
+    } catch (directErr: any) {
+      console.warn('Direct Cloudinary upload error:', directErr);
+      // If the file is larger than 4MB, it cannot pass through Vercel's serverless fallback
+      if (file.size > 4 * 1024 * 1024) {
+        throw new Error(
+          directErr.message || 'Video upload failed. The file exceeds 4MB and could not be uploaded.'
+        );
+      }
+    }
+
+    // 2. Fallback to API route for files under 4MB
+    const fallbackFormData = new FormData();
+    fallbackFormData.append('file', file);
+    fallbackFormData.append('folder', folder);
+    if (resourceType === 'video') {
+      fallbackFormData.append('resourceType', 'video');
+    }
+
+    const response = await fetch(API_UPLOAD_ENDPOINT, {
+      method: 'POST',
+      body: fallbackFormData,
+    });
+
+    if (!response.ok) {
+      if (response.status === 413) {
+        throw new Error('Upload failed: payload too large (413). Please compress your video to under 10MB.');
+      }
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.error || `Upload failed with status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.success) {
+      return {
+        public_id: data.public_id,
+        url: data.url,
+      };
+    }
+    throw new Error(data.error || 'Failed to upload media');
+  };
+
   // Handle image upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     
     setLoading(true);
     setError('');
-    setUploadStatus('Uploading images...');
+    setUploadStatus('Uploading image...');
     
     try {
       const file = e.target.files[0];
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('folder', 'product_images');
+      const result = await uploadMediaFile(file, 'image', 'product_images');
       
-      const response = await fetch(API_UPLOAD_ENDPOINT, {
-        method: 'POST',
-        body: formData,
-      });
+      const newMedia = {
+        id: result.public_id,
+        type: 'image' as const,
+        url: result.url,
+        preview: result.url
+      };
       
-      if (!response.ok) {
-        throw new Error(`Upload failed with status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        // Add the uploaded image to the media array
-        const newMedia = {
-          id: data.public_id,
-          type: 'image' as const,
-          url: data.url,
-          preview: data.url
-        };
-        
-        setMedia(prev => [...prev, newMedia]);
-        setUploadStatus('Image uploaded successfully');
-      } else {
-        throw new Error(data.error || 'Failed to upload image');
-      }
+      setMedia(prev => [...prev, newMedia]);
+      setUploadStatus('Image uploaded successfully');
     } catch (error) {
       console.error('Error uploading image:', error);
       setError(error instanceof Error ? error.message : 'Failed to upload image');
     } finally {
       setLoading(false);
-      // Reset the file input
       e.target.value = '';
     }
   };
@@ -235,48 +294,36 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     
+    const file = e.target.files[0];
+
+    // Check reasonable size limit (50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      setError(`Video is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). For fast product page loading and smooth mobile playback, please compress your video to under 15MB.`);
+      e.target.value = '';
+      return;
+    }
+    
     setLoading(true);
     setError('');
-    setUploadStatus('Uploading video...');
+    setUploadStatus(`Uploading video (${(file.size / (1024 * 1024)).toFixed(1)}MB) directly to Cloudinary... Please wait.`);
     
     try {
-      const file = e.target.files[0];
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('resourceType', 'video');
-      formData.append('folder', 'product_videos');
+      const result = await uploadMediaFile(file, 'video', 'product_videos');
       
-      const response = await fetch(API_UPLOAD_ENDPOINT, {
-        method: 'POST',
-        body: formData,
-      });
+      const newMedia = {
+        id: result.public_id,
+        type: 'video' as const,
+        url: result.url,
+        preview: result.url
+      };
       
-      if (!response.ok) {
-        throw new Error(`Upload failed with status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        // Add the uploaded video to the media array
-        const newMedia = {
-          id: data.public_id,
-          type: 'video' as const,
-          url: data.url,
-          preview: data.url
-        };
-        
-        setMedia(prev => [...prev, newMedia]);
-        setUploadStatus('Video uploaded successfully');
-      } else {
-        throw new Error(data.error || 'Failed to upload video');
-      }
+      setMedia(prev => [...prev, newMedia]);
+      setUploadStatus('Video uploaded successfully!');
     } catch (error) {
       console.error('Error uploading video:', error);
       setError(error instanceof Error ? error.message : 'Failed to upload video');
     } finally {
       setLoading(false);
-      // Reset the file input
       e.target.value = '';
     }
   };
@@ -828,6 +875,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
             >
               <FiUpload className="mr-2" /> Add Video
             </label>
+            <p className="text-xs text-gray-500 mt-1.5">
+              MP4, 30 fps, ~2 Mbps recommended (&lt; 15MB for fast loading)
+            </p>
           </div>
         </div>
       </div>
