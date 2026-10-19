@@ -25,6 +25,25 @@ interface CartItem {
   }>;
 }
 
+const getItemSellingPrice = (item: CartItem) => {
+  const p = Number(item.price) || 0;
+  const dp = Number(item.discountedPrice) || 0;
+  const cp = Number(item.comparePrice) || 0;
+  if (dp > 0 && dp < p) return dp;
+  if (cp > 0 && cp < p) return cp;
+  return p;
+};
+
+const getItemOriginalPrice = (item: CartItem) => {
+  const p = Number(item.price) || 0;
+  const dp = Number(item.discountedPrice) || 0;
+  const cp = Number(item.comparePrice) || 0;
+  if (cp > p && p > 0) return cp;
+  if (dp > 0 && dp < p) return p;
+  if (cp > 0 && cp < p) return p;
+  return undefined;
+};
+
 export default function CartPage() {
   const router = useRouter();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -48,8 +67,7 @@ export default function CartPage() {
         
         // Calculate subtotal
         const total = normalizedCart.reduce((sum: number, item: CartItem) => {
-          const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
-          return sum + (itemPrice * item.quantity);
+          return sum + (getItemSellingPrice(item) * item.quantity);
         }, 0);
         
         setSubtotal(total);
@@ -89,8 +107,7 @@ export default function CartPage() {
     
     // Recalculate subtotal
     const newSubtotal = updatedCart.reduce((sum, item) => {
-      const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
-      return sum + (itemPrice * item.quantity);
+      return sum + (getItemSellingPrice(item) * item.quantity);
     }, 0);
     
     setSubtotal(newSubtotal);
@@ -121,8 +138,7 @@ export default function CartPage() {
     
     // Recalculate subtotal
     const newSubtotal = updatedCart.reduce((sum, item) => {
-      const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
-      return sum + (itemPrice * item.quantity);
+      return sum + (getItemSellingPrice(item) * item.quantity);
     }, 0);
     
     setSubtotal(newSubtotal);
@@ -246,26 +262,19 @@ export default function CartPage() {
                           </div>
                         </td>
                         <td className="py-4 text-right">
-                          {item.comparePrice && item.price && item.comparePrice > item.price ? (
+                          {getItemOriginalPrice(item) ? (
                             <div>
                               <span className="text-[#5A606B] line-through text-sm mr-2">
-                                MRP ₹{item.comparePrice.toFixed(2)}
+                                MRP ₹{(getItemOriginalPrice(item) as number).toFixed(2)}
                               </span>
-                              <div className="font-semibold text-[#0B0B0D]">₹{item.price.toFixed(2)}</div>
-                            </div>
-                          ) : item.discountedPrice && item.price && item.discountedPrice < item.price ? (
-                            <div>
-                              <span className="text-[#5A606B] line-through text-sm mr-2">
-                                MRP ₹{item.price.toFixed(2)}
-                              </span>
-                              <div className="font-semibold text-[#0B0B0D]">₹{item.discountedPrice.toFixed(2)}</div>
+                              <div className="font-semibold text-[#0B0B0D]">₹{getItemSellingPrice(item).toFixed(2)}</div>
                             </div>
                           ) : (
-                            <div className="font-semibold text-[#0B0B0D]">₹{((item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price).toFixed(2)}</div>
+                            <div className="font-semibold text-[#0B0B0D]">₹{getItemSellingPrice(item).toFixed(2)}</div>
                           )}
                         </td>
                         <td className="py-4 text-right font-medium">
-                          ₹{(((item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price) * item.quantity).toFixed(2)}
+                          ₹{(getItemSellingPrice(item) * item.quantity).toFixed(2)}
                         </td>
                         <td className="py-4 text-right">
                           <button

@@ -30,6 +30,25 @@ interface MiniCartProps {
   onClose: () => void;
 }
 
+const getItemSellingPrice = (item: CartItem) => {
+  const p = Number(item.price) || 0;
+  const dp = Number(item.discountedPrice) || 0;
+  const cp = Number(item.comparePrice) || 0;
+  if (dp > 0 && dp < p) return dp;
+  if (cp > 0 && cp < p) return cp;
+  return p;
+};
+
+const getItemOriginalPrice = (item: CartItem) => {
+  const p = Number(item.price) || 0;
+  const dp = Number(item.discountedPrice) || 0;
+  const cp = Number(item.comparePrice) || 0;
+  if (cp > p && p > 0) return cp;
+  if (dp > 0 && dp < p) return p;
+  if (cp > 0 && cp < p) return p;
+  return undefined;
+};
+
 export default function MiniCart({ isOpen, onClose }: MiniCartProps) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [subtotal, setSubtotal] = useState(0);
@@ -105,7 +124,7 @@ export default function MiniCart({ isOpen, onClose }: MiniCartProps) {
           
           // Calculate subtotal
           const total = parsedCart.reduce(
-            (sum: number, item: CartItem) => sum + item.price * item.quantity,
+            (sum: number, item: CartItem) => sum + getItemSellingPrice(item) * item.quantity,
             0
           );
           setSubtotal(total);
@@ -423,22 +442,15 @@ export default function MiniCart({ isOpen, onClose }: MiniCartProps) {
                     >
                       Remove
                     </button>
-                    {item.discountedPrice && item.price && item.discountedPrice < item.price ? (
+                    {getItemOriginalPrice(item) ? (
                       <div className="text-right">
                         <span className="text-[#5A606B] line-through text-xs font-normal mr-1">
-                          ₹{item.price.toFixed(2)}
+                          ₹{(getItemOriginalPrice(item) as number).toFixed(2)}
                         </span>
-                        <span className="font-medium text-[#0B0B0D]">₹{item.discountedPrice.toFixed(2)}</span>
-                      </div>
-                    ) : item.comparePrice && item.price && item.comparePrice > item.price ? (
-                      <div className="text-right">
-                        <span className="text-[#5A606B] line-through text-xs font-normal mr-1">
-                          ₹{item.comparePrice.toFixed(2)}
-                        </span>
-                        <span className="font-medium text-[#0B0B0D]">₹{item.price.toFixed(2)}</span>
+                        <span className="font-medium text-[#0B0B0D]">₹{getItemSellingPrice(item).toFixed(2)}</span>
                       </div>
                     ) : (
-                      <span className="font-medium">₹{(item.discountedPrice || item.price).toFixed(2)}</span>
+                      <span className="font-medium">₹{getItemSellingPrice(item).toFixed(2)}</span>
                     )}
                   </div>
                 </div>

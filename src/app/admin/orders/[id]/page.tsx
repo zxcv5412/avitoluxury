@@ -169,14 +169,16 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     // Format items consistently
     const items = orderData.items || orderData.orderItems || [];
     
+    const shippingPrice = typeof orderData.shippingPrice === 'number' ? orderData.shippingPrice : 0;
+    const itemsTotal = items.reduce((sum: number, item: any) => {
+      return sum + ((item.price || 0) * (item.quantity || 1));
+    }, 0);
+    const itemsPrice = typeof orderData.itemsPrice === 'number' ? orderData.itemsPrice : itemsTotal;
+
     // Calculate total price if missing
     let totalPrice = orderData.totalPrice || orderData.total || 0;
     if (totalPrice === 0 && items.length > 0) {
-      const itemsTotal = items.reduce((sum: number, item: any) => {
-        return sum + ((item.price || 0) * (item.quantity || 1));
-      }, 0);
-      const shippingPrice = orderData.shippingPrice || 0;
-      totalPrice = itemsTotal + shippingPrice;
+      totalPrice = itemsPrice + shippingPrice;
     }
     
     // Log items to help debug
@@ -197,6 +199,10 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
       date: orderData.createdAt || orderData.date || new Date().toISOString(),
       status: orderData.status || 'Processing',
       total: totalPrice,
+      totalPrice: totalPrice,
+      itemsPrice: itemsPrice,
+      shippingPrice: shippingPrice,
+      taxPrice: orderData.taxPrice || 0,
       items: items.map((item: any) => {
         // Try to get product details from various possible locations in the API response
         const productDetails = typeof item.product === 'object' ? item.product : {};
@@ -590,18 +596,46 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 </tr>
               ))}
             </tbody>
-            <tfoot className="bg-gray-50">
+            <tfoot className="bg-gray-50 divide-y divide-gray-200">
               <tr>
-                <th scope="row" colSpan={4} className="px-3 sm:px-6 py-3 text-right text-sm font-medium text-gray-900 hidden md:table-cell">
-                  Subtotal
+                <th scope="row" colSpan={6} className="px-3 sm:px-6 py-2.5 text-right text-sm font-medium text-gray-600 hidden md:table-cell">
+                  Items Subtotal
                 </th>
-                <th scope="row" colSpan={1} className="px-3 sm:px-6 py-3 text-right text-sm font-medium text-gray-900 md:hidden">
-                  Subtotal
+                <th scope="row" colSpan={5} className="px-3 sm:px-6 py-2.5 text-right text-sm font-medium text-gray-600 hidden sm:table-cell md:hidden">
+                  Items Subtotal
                 </th>
-                <td colSpan={2} className="px-3 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-900 font-medium md:hidden">
-                  ₹{order.total?.toFixed(2) || 'N/A'}
+                <th scope="row" colSpan={3} className="px-3 sm:px-6 py-2.5 text-right text-sm font-medium text-gray-600 sm:hidden">
+                  Items Subtotal
+                </th>
+                <td className="px-3 sm:px-6 py-2.5 whitespace-nowrap text-sm text-gray-700 font-medium text-right">
+                  ₹{(typeof order.itemsPrice === 'number' ? order.itemsPrice : ((order.total || 0) - (order.shippingPrice || 0))).toFixed(2)}
                 </td>
-                <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-900 font-medium hidden md:table-cell">
+              </tr>
+              <tr>
+                <th scope="row" colSpan={6} className="px-3 sm:px-6 py-2.5 text-right text-sm font-medium text-gray-600 hidden md:table-cell">
+                  Delivery Charge
+                </th>
+                <th scope="row" colSpan={5} className="px-3 sm:px-6 py-2.5 text-right text-sm font-medium text-gray-600 hidden sm:table-cell md:hidden">
+                  Delivery Charge
+                </th>
+                <th scope="row" colSpan={3} className="px-3 sm:px-6 py-2.5 text-right text-sm font-medium text-gray-600 sm:hidden">
+                  Delivery Charge
+                </th>
+                <td className="px-3 sm:px-6 py-2.5 whitespace-nowrap text-sm text-gray-700 font-medium text-right">
+                  {order.shippingPrice && order.shippingPrice > 0 ? `₹${order.shippingPrice.toFixed(2)}` : 'Free'}
+                </td>
+              </tr>
+              <tr className="bg-gray-100 font-bold">
+                <th scope="row" colSpan={6} className="px-3 sm:px-6 py-3 text-right text-sm font-bold text-gray-900 hidden md:table-cell">
+                  Total
+                </th>
+                <th scope="row" colSpan={5} className="px-3 sm:px-6 py-3 text-right text-sm font-bold text-gray-900 hidden sm:table-cell md:hidden">
+                  Total
+                </th>
+                <th scope="row" colSpan={3} className="px-3 sm:px-6 py-3 text-right text-sm font-bold text-gray-900 sm:hidden">
+                  Total
+                </th>
+                <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-900 font-bold text-right">
                   ₹{order.total?.toFixed(2) || 'N/A'}
                 </td>
               </tr>

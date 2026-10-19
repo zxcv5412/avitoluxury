@@ -153,7 +153,7 @@ export async function POST(request: Request) {
       quantity: parseInt(productInfo.quantity.toString() || '0'),
       featured: productInfo.featured || false,
       isNewProduct: productInfo.isNewArrival || false, // For backward compatibility
-      onSale: productInfo.comparePrice && productInfo.comparePrice > productInfo.price,
+      onSale: Boolean(productInfo.comparePrice && productInfo.comparePrice !== productInfo.price && productInfo.comparePrice > 0),
     };
     
     console.log('Creating new product:', productData);

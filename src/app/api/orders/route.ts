@@ -213,7 +213,7 @@ export async function POST(request: Request) {
     // Use custom shipping price if provided, otherwise calculate based on subtotal
     const shippingPrice = typeof customShippingPrice === 'number' ? 
       customShippingPrice : 
-      (subtotal > 500 ? 0 : 75); // Free shipping over 500
+      (subtotal >= 500 ? 0 : 70); // Free shipping over ₹500, otherwise ₹70
     
     // Apply discount if provided
     const discount = discountAmount || 0;
@@ -251,11 +251,25 @@ export async function POST(request: Request) {
         console.log('Order API: Fallback - Found product by name:', !!productDetails);
       }
       
+      let effectivePrice = Number(item.price) || 0;
+      if (productDetails) {
+        const prodP = Number(productDetails.price) || 0;
+        const prodCP = Number((productDetails as any).comparePrice) || 0;
+        const prodDP = Number((productDetails as any).discountedPrice) || 0;
+        if (prodDP > 0 && prodDP < prodP && (effectivePrice >= prodP || effectivePrice > prodDP)) {
+          effectivePrice = prodDP;
+        } else if (prodCP > 0 && prodCP < prodP && (effectivePrice >= prodP || effectivePrice > prodCP)) {
+          effectivePrice = prodCP;
+        } else if (prodCP > 0 && prodP > 0 && prodCP > prodP && effectivePrice >= prodCP) {
+          effectivePrice = prodP;
+        }
+      }
+      
       return {
         product: productDetails?._id || (item.product && mongoose.Types.ObjectId.isValid(item.product) ? item.product : null),
         name: item.name,
         quantity: item.quantity,
-        price: item.price,
+        price: effectivePrice > 0 ? effectivePrice : item.price,
         image: item.image,
         sku: productDetails?.sku || 'COMBO-2ML',
         productType: productDetails?.productType || 'Discovery Set',

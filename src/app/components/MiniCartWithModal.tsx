@@ -33,6 +33,25 @@ interface MiniCartWithModalProps {
   onClose: () => void;
 }
 
+const getItemSellingPrice = (item: CartItem) => {
+  const p = Number(item.price) || 0;
+  const dp = Number(item.discountedPrice) || 0;
+  const cp = Number(item.comparePrice) || 0;
+  if (dp > 0 && dp < p) return dp;
+  if (cp > 0 && cp < p) return cp;
+  return p;
+};
+
+const getItemOriginalPrice = (item: CartItem) => {
+  const p = Number(item.price) || 0;
+  const dp = Number(item.discountedPrice) || 0;
+  const cp = Number(item.comparePrice) || 0;
+  if (cp > p && p > 0) return cp;
+  if (dp > 0 && dp < p) return p;
+  if (cp > 0 && cp < p) return p;
+  return undefined;
+};
+
 export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModalProps) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [subtotal, setSubtotal] = useState(0);
@@ -57,8 +76,7 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
             
             // Calculate subtotal
             const total = parsedCart.reduce((sum: number, item: CartItem) => {
-              const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
-              return sum + (itemPrice * (item.quantity || 1));
+              return sum + (getItemSellingPrice(item) * (item.quantity || 1));
             }, 0);
             
             setSubtotal(total);
@@ -119,8 +137,7 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
     
     // Recalculate subtotal
     const newSubtotal = updatedCart.reduce((sum, item) => {
-      const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
-      return sum + (itemPrice * (item.quantity || 1));
+      return sum + (getItemSellingPrice(item) * (item.quantity || 1));
     }, 0);
     
     setSubtotal(newSubtotal);
@@ -164,8 +181,7 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
     
     // Recalculate subtotal
     const newSubtotal = updatedCart.reduce((sum: number, item: CartItem) => {
-      const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
-      return sum + (itemPrice * (item.quantity || 1));
+      return sum + (getItemSellingPrice(item) * (item.quantity || 1));
     }, 0);
     
     setSubtotal(newSubtotal);
@@ -392,22 +408,15 @@ export default function MiniCartWithModal({ isOpen, onClose }: MiniCartWithModal
                       </div>
                       
                       <div className="font-semibold">
-                        {item.comparePrice && item.price && item.comparePrice > item.price ? (
+                        {getItemOriginalPrice(item) ? (
                           <div className="flex items-center gap-1.5">
                             <span className="text-[#5A606B] line-through text-xs font-normal">
-                              MRP ₹{item.comparePrice.toFixed(2)}
+                              MRP ₹{(getItemOriginalPrice(item) as number).toFixed(2)}
                             </span>
-                            <span className="text-[#0B0B0D]">₹{item.price.toFixed(2)}</span>
-                          </div>
-                        ) : item.discountedPrice && item.price && item.discountedPrice < item.price ? (
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[#5A606B] line-through text-xs font-normal">
-                              MRP ₹{item.price.toFixed(2)}
-                            </span>
-                            <span className="text-[#0B0B0D]">₹{item.discountedPrice.toFixed(2)}</span>
+                            <span className="text-[#0B0B0D]">₹{getItemSellingPrice(item).toFixed(2)}</span>
                           </div>
                         ) : (
-                          <span className="text-[#0B0B0D]">₹{((item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price).toFixed(2)}</span>
+                          <span className="text-[#0B0B0D]">₹{getItemSellingPrice(item).toFixed(2)}</span>
                         )}
                       </div>
                     </div>

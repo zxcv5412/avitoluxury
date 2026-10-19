@@ -234,10 +234,20 @@ export async function POST(request: Request) {
       cart.items[existingItemIndex].quantity = quantity || cart.items[existingItemIndex].quantity + 1;
     } else {
       // Add new item if product doesn't exist
+      const prodP = Number(product.price) || 0;
+      const prodCP = Number((product as any).comparePrice) || 0;
+      const prodDP = Number((product as any).discountedPrice) || 0;
+      let effectiveSellingPrice = prodP;
+      if (prodDP > 0 && prodDP < prodP) {
+        effectiveSellingPrice = prodDP;
+      } else if (prodCP > 0 && prodCP < prodP) {
+        effectiveSellingPrice = prodCP;
+      }
+
       cart.items.push({
         product: productId,
         quantity: quantity || 1,
-        price: product.price,
+        price: effectiveSellingPrice,
         name: product.name,
         image: getProductImageUrl(product)
       });
@@ -426,10 +436,20 @@ export async function PUT(request: Request) {
       if (!product) continue;
       
       // Add to cart
+      const prodP = Number(product.price) || 0;
+      const prodCP = Number((product as any).comparePrice) || 0;
+      const prodDP = Number((product as any).discountedPrice) || 0;
+      let effectiveSellingPrice = prodP;
+      if (prodDP > 0 && prodDP < prodP) {
+        effectiveSellingPrice = prodDP;
+      } else if (prodCP > 0 && prodCP < prodP) {
+        effectiveSellingPrice = prodCP;
+      }
+
       cart.items.push({
         product: item.id,
         quantity: item.quantity,
-        price: product.price,
+        price: effectiveSellingPrice,
         name: product.name,
         image: getProductImageUrl(product)
       });

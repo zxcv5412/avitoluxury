@@ -49,7 +49,10 @@ export default function CheckoutPage() {
         
         // Calculate subtotal
         const total = parsedCart.reduce((sum: number, item: any) => {
-          const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
+          const p = Number(item.price) || 0;
+          const dp = Number(item.discountedPrice) || 0;
+          const cp = Number(item.comparePrice) || 0;
+          const itemPrice = (dp > 0 && dp < p) ? dp : (cp > 0 && cp < p) ? cp : p;
           return sum + (itemPrice * item.quantity);
         }, 0);
         

@@ -58,6 +58,37 @@ export async function POST(request: NextRequest) {
     // Generate tracking ID
     const trackingId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
     
+    // Helper to determine true effective selling price
+    const getEffectivePrice = (item: any, dbProduct: any) => {
+      const itemP = Number(item.price) || 0;
+      const itemDP = Number(item.discountedPrice) || 0;
+      const itemCP = Number(item.comparePrice) || 0;
+
+      let effectivePrice = itemP;
+      if (itemDP > 0 && itemDP < itemP) {
+        effectivePrice = itemDP;
+      } else if (itemCP > 0 && itemCP < itemP) {
+        effectivePrice = itemCP;
+      }
+
+      // If DB product has discount information, verify / enforce
+      if (dbProduct) {
+        const prodP = Number(dbProduct.price) || 0;
+        const prodCP = Number(dbProduct.comparePrice) || 0;
+        const prodDP = Number(dbProduct.discountedPrice) || 0;
+
+        if (prodDP > 0 && prodDP < prodP && (effectivePrice >= prodP || effectivePrice > prodDP)) {
+          effectivePrice = prodDP;
+        } else if (prodCP > 0 && prodCP < prodP && (effectivePrice >= prodP || effectivePrice > prodCP)) {
+          effectivePrice = prodCP;
+        } else if (prodCP > 0 && prodP > 0 && prodCP > prodP && effectivePrice >= prodCP) {
+          effectivePrice = prodP;
+        }
+      }
+
+      return effectivePrice > 0 ? effectivePrice : itemP;
+    };
+
     // Create order items with product references
     const orderItems = await Promise.all(cartItems.map(async (item: any) => {
       // Find product in database to get reference safely
@@ -73,7 +104,7 @@ export async function POST(request: NextRequest) {
           return {
             product: productByName._id,
             name: item.name,
-            price: item.discountedPrice || item.price,
+            price: getEffectivePrice(item, productByName),
             quantity: item.quantity,
             image: item.image,
             sku: productByName.sku || '',
@@ -91,7 +122,7 @@ export async function POST(request: NextRequest) {
         return {
           product: null,
           name: item.name,
-          price: item.discountedPrice || item.price,
+          price: getEffectivePrice(item, null),
           quantity: item.quantity,
           image: item.image,
           sku: 'COMBO-2ML',
@@ -118,7 +149,7 @@ export async function POST(request: NextRequest) {
       return {
         product: product ? product._id : null,
         name: item.name,
-        price: item.discountedPrice || item.price,
+        price: getEffectivePrice(item, product),
         quantity: item.quantity,
         image: item.image,
         sku: product?.sku || '',
@@ -133,6 +164,14 @@ export async function POST(request: NextRequest) {
         bundleItems: item.bundleItems
       };
     }));
+
+    // Ensure shipping is ₹70 if subtotal < 500, or Free (0) if subtotal >= 500
+    const calculatedShipping = (subtotal >= 500) ? 0 : 70;
+    const finalShippingPrice = typeof shippingCost === 'number' && (shippingCost === 0 || shippingCost === 70) 
+      ? shippingCost 
+      : calculatedShipping;
+    const codFee = body.paymentMethod === 'COD' ? 50 : 0;
+    const finalTotalPrice = (totalAmount && totalAmount > 0) ? totalAmount : (subtotal + finalShippingPrice + codFee);
     
     // Create order
     const order = new Order({
@@ -151,8 +190,8 @@ export async function POST(request: NextRequest) {
       alternatePhone: userData.alternatePhone,
       paymentMethod: body.paymentMethod || 'Razorpay',
       itemsPrice: subtotal,
-      shippingPrice: shippingCost,
-      totalPrice: totalAmount,
+      shippingPrice: finalShippingPrice,
+      totalPrice: finalTotalPrice,
       isPaid: false,
       isDelivered: false,
       status: 'Pending'

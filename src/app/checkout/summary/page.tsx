@@ -37,6 +37,25 @@ interface CartItem {
   }>;
 }
 
+const getItemSellingPrice = (item: CartItem) => {
+  const p = Number(item.price) || 0;
+  const dp = Number(item.discountedPrice) || 0;
+  const cp = Number(item.comparePrice) || 0;
+  if (dp > 0 && dp < p) return dp;
+  if (cp > 0 && cp < p) return cp;
+  return p;
+};
+
+const getItemOriginalPrice = (item: CartItem) => {
+  const p = Number(item.price) || 0;
+  const dp = Number(item.discountedPrice) || 0;
+  const cp = Number(item.comparePrice) || 0;
+  if (cp > p && p > 0) return cp;
+  if (dp > 0 && dp < p) return p;
+  if (cp > 0 && cp < p) return p;
+  return undefined;
+};
+
 export default function CheckoutSummaryPage() {
   const router = useRouter();
   const [formData, setFormData] = useState<FormData | null>(null);
@@ -76,14 +95,13 @@ export default function CheckoutSummaryPage() {
         
         // Calculate subtotal
         const total = parsedCart.reduce((sum: number, item: CartItem) => {
-          const itemPrice = (item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price;
-          return sum + (itemPrice * item.quantity);
+          return sum + (getItemSellingPrice(item) * item.quantity);
         }, 0);
         
         setSubtotal(total);
         
-        // Calculate shipping (free over ₹500)
-        setShippingCost(total >= 500 ? 0 : 50);
+        // Calculate shipping (free over ₹500, otherwise ₹70)
+        setShippingCost(total >= 500 ? 0 : 70);
       } else {
         // Redirect to cart page if cart is empty
         router.push('/cart');
@@ -132,7 +150,11 @@ export default function CheckoutSummaryPage() {
             ...formData,
             alternatePhone: alternatePhone || undefined
           },
-          cartItems,
+          cartItems: cartItems.map(item => ({
+            ...item,
+            price: getItemSellingPrice(item),
+            originalPrice: getItemOriginalPrice(item)
+          })),
           subtotal,
           shippingCost,
           totalAmount,
@@ -310,15 +332,11 @@ export default function CheckoutSummaryPage() {
                   
                   <div className="text-right">
                     <p className="font-medium text-[#0B0B0D]">
-                      ₹{(((item.discountedPrice && item.discountedPrice < item.price) ? item.discountedPrice : item.price) * item.quantity).toFixed(2)}
+                      ₹{(getItemSellingPrice(item) * item.quantity).toFixed(2)}
                     </p>
-                    {item.comparePrice && item.price && item.comparePrice > item.price ? (
+                    {getItemOriginalPrice(item) ? (
                       <p className="text-xs text-[#5A606B] line-through">
-                        MRP ₹{(item.comparePrice * item.quantity).toFixed(2)}
-                      </p>
-                    ) : item.discountedPrice && item.price && item.discountedPrice < item.price ? (
-                      <p className="text-xs text-[#5A606B] line-through">
-                        MRP ₹{(item.price * item.quantity).toFixed(2)}
+                        MRP ₹{((getItemOriginalPrice(item) as number) * item.quantity).toFixed(2)}
                       </p>
                     ) : null}
                   </div>

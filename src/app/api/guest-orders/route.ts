@@ -107,15 +107,30 @@ export async function POST(request: NextRequest) {
         volume: product.volume
       });
       
+      let effectivePrice = Number(item.price) || 0;
+      if (product) {
+        const prodP = Number(product.price) || 0;
+        const prodCP = Number((product as any).comparePrice) || 0;
+        const prodDP = Number((product as any).discountedPrice) || 0;
+        if (prodDP > 0 && prodDP < prodP && (effectivePrice >= prodP || effectivePrice > prodDP)) {
+          effectivePrice = prodDP;
+        } else if (prodCP > 0 && prodCP < prodP && (effectivePrice >= prodP || effectivePrice > prodCP)) {
+          effectivePrice = prodCP;
+        } else if (prodCP > 0 && prodP > 0 && prodCP > prodP && effectivePrice >= prodCP) {
+          effectivePrice = prodP;
+        }
+      }
+      if (effectivePrice <= 0) effectivePrice = item.price;
+
       // Calculate item price
-      const itemTotal = item.price * item.quantity;
+      const itemTotal = effectivePrice * item.quantity;
       itemsPrice += itemTotal;
       
       // Return item with complete product details
       return {
         product: item.product,
         name: item.name,
-        price: item.price,
+        price: effectivePrice,
         quantity: item.quantity,
         image: item.image,
         // Add complete product details

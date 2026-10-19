@@ -133,7 +133,7 @@ export async function PUT(
       quantity: productInfo.quantity || 0,
       featured: productInfo.featured || false,
       isNewProduct: productInfo.isNewArrival || false, // For backward compatibility
-      onSale: productInfo.comparePrice && productInfo.comparePrice > productInfo.price,
+      onSale: Boolean(productInfo.comparePrice && productInfo.comparePrice !== productInfo.price && productInfo.comparePrice > 0),
       bulletPoints: Array.isArray(productInfo.bulletPoints) ? productInfo.bulletPoints : [],
     };
     
