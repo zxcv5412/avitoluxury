@@ -284,21 +284,29 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
   };
   
   const handlePreviousImage = () => {
-    if (!product || !product.images.length) return;
+    if (!product) return;
+    const totalMedia = (product.images?.length || 0) + (product.videos?.length || 0);
+    if (totalMedia === 0) return;
     setCurrentImageIndex(prevIndex => 
-      prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
+      prevIndex === 0 ? totalMedia - 1 : prevIndex - 1
     );
   };
   
   const handleNextImage = () => {
-    if (!product || !product.images.length) return;
+    if (!product) return;
+    const totalMedia = (product.images?.length || 0) + (product.videos?.length || 0);
+    if (totalMedia === 0) return;
     setCurrentImageIndex(prevIndex => 
-      prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
+      prevIndex === totalMedia - 1 ? 0 : prevIndex + 1
     );
   };
   
   const renderImageGallery = () => {
-    if (!product || (!product.images || product.images.length === 0) && (!product.videos || product.videos.length === 0)) {
+    const imagesList = product?.images || [];
+    const videosList = product?.videos || [];
+    const totalMedia = imagesList.length + videosList.length;
+
+    if (!product || totalMedia === 0) {
       return (
         <div className="aspect-square bg-gray-100 rounded-lg">
           <Image
@@ -312,38 +320,48 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
       );
     }
     
+    const isVideo = currentImageIndex >= imagesList.length;
+    const currentVideo = isVideo ? videosList[currentImageIndex - imagesList.length] : null;
+    const currentImage = !isVideo ? imagesList[currentImageIndex] : null;
+
     return (
       <div>
-        <div className="relative aspect-square overflow-hidden">
-          {currentImageIndex < product.images.length ? (
+        <div className="relative aspect-square overflow-hidden bg-gray-50 rounded-lg flex items-center justify-center">
+          {!isVideo ? (
             <Image
-              src={optimizeImageUrl(product.images[currentImageIndex]?.url || '/placeholder-image.jpg', 800)}
+              src={optimizeImageUrl(currentImage?.url || '/placeholder-image.jpg', 800)}
               alt={`${product.name} - Image ${currentImageIndex + 1}`}
               width={600}
               height={800}
               className="w-full h-full object-contain rounded-lg"
+              priority={currentImageIndex === 0}
             />
           ) : (
             <video 
-              src={product.videos[currentImageIndex - product.images.length]?.url} 
+              key={currentVideo?.url}
+              src={currentVideo?.url} 
               controls
-              className="w-full h-full object-contain rounded-lg"
+              playsInline
+              preload="metadata"
+              className="w-full h-full object-contain rounded-lg bg-black"
             />
           )}
           
-          {product.images.length > 1 && (
+          {totalMedia > 1 && (
             <>
               <button 
+                type="button"
                 onClick={handlePreviousImage}
-                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-75 p-2 rounded-full"
-                aria-label="Previous image"
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-md transition-all z-10"
+                aria-label="Previous media"
               >
                 <FiChevronLeft size={20} />
               </button>
               <button 
+                type="button"
                 onClick={handleNextImage}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-75 p-2 rounded-full"
-                aria-label="Next image"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-md transition-all z-10"
+                aria-label="Next media"
               >
                 <FiChevronRight size={20} />
               </button>
@@ -352,13 +370,14 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
         </div>
         
         {/* Thumbnail navigation */}
-        {product.images.length > 1 && (
+        {totalMedia > 1 && (
           <div className="flex space-x-2 mt-4 overflow-x-auto py-2">
-            {product.images.map((image, index) => (
+            {imagesList.map((image, index) => (
               <button 
-                key={index} 
+                key={`img-${index}`} 
+                type="button"
                 onClick={() => setCurrentImageIndex(index)}
-                className={`w-16 h-16 flex-shrink-0 ${currentImageIndex === index ? 'ring-2 ring-black' : 'opacity-70'}`}
+                className={`w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border ${currentImageIndex === index ? 'ring-2 ring-black border-black' : 'opacity-70 border-gray-200 hover:opacity-100'} transition-all`}
               >
                 <Image
                   src={optimizeImageUrl(image.url, 150)}
@@ -369,6 +388,35 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
                 />
               </button>
             ))}
+            {videosList.map((video, vIndex) => {
+              const videoIndex = imagesList.length + vIndex;
+              const isSelected = currentImageIndex === videoIndex;
+              return (
+                <button
+                  key={`vid-${vIndex}`}
+                  type="button"
+                  onClick={() => setCurrentImageIndex(videoIndex)}
+                  className={`relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden bg-black border ${isSelected ? 'ring-2 ring-black border-black opacity-100' : 'opacity-70 border-gray-300 hover:opacity-100'} transition-all flex items-center justify-center`}
+                  title={`Video ${vIndex + 1}`}
+                >
+                  <video
+                    src={`${video.url}#t=0.5`}
+                    preload="metadata"
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover pointer-events-none"
+                  />
+                  <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white pointer-events-none">
+                    <span className="w-5 h-5 rounded-full bg-black/70 flex items-center justify-center text-[10px] border border-white/60 pl-0.5">
+                      ▶
+                    </span>
+                    <span className="text-[8px] uppercase tracking-wider font-semibold mt-0.5">
+                      Video
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

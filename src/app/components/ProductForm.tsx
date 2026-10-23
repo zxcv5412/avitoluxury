@@ -371,14 +371,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
     
     try {
       if (media.length === 0) {
-        throw new Error('At least one image is required');
+        throw new Error('At least one image or video is required');
       }
       
       // Prepare product data for submission
       const productData = {
         ...data,
         bulletPoints: fields.bulletPoints.filter(point => point.trim() !== ''),
-        mainImage: media.find(m => m.type === 'image')?.url || '',
+        mainImage: media.find(m => m.type === 'image')?.url || (media[0]?.type === 'video' ? media[0].url.replace(/\.[^/.]+$/, ".jpg") : ''),
         images: media.filter(m => m.type === 'image').map(m => m.url),
         videos: media.filter(m => m.type === 'video').map(m => m.url),
       };
@@ -787,11 +787,23 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     className="w-24 h-24 object-cover rounded-md border border-gray-300"
                   />
                 ) : (
-                  <video 
-                    src={item.url}
-                    className="w-24 h-24 object-cover rounded-md border border-gray-300"
-                    controls
-                  />
+                  <div className="relative w-24 h-24 rounded-md overflow-hidden bg-black border border-gray-300 flex items-center justify-center">
+                    <video 
+                      src={`${item.url}#t=0.5`}
+                      preload="metadata"
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover pointer-events-none"
+                    />
+                    <div className="absolute inset-0 bg-black/35 flex flex-col items-center justify-center text-white pointer-events-none">
+                      <span className="w-7 h-7 rounded-full bg-black/60 flex items-center justify-center text-xs shadow-md border border-white/50 pl-0.5">
+                        ▶
+                      </span>
+                      <span className="text-[9px] uppercase tracking-wider font-semibold mt-1 bg-black/60 px-1.5 py-0.5 rounded text-gray-200">
+                        Video
+                      </span>
+                    </div>
+                  </div>
                 )}
                 <button
                   type="button"
