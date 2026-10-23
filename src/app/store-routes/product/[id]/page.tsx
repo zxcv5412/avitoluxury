@@ -300,7 +300,10 @@ export default function ProductDetailPage() {
               playsInline
               preload="metadata"
               className="w-full h-full object-contain rounded-lg bg-black"
-            />
+            >
+              <source src={currentVideo?.url} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
           )}
           
           {totalMedia > 1 && (
