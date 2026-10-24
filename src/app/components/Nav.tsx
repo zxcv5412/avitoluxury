@@ -388,10 +388,10 @@ export default function Nav() {
           name: 'Car Fresheners',
           path: '/air-fresheners/car'
         },
-        // {
-        //   name: 'Room Fresheners',
-        //   path: '/air-fresheners/room'
-        // }
+        {
+          name: 'Room Fresheners',
+          path: '/air-fresheners/room'
+        }
       ]
     },
     // {
