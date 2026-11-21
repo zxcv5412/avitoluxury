@@ -25,9 +25,13 @@ const convertToRupees = (dollarPrice: number) => {
   return dollarPrice;
 };
 
-// Helper function to inject Cloudinary optimization transformations
+// Helper function to inject Cloudinary & ImageKit optimization transformations
 const optimizeImageUrl = (url: string, width = 800) => {
   if (!url) return '/perfume-placeholder.jpg';
+  if (url.includes('ik.imagekit.io')) {
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}tr=w-${width},q-80,f-auto`;
+  }
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
     return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_limit/`);
   }
