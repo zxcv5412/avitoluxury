@@ -16,67 +16,75 @@ export interface StorySwatch {
 export const DEFAULT_STORY_SWATCHES: StorySwatch[] = [
   {
     id: 'swatch-2ml',
-    title: '2 ML ROLL-ONS',
-    imageUrl: 'https://res.cloudinary.com/dqtkw2hvh/image/upload/v1720000000/placeholder_attar.jpg',
+    title: '2 ML ATTARS',
+    imageUrl: 'https://ik.imagekit.io/kketfxdcu/2%20ml%20Listing%20Combo%20(final)/S_F_J_2ml_clean.png?updatedAt=1795276839329',
     linkUrl: '/collection?volume=2ml',
     isActive: true,
     order: 1
   },
   {
-    id: 'swatch-3ml',
-    title: '3 ML ATTARS',
-    imageUrl: 'https://res.cloudinary.com/dqtkw2hvh/image/upload/v1720000000/placeholder_attar.jpg',
-    linkUrl: '/collection?volume=3ml',
+    id: 'swatch-6ml',
+    title: '6 ML ATTARS',
+    imageUrl: 'https://ik.imagekit.io/kketfxdcu/All%206%20ml%20Attar%20Listing%20(Final)/Avito%20Luxury%20Attar%20Collection.png',
+    linkUrl: '/collection?volume=6ml',
     isActive: true,
     order: 2
   },
   {
-    id: 'swatch-6ml',
-    title: '6 ML ATTARS',
-    imageUrl: 'https://res.cloudinary.com/dqtkw2hvh/image/upload/v1720000000/placeholder_attar.jpg',
-    linkUrl: '/collection?volume=6ml',
+    id: 'swatch-10ml',
+    title: '10 ML EDP',
+    imageUrl: 'https://ik.imagekit.io/kketfxdcu/10%20ml/flora.png',
+    linkUrl: '/perfumes?volume=10ml',
     isActive: true,
     order: 3
   },
   {
-    id: 'swatch-12ml',
-    title: '12 ML ATTARS',
-    imageUrl: 'https://res.cloudinary.com/dqtkw2hvh/image/upload/v1720000000/placeholder_attar.jpg',
-    linkUrl: '/collection?volume=12ml',
+    id: 'swatch-20ml',
+    title: '20 ML EDP',
+    imageUrl: 'https://ik.imagekit.io/kketfxdcu/20%20ml%20listing%20(final)/france%202000%20with%20box.png?updatedAt=1795281440653',
+    linkUrl: '/collection?volume=20ml',
     isActive: true,
     order: 4
   },
   {
-    id: 'swatch-30ml',
-    title: '30 ML PERFUMES',
-    imageUrl: 'https://res.cloudinary.com/dqtkw2hvh/image/upload/v1720000000/placeholder_perfume.jpg',
-    linkUrl: '/collection?volume=30ml',
+    id: 'swatch-50ml',
+    title: '50 ML EDP',
+    imageUrl: 'https://ik.imagekit.io/kketfxdcu/50%20ML%20New%20Packing/50%20ml%20listing%20(final)/new-50ml-collection.png?updatedAt=1795277351733',
+    linkUrl: '/collection?volume=50ml',
     isActive: true,
     order: 5
   },
   {
-    id: 'swatch-50ml',
-    title: '50 ML PERFUMES',
-    imageUrl: 'https://res.cloudinary.com/dqtkw2hvh/image/upload/v1720000000/placeholder_perfume.jpg',
-    linkUrl: '/collection?volume=50ml',
+    id: 'swatch-100ml',
+    title: '100 ML EDP',
+    imageUrl: 'https://ik.imagekit.io/kketfxdcu/100%20ml/PEACH_100_ML_TILT.png?updatedAt=1795277313806',
+    linkUrl: '/collection?volume=100ml',
     isActive: true,
     order: 6
   },
   {
-    id: 'swatch-100ml',
-    title: '100 ML SPRAYS',
-    imageUrl: 'https://res.cloudinary.com/dqtkw2hvh/image/upload/v1720000000/placeholder_perfume.jpg',
-    linkUrl: '/collection?volume=100ml',
+    id: 'swatch-combo',
+    title: 'COMBOS',
+    imageUrl: 'https://ik.imagekit.io/kketfxdcu/8%20ml%20combo%20listing%20(final)/1.png',
+    linkUrl: '/combos',
     isActive: true,
     order: 7
   },
   {
     id: 'swatch-car',
     title: 'CAR FRESHENERS',
-    imageUrl: 'https://res.cloudinary.com/dqtkw2hvh/image/upload/v1720000000/placeholder_car.jpg',
+    imageUrl: 'https://ik.imagekit.io/kketfxdcu/Car%20Perfume%20Listing%20(Final)/car_perfume_combo_product.jpg?updatedAt=1795271494624',
     linkUrl: '/air-fresheners/car',
     isActive: true,
     order: 8
+  },
+  {
+    id: 'swatch-room',
+    title: 'ROOM FRESHENERS',
+    imageUrl: 'https://ik.imagekit.io/kketfxdcu/Air%20Fresheners%20Listing%20(final)/All%20in%20One.png?updatedAt=1795271448587',
+    linkUrl: '/air-fresheners/room',
+    isActive: true,
+    order: 9
   }
 ];
 
