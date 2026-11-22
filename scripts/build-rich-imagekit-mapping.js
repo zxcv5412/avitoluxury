@@ -89,7 +89,7 @@ const mappings = backup.map(product => {
       // Preferred main image: front bottle
       const frontFile = scentFiles.find(f => f.name.includes('front')) || scentFiles[0];
       main = frontFile ? frontFile.url : null;
-      // Gallery: main front first, then box, usage, pocket, cap_separated, plus 4 info cards + 2ml combo previews
+      // Gallery: main front first, then box, usage, pocket, cap_separated, plus 4 info cards
       const sortOrder = ['front', 'box', 'usage', 'pocket', 'cap', 'separated'];
       scentFiles.sort((a, b) => {
         const idxA = sortOrder.findIndex(k => a.name.includes(k));
@@ -99,8 +99,7 @@ const mappings = backup.map(product => {
       gallery = [...new Set([
         main,
         ...scentFiles.map(f => f.url),
-        ...attarInfoCards,
-        ...combo2mlPreviews
+        ...attarInfoCards
       ])];
     }
   }
@@ -313,14 +312,13 @@ const mappings = backup.map(product => {
       const genericBox = files.find(f => f.folder === '/All 6 ml Attar Listing (Final)/With Box' && f.name === '1) box.png');
       const boxList = box.length > 0 ? box : (genericBox ? [genericBox] : []);
 
-      // Full gallery: Main bottle, other plain views, box shots, front graphics, 4 info cards, 2ml combo preview
+      // Full gallery: Main bottle, other plain views, box shots, front graphics, 4 info cards
       const allFiles = [
         main,
         ...plain.map(f => f.url),
         ...boxList.map(f => f.url),
         ...graphics.map(f => f.url),
-        ...attarInfoCards,
-        ...combo2mlPreviews
+        ...attarInfoCards
       ];
       gallery = [...new Set(allFiles.filter(Boolean))];
     }
