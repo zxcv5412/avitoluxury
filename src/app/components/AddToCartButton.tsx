@@ -5,6 +5,7 @@ import { FiShoppingBag } from 'react-icons/fi';
 import { useAuth } from './AuthProvider';
 import { CartService } from '@/app/services/CartService';
 import { UserActivityTracker } from '@/app/services/UserActivityTracker';
+import { trackAddToCart as trackClarityAddToCart } from '@/app/lib/clarity';
 
 // Custom event for cart updates
 export const triggerMiniCartOpen = () => {
@@ -65,6 +66,14 @@ export default function AddToCartButton({
         quantity,
         (user as any)?.userId
       );
+      
+      // Clarity tracking
+      trackClarityAddToCart({
+        id: productId,
+        name: productName,
+        price: productPrice,
+        quantity
+      });
       
       // Show mini cart
       triggerMiniCartOpen();

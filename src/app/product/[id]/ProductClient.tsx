@@ -9,6 +9,11 @@ import { useAuth } from '@/app/components/AuthProvider';
 import AddToCartButton from '@/app/components/AddToCartButton';
 import UpiDiscountBanner from '@/app/components/UpiDiscountBanner';
 import { UserActivityTracker } from '@/app/services/UserActivityTracker';
+import VisualNotes from '@/app/components/product/VisualNotes';
+import WhereToWear from '@/app/components/product/WhereToWear';
+import CustomerProofReviews from '@/app/components/product/CustomerProofReviews';
+import { getProductVisualNotes } from '@/app/lib/fragranceNotesData';
+import { trackAddToCart as trackClarityAddToCart, trackBuyNow as trackClarityBuyNow } from '@/app/lib/clarity';
 
 interface Product {
   _id: string;
@@ -33,6 +38,7 @@ interface Product {
   size?: number;
   gender?: string;
   productType?: string;
+  volume?: string;
   volumeRaw?: string;
   bulletPoints?: string[];
 }
@@ -243,6 +249,15 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
     window.dispatchEvent(new Event('storage'));
     window.dispatchEvent(new Event('cart-updated'));
     window.dispatchEvent(new CustomEvent('openMiniCart'));
+
+    // Track in Clarity
+    trackClarityAddToCart({
+      id: product._id,
+      name: product.name,
+      price: sellingPrice,
+      volume: product.volume || product.volumeRaw || '',
+      quantity: quantity
+    });
   };
 
   // Handle buy now
@@ -284,6 +299,14 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new Event('storage'));
     window.dispatchEvent(new Event('cart-updated'));
+
+    // Track in Clarity
+    trackClarityBuyNow({
+      id: product._id,
+      name: product.name,
+      price: sellingPrice
+    });
+
     router.push('/checkout');
   };
   
@@ -644,6 +667,9 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
               {/* Brand-Matched UPI Payment Discount Banner */}
               <UpiDiscountBanner />
             </div>
+
+            {/* Where to Wear It - High-intent occasion pills */}
+            <WhereToWear productType={product.productType} category={product.category} />
             
             {/* Description */}
             <div>
@@ -662,6 +688,9 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
                 </ul>
               </div>
             )}
+
+            {/* Visual Notes Showcase - High-contrast sensory ingredient cards */}
+            <VisualNotes notes={getProductVisualNotes(product)} />
             
             {/* Fragrance Notes */}
             {product.fragrance_notes && (
@@ -742,6 +771,11 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Customer Reviews & WhatsApp/Instagram UGC Social Proof */}
+      <div className="container mx-auto px-4">
+        <CustomerProofReviews />
       </div>
       
       {/* Related Products Section */}
