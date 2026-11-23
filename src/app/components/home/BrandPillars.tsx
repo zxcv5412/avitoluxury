@@ -32,21 +32,18 @@ const PILLARS = [
 
 export default function BrandPillars() {
   return (
-    <section className="w-full bg-[#0B0B0D] text-white py-14 sm:py-20 px-4 border-t border-b border-white/5 relative overflow-hidden">
-      {/* Subtle luxury ambient backlight */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-amber-500/5 blur-[120px] pointer-events-none rounded-full" />
-
+    <section className="w-full bg-white text-[#0B0B0D] py-16 sm:py-24 px-4 border-t border-b border-gray-100 relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-          <p className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] text-amber-300 uppercase mb-2">
+          <p className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] text-[#8C734B] uppercase mb-2">
             The Avito Standard
           </p>
-          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-normal uppercase tracking-[0.15em] text-white">
+          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-normal uppercase tracking-[0.15em] text-[#0B0B0D]">
             Pure Luxury Without Compromise
           </h2>
-          <div className="w-12 h-[1px] bg-amber-400/40 mx-auto mt-4 mb-4" />
-          <p className="text-xs sm:text-sm text-gray-400 font-light leading-relaxed">
+          <div className="w-12 h-[1.5px] bg-[#8C734B]/60 mx-auto mt-4 mb-4" />
+          <p className="text-xs sm:text-sm text-gray-500 font-light leading-relaxed">
             Crafted for fragrance connoisseurs who refuse to settle for weak projection or synthetic aftertastes.
           </p>
         </div>
@@ -58,22 +55,26 @@ export default function BrandPillars() {
             return (
               <div
                 key={index}
-                className="bg-[#141418] rounded-2xl p-6 sm:p-7 border border-white/5 hover:border-amber-400/30 transition-all duration-300 flex flex-col justify-between group shadow-lg"
+                className="bg-[#FAF9F6] rounded-2xl p-6 sm:p-7 border border-gray-200/70 hover:border-[#8C734B]/40 hover:bg-white transition-all duration-300 flex flex-col justify-between group shadow-sm hover:shadow-md"
               >
                 <div>
-                  {/* Icon Container */}
-                  <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-amber-300 group-hover:bg-amber-400 group-hover:text-black group-hover:border-amber-400 transition-all duration-300 mb-5">
-                    <Icon className="w-6 h-6 stroke-[1.5]" />
+                  {/* Luxury Icon Badge */}
+                  <div className="w-12 h-12 rounded-xl bg-[#FAF6EE] border border-[#EADBCE] text-[#8C734B] flex items-center justify-center mb-5 group-hover:bg-[#8C734B] group-hover:text-white group-hover:border-[#8C734B] transition-all duration-300">
+                    <Icon className="w-5 h-5 stroke-[1.6]" />
                   </div>
 
-                  {/* Text */}
-                  <p className="text-[10px] font-mono tracking-widest uppercase text-amber-300/80 font-medium mb-1">
+                  {/* Subtitle / Eyebrow */}
+                  <p className="text-[10px] sm:text-[11px] font-mono tracking-widest uppercase text-[#8C734B] font-semibold mb-1">
                     {pillar.subtitle}
                   </p>
-                  <h3 className="font-serif text-base sm:text-lg font-medium text-white mb-2.5 tracking-wide">
+
+                  {/* Title */}
+                  <h3 className="font-serif text-base sm:text-lg font-medium text-[#0B0B0D] mb-2.5 tracking-wide">
                     {pillar.title}
                   </h3>
-                  <p className="text-xs text-gray-400 leading-relaxed font-light">
+
+                  {/* Description */}
+                  <p className="text-xs sm:text-[13px] text-gray-600 leading-relaxed font-light">
                     {pillar.description}
                   </p>
                 </div>
