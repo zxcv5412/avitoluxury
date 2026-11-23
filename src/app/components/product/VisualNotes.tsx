@@ -105,6 +105,10 @@ export default function VisualNotes({ notes, title = 'NOTES' }: VisualNotesProps
                 src={note.imageUrl}
                 alt={note.name}
                 loading="lazy"
+                onError={(e) => {
+                  // Fallback to botanical aroma placeholder if image fails to load
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80';
+                }}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               {/* Type pill if available */}

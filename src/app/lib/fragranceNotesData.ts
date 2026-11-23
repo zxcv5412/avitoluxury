@@ -137,7 +137,7 @@ export const FRAGRANCE_NOTES_DICTIONARY: Record<string, FragranceNoteItem> = {
 /**
  * Derives visual notes for any product based on its fragrance_notes, description, or category/subCategories.
  */
-export function getProductVisualNotes(product: {
+export function getProductVisualNotes(product?: {
   name?: string;
   description?: string;
   category?: string;
@@ -149,6 +149,7 @@ export function getProductVisualNotes(product: {
     base?: string[];
   };
 }): FragranceNoteItem[] {
+  if (!product) return [];
   const result: FragranceNoteItem[] = [];
   const addedKeys = new Set<string>();
 
