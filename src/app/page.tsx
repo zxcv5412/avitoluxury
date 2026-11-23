@@ -2,7 +2,6 @@ import Link from 'next/link';
 import ProductCard from './components/store/ProductCard';
 import SaleCarousel from '@/app/components/SaleCarousel';
 import ShopByCircleSwatches from '@/app/components/ShopByCircleSwatches';
-import BrandPillars from '@/app/components/home/BrandPillars';
 import HomeFAQ from '@/app/components/home/HomeFAQ';
 import Nav from '@/app/components/Nav';
 import Footer from '@/app/components/Footer';
@@ -252,9 +251,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Brand Pillars & Craftsmanship USP Section */}
-        <BrandPillars />
-        
         {/* About Section */}
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
