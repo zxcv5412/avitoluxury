@@ -45,17 +45,14 @@ export default function VisualNotes({ notes, title = 'NOTES' }: VisualNotesProps
   if (!notes || notes.length === 0) return null;
 
   return (
-    <section className="w-full bg-[#0D0D11] text-white rounded-2xl p-5 sm:p-7 my-6 shadow-xl border border-white/5 relative overflow-hidden">
-      {/* Subtle luxury ambient glow */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-
+    <section className="w-full bg-[#FAF9F6] text-[#0B0B0D] rounded-2xl p-5 sm:p-7 my-6 border border-gray-200/80 shadow-sm relative overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="font-serif text-lg sm:text-xl tracking-[0.2em] uppercase font-light text-white">
+          <h3 className="font-serif text-base sm:text-lg tracking-[0.2em] uppercase font-normal text-[#0B0B0D]">
             {title}
           </h3>
-          <p className="text-[11px] sm:text-xs text-gray-400 tracking-wider uppercase mt-0.5">
+          <p className="text-[11px] sm:text-xs text-[#8C734B] tracking-wider uppercase font-medium mt-0.5">
             Key Olfactory Ingredients
           </p>
         </div>
@@ -68,8 +65,8 @@ export default function VisualNotes({ notes, title = 'NOTES' }: VisualNotesProps
             aria-label="Scroll left"
             className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border transition-all ${
               canScrollLeft
-                ? 'border-gray-700 bg-white/10 text-white hover:bg-white hover:text-black cursor-pointer'
-                : 'border-gray-800 text-gray-600 cursor-not-allowed opacity-40'
+                ? 'border-gray-300 bg-white text-gray-800 hover:bg-black hover:text-white cursor-pointer shadow-xs'
+                : 'border-gray-200 text-gray-300 cursor-not-allowed opacity-40'
             }`}
           >
             <FiChevronLeft className="w-4 h-4" />
@@ -80,8 +77,8 @@ export default function VisualNotes({ notes, title = 'NOTES' }: VisualNotesProps
             aria-label="Scroll right"
             className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border transition-all ${
               canScrollRight
-                ? 'border-gray-700 bg-white/10 text-white hover:bg-white hover:text-black cursor-pointer'
-                : 'border-gray-800 text-gray-600 cursor-not-allowed opacity-40'
+                ? 'border-gray-300 bg-white text-gray-800 hover:bg-black hover:text-white cursor-pointer shadow-xs'
+                : 'border-gray-200 text-gray-300 cursor-not-allowed opacity-40'
             }`}
           >
             <FiChevronRight className="w-4 h-4" />
@@ -100,7 +97,7 @@ export default function VisualNotes({ notes, title = 'NOTES' }: VisualNotesProps
             className="flex-shrink-0 w-[120px] sm:w-[135px] flex flex-col group snap-start cursor-default"
           >
             {/* Card Image Container */}
-            <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-gray-900 border border-white/10 shadow-md group-hover:border-amber-400/40 transition-all duration-300">
+            <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-gray-100 border border-gray-200/90 shadow-xs group-hover:border-[#8C734B]/60 transition-all duration-300">
               <img
                 src={note.imageUrl}
                 alt={note.name}
@@ -113,7 +110,7 @@ export default function VisualNotes({ notes, title = 'NOTES' }: VisualNotesProps
               />
               {/* Type pill if available */}
               {note.type && (
-                <span className="absolute top-2 left-2 text-[9px] font-bold tracking-widest uppercase bg-black/70 backdrop-blur-sm text-gray-200 px-2 py-0.5 rounded-full border border-white/10">
+                <span className="absolute top-2 left-2 text-[9px] font-bold tracking-widest uppercase bg-white/90 backdrop-blur-sm text-[#0B0B0D] px-2 py-0.5 rounded-full border border-gray-200 shadow-xs">
                   {note.type}
                 </span>
               )}
@@ -121,10 +118,10 @@ export default function VisualNotes({ notes, title = 'NOTES' }: VisualNotesProps
 
             {/* Note Name & Sensory Tag */}
             <div className="mt-2.5 text-center">
-              <p className="text-xs sm:text-sm font-serif tracking-wider text-gray-200 font-medium">
+              <p className="text-xs sm:text-sm font-serif tracking-wider text-[#0B0B0D] font-medium">
                 {note.name.toUpperCase()}
               </p>
-              <p className="text-[10px] sm:text-[11px] font-mono tracking-widest uppercase text-amber-300/90 font-semibold mt-0.5">
+              <p className="text-[10px] sm:text-[11px] font-mono tracking-widest uppercase text-[#8C734B] font-semibold mt-0.5">
                 {note.descriptor}
               </p>
             </div>

@@ -356,12 +356,20 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
         <div className="relative aspect-square overflow-hidden bg-gray-50 rounded-lg flex items-center justify-center">
           {!isVideo ? (
             <Image
-              src={optimizeImageUrl(currentImage?.url || '/placeholder-image.jpg', 800)}
+              src={optimizeImageUrl(currentImage?.url || product.mainImage || '/placeholder-image.jpg', 800)}
               alt={`${product.name} - Image ${currentImageIndex + 1}`}
               width={600}
               height={800}
               className="w-full h-full object-contain rounded-lg"
               priority={currentImageIndex === 0}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (product.mainImage && target.src !== product.mainImage) {
+                  target.src = product.mainImage;
+                } else if (target.src !== '/placeholder-image.jpg') {
+                  target.src = '/placeholder-image.jpg';
+                }
+              }}
             />
           ) : (
             <video 
@@ -410,11 +418,19 @@ export default function ProductClient({ initialProduct, id }: { initialProduct: 
                 className={`w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border ${currentImageIndex === index ? 'ring-2 ring-black border-black' : 'opacity-70 border-gray-200 hover:opacity-100'} transition-all`}
               >
                 <Image
-                  src={optimizeImageUrl(image.url, 150)}
+                  src={optimizeImageUrl(image.url || product.mainImage || '/placeholder-image.jpg', 150)}
                   alt={`Thumbnail ${index + 1}`}
                   width={100}
                   height={100}
                   className="w-full h-full object-contain"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (product.mainImage && target.src !== product.mainImage) {
+                      target.src = product.mainImage;
+                    } else if (target.src !== '/placeholder-image.jpg') {
+                      target.src = '/placeholder-image.jpg';
+                    }
+                  }}
                 />
               </button>
             ))}

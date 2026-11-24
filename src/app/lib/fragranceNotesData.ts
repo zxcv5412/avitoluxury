@@ -75,7 +75,7 @@ export const FRAGRANCE_NOTES_DICTIONARY: Record<string, FragranceNoteItem> = {
   peach: {
     name: 'Velvet Peach',
     descriptor: 'LUSCIOUS FRUITY',
-    imageUrl: 'https://images.unsplash.com/photo-1595126731133-463128241f4d?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1629828874514-c1e5103f2150?auto=format&fit=crop&w=400&q=80',
     type: 'HEART'
   },
   oud: {
@@ -87,25 +87,25 @@ export const FRAGRANCE_NOTES_DICTIONARY: Record<string, FragranceNoteItem> = {
   sandalwood: {
     name: 'Sandalwood',
     descriptor: 'CREAMY SACRED WOOD',
-    imageUrl: 'https://images.unsplash.com/photo-1615715912959-1e434f0c609c?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
     type: 'BASE'
   },
   chandan: {
     name: 'Chandan',
     descriptor: 'SACRED WOOD',
-    imageUrl: 'https://images.unsplash.com/photo-1615715912959-1e434f0c609c?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
     type: 'BASE'
   },
   cedarwood: {
     name: 'Cedarwood',
     descriptor: 'DRY WOODY DEPTH',
-    imageUrl: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=400&q=80',
     type: 'BASE'
   },
   amber: {
     name: 'Golden Amber',
     descriptor: 'WARM SENSUAL GLOW',
-    imageUrl: 'https://images.unsplash.com/photo-1615715912959-1e434f0c609c?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=400&q=80',
     type: 'BASE'
   },
   vanilla: {

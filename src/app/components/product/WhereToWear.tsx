@@ -9,11 +9,23 @@ interface WhereToWearProps {
 }
 
 export default function WhereToWear({ occasions, productType = '', category = '' }: WhereToWearProps) {
-  // Determine relevant occasion pills based on category/type if not explicitly provided
+  const cat = (category + ' ' + productType).toLowerCase();
+  const isCarFreshener = cat.includes('car') || cat.includes('diffuser');
+  const isRoomFreshener = cat.includes('room') || cat.includes('air freshener');
+
+  // Title adapts between wear and setting
+  const sectionTitle = isCarFreshener || isRoomFreshener ? 'Where to use it' : 'Where to wear it';
+
+  // Determine relevant occasion/setting pills based on category/type
   const defaultOccasions = (() => {
     if (occasions && occasions.length > 0) return occasions;
 
-    const cat = (category + ' ' + productType).toLowerCase();
+    if (isCarFreshener) {
+      return ['Daily Commute', 'Road Trips', 'Car Interiors', 'Personal Cabin', 'AC Airflow'];
+    }
+    if (isRoomFreshener) {
+      return ['Living Rooms', 'Bed Chambers', 'Wardrobes', 'Office Spaces', 'Home Entryway'];
+    }
     if (cat.includes('attar')) {
       return ['Spiritual & Daily', 'Personal Rituals', 'Aesthetic Look', 'Festive Occasions', 'Evening Calm'];
     }
@@ -27,15 +39,15 @@ export default function WhereToWear({ occasions, productType = '', category = ''
   })();
 
   return (
-    <div className="w-full bg-[#0D0D11] text-white rounded-xl p-4 sm:p-5 my-4 border border-white/5 shadow-md">
-      <h4 className="text-xs sm:text-sm font-serif tracking-[0.15em] uppercase text-gray-300 font-light mb-3">
-        Where to wear it
+    <div className="w-full bg-[#FAF9F6] text-[#0B0B0D] rounded-xl p-4 sm:p-5 my-4 border border-gray-200/80 shadow-sm">
+      <h4 className="text-xs sm:text-sm font-serif tracking-[0.15em] uppercase text-[#0B0B0D] font-medium mb-3">
+        {sectionTitle}
       </h4>
       <div className="flex flex-wrap gap-2 sm:gap-2.5">
         {defaultOccasions.map((item, index) => (
           <span
             key={index}
-            className="inline-flex items-center text-[11px] sm:text-xs font-medium tracking-wider uppercase bg-white/10 text-gray-200 px-3.5 py-1.5 rounded-full border border-white/10 hover:border-amber-400/40 hover:bg-white/15 transition-all cursor-default"
+            className="inline-flex items-center text-[11px] sm:text-xs font-medium tracking-wider uppercase bg-white text-gray-700 px-3.5 py-1.5 rounded-full border border-gray-200/90 hover:border-[#8C734B]/60 hover:text-[#8C734B] transition-all cursor-default shadow-xs"
           >
             {item}
           </span>

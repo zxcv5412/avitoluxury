@@ -5,6 +5,7 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -21,6 +22,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'ik.imagekit.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       },
     ],
     dangerouslyAllowSVG: true,
